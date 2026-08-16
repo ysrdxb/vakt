@@ -115,3 +115,9 @@ Route::middleware(['auth'])->group(function () {
     });
 
 });
+
+Route::get('/clear-cache', function() {
+    \Illuminate\Support\Facades\Artisan::call('view:clear');
+    \Illuminate\Support\Facades\Artisan::call('cache:clear');
+    return 'Cache cleared successfully. You can now go back and refresh the page!';
+});
