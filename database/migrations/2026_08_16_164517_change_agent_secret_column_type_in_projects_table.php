@@ -12,9 +12,11 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::table('projects', function (Blueprint $table) {
-            $table->text('agent_secret')->nullable()->change();
-        });
+        if (DB::getDriverName() !== 'sqlite') {
+            Schema::table('projects', function (Blueprint $table) {
+                $table->text('agent_secret')->nullable()->change();
+            });
+        }
     }
 
     /**
