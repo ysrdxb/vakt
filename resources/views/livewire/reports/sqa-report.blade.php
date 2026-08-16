@@ -12,9 +12,9 @@
                 </select>
             </div>
             
-            <button wire:click="generateReport" class="btn btn-primary" {{ !$projectId ? 'disabled title="Select a project first"' : '' }}>
+            <x-btn wire:click="generateReport" variant="primary" :disabled="!$projectId" :title="!$projectId ? 'Select a project first' : ''">
                 Generate Monthly Report
-            </button>
+            </x-btn>
         </div>
     </div>
 

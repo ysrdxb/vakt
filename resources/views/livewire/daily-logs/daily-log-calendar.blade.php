@@ -51,15 +51,15 @@
                                     <div style="font-size:0.8rem;color:var(--color-text-dim);flex:1">
                                         {{ $log->actions_taken ?: 'No notes.' }}
                                     </div>
-                                    <button @click="editing = true" class="btn btn-ghost btn-sm" title="Edit Note">
+                                    <x-btn variant="ghost" @click="editing = true"  title="Edit Note" class="btn-sm">
                                         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" style="width:14px;height:14px"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" /></svg>
-                                    </button>
+                                    </x-btn>
                                 </div>
                                 <div x-show="editing" style="display:flex;gap:4px">
                                     <textarea x-model="note" class="form-control form-control-sm" rows="2" style="flex:1"></textarea>
                                     <div style="display:flex;flex-direction:column;gap:4px">
                                         <button @click="$wire.addNote({{ $log->id }}, note); editing = false" class="btn btn-primary btn-sm" style="padding:2px 8px">Save</button>
-                                        <button @click="editing = false" class="btn btn-ghost btn-sm" style="padding:2px 8px">X</button>
+                                        <x-btn variant="ghost" @click="editing = false"  style="padding:2px 8px" class="btn-sm">X</x-btn>
                                     </div>
                                 </div>
                             </div>

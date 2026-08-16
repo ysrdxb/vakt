@@ -12,13 +12,13 @@
                 </select>
                 
                 @if($projectId)
-                    <button wire:click="seedAuditItems" class="btn btn-ghost" onclick="return confirm('This will load the default checklist items if they don\'t exist. Continue?')">
+                    <x-btn variant="ghost" wire:click="seedAuditItems"  onclick="return confirm('This will load the default checklist items if they don\'t exist. Continue?')">
                         Load Default Checklist
-                    </button>
+                    </x-btn>
                 @endif
             </div>
             
-            <button class="btn btn-ghost" disabled>Export PDF (Coming Soon)</button>
+            <x-btn variant="ghost"  disabled>Export PDF (Coming Soon)</x-btn>
         </div>
     </div>
 

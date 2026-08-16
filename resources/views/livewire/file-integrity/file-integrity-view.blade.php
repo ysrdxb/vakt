@@ -27,9 +27,9 @@
                 </select>
             </div>
             
-            <button wire:click="initScan" class="btn btn-primary" {{ !$projectId ? 'disabled' : '' }}>
-                Take Snapshot / Scan Now
-            </button>
+            <x-btn variant="primary" wire:click="initScan" :disabled="!$projectId">
+                Run Integrity Scan
+            </x-btn>
         </div>
     </div>
 

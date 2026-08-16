@@ -60,7 +60,7 @@
                         <div style="margin-top:16px;display:flex;gap:8px" x-data="{ declineReason: '' }">
                             <button wire:click="approve({{ $item->id }})" class="btn btn-success btn-sm">Approve</button>
                             <div x-data="{ open: false }" style="position:relative">
-                                <button @click="open = !open" class="btn btn-ghost btn-sm">Decline</button>
+                                <x-btn variant="ghost" @click="open = !open"  class="btn-sm">Decline</x-btn>
                                 <div x-show="open" @click.away="open = false" style="position:absolute;top:100%;left:0;margin-top:8px;background:var(--color-surface);border:1px solid var(--color-border);padding:12px;border-radius:8px;width:250px;z-index:10;box-shadow:0 10px 25px rgba(0,0,0,0.5)">
                                     <textarea x-model="declineReason" class="form-control mb-4" rows="2" placeholder="Reason for declining..."></textarea>
                                     <button @click="$wire.decline({{ $item->id }}, declineReason); open = false" class="btn btn-danger btn-sm" style="width:100%">Confirm Decline</button>

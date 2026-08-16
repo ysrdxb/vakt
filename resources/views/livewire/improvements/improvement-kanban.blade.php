@@ -10,9 +10,9 @@
                 @endforeach
             </select>
             
-            <button wire:click="$toggle('showForm')" class="btn btn-primary">
+            <x-btn variant="primary" wire:click="$toggle('showForm')" >
                 {{ $showForm ? 'Cancel' : 'Add Improvement' }}
-            </button>
+            </x-btn>
         </div>
     </div>
 
@@ -24,7 +24,19 @@
             <form wire:submit="addImprovement">
                 <div class="card-body">
                     <div class="grid grid-2 gap-6 mb-4">
+                        <div class="form-group">
+                            <label class="form-label">Project</label>
+                            <select wire:model.live="projectId" class="form-control" required>
+                                <option value="">-- Select Project --</option>
+                                @foreach($projects as $project)
+                                    <option value="{{ $project->id }}">{{ $project->domain }}</option>
+                                @endforeach
+                            </select>
+                        </div>
                         <x-input name="title" label="Title" wire:model="title" required />
+                    </div>
+                    
+                    <div class="mb-4">
                         <x-select name="category" label="Category" wire:model="category" :options="['security'=>'Security', 'performance'=>'Performance', 'ux'=>'UX/UI', 'feature'=>'New Feature', 'technical_debt'=>'Technical Debt', 'compliance'=>'Compliance']" required />
                     </div>
                     
@@ -39,14 +51,14 @@
                     </div>
                 </div>
                 <div class="card-footer" style="display:flex;justify-content:flex-end;gap:8px">
-                    <button type="button" wire:click="$toggle('showForm')" class="btn btn-ghost">Cancel</button>
-                    <button type="submit" class="btn btn-primary" {{ !$projectId ? 'disabled title="Select a project first"' : '' }}>Submit Proposal</button>
+                    <x-btn variant="ghost" type="button" wire:click="$toggle('showForm')" >Cancel</x-btn>
+                    <x-btn variant="primary" type="submit" :disabled="!$projectId">Submit Proposal</x-btn>
                 </div>
             </form>
         </div>
     @endif
 
-    <div style="display:flex;gap:16px;overflow-x:auto;padding-bottom:16px;min-height:600px">
+    <div style="display:flex;gap:16px;overflow-x:auto;padding-bottom:16px;min-height:600px;width:100%">
         @foreach($columns as $status => $items)
             <div style="flex:0 0 320px;background:var(--color-surface-2);border-radius:12px;padding:16px;display:flex;flex-direction:column;gap:12px">
                 <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">

@@ -83,14 +83,14 @@
                                 <button wire:click="toggleActive({{ $project->id }})" class="btn btn-ghost btn-sm" title="{{ $project->active ? 'Disable Monitoring' : 'Enable Monitoring' }}">
                                     @if($project->active) Pause @else Resume @endif
                                 </button>
-                                <button @click="openDelete = true" class="btn btn-ghost btn-sm" style="color:var(--color-danger)">Delete</button>
+                                <x-btn variant="ghost" @click="openDelete = true"  style="color:var(--color-danger)" class="btn-sm">Delete</x-btn>
                                 
                                 <div x-show="openDelete" @click.away="openDelete = false" style="position:absolute;z-index:10;background:var(--color-surface);border:1px solid var(--color-danger);padding:16px;border-radius:8px;box-shadow:0 10px 25px rgba(0,0,0,0.5);width:260px;right:0;transform:translateY(-120%);" x-cloak>
                                     <div style="font-weight:600;margin-bottom:8px">Delete {{ $project->domain }}?</div>
                                     <div style="font-size:0.8rem;color:var(--color-muted);margin-bottom:12px">This will remove all logs and incidents. Cannot be undone.</div>
                                     <div style="display:flex;gap:8px">
                                         <button wire:click="delete({{ $project->id }})" class="btn btn-danger btn-sm" style="flex:1">Confirm</button>
-                                        <button @click="openDelete = false" class="btn btn-ghost btn-sm" style="flex:1">Cancel</button>
+                                        <x-btn variant="ghost" @click="openDelete = false"  style="flex:1" class="btn-sm">Cancel</x-btn>
                                     </div>
                                 </div>
                             </div>

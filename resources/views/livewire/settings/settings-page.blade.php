@@ -62,10 +62,10 @@
                             </div>
                         </div>
                         <div class="card-footer" style="display:flex; justify-content: flex-end; align-items: center; gap: 16px;">
-                            <button type="submit" class="btn btn-primary" wire:loading.attr="disabled">
+                            <x-btn variant="primary" type="submit"  >
                                 <span wire:loading.remove wire:target="saveProfile">Save Profile</span>
                                 <span wire:loading wire:target="saveProfile">Saving...</span>
-                            </button>
+                            </x-btn>
                         </div>
                     </form>
                 </div>
@@ -91,10 +91,10 @@
                             </div>
                         </div>
                         <div class="card-footer" style="display:flex; justify-content: flex-end; align-items: center; gap: 16px;">
-                            <button type="submit" class="btn btn-primary" wire:loading.attr="disabled">
+                            <x-btn variant="primary" type="submit"  >
                                 <span wire:loading.remove wire:target="changePassword">Update Password</span>
                                 <span wire:loading wire:target="changePassword">Updating...</span>
-                            </button>
+                            </x-btn>
                         </div>
                     </form>
                 </div>
@@ -125,10 +125,10 @@
                                 <label class="form-label">Set New Client Password</label>
                                 <div style="display:flex;gap:12px; align-items: stretch;">
                                     <input type="password" wire:model="newClientPassword" class="form-control" placeholder="New password (min 8 chars)" style="flex:1" />
-                                    <button wire:click="updateClientPassword" class="btn btn-primary" wire:loading.attr="disabled">
+                                    <x-btn variant="primary" wire:click="updateClientPassword"  >
                                         <span wire:loading.remove wire:target="updateClientPassword">Update Key</span>
                                         <span wire:loading wire:target="updateClientPassword">Saving...</span>
-                                    </button>
+                                    </x-btn>
                                 </div>
                                 @error('newClientPassword') <div class="text-sm text-muted mt-2" style="color: var(--color-danger);">{{ $message }}</div> @enderror
                             </div>

@@ -72,18 +72,18 @@
     {{-- Action Buttons --}}
     <div class="card-footer" style="display:flex;gap:8px;flex-wrap:wrap">
         @if($incident->status === 'open')
-        <button wire:click="transitionStatus('investigating')" class="btn btn-warning">Start Investigation</button>
+        <x-btn variant="warning" wire:click="transitionStatus('investigating')" >Start Investigation</x-btn>
         @endif
         @if($incident->status === 'investigating')
-        <button wire:click="transitionStatus('contained')" class="btn btn-primary">Mark Contained</button>
+        <x-btn variant="primary" wire:click="transitionStatus('contained')" >Mark Contained</x-btn>
         @endif
         @if(in_array($incident->status, ['investigating','contained']))
-        <button wire:click="transitionStatus('resolved')" class="btn btn-success">Mark Resolved</button>
+        <x-btn variant="success" wire:click="transitionStatus('resolved')" >Mark Resolved</x-btn>
         @endif
         @if($incident->status === 'resolved')
-        <button wire:click="transitionStatus('closed')" class="btn btn-ghost">Close Incident</button>
+        <x-btn variant="ghost" wire:click="transitionStatus('closed')" >Close Incident</x-btn>
         @endif
-        <button wire:click="$set('editMode', true)" class="btn btn-ghost">Edit Notes</button>
+        <x-btn variant="ghost" wire:click="$set('editMode', true)" >Edit Notes</x-btn>
     </div>
 </div>
 
@@ -95,11 +95,11 @@
             <div class="card-title">Investigation Notes</div>
             @if($editMode)
             <div style="display:flex;gap:8px">
-                <button wire:click="saveNotes" class="btn btn-primary btn-sm">Save</button>
-                <button wire:click="$set('editMode', false)" class="btn btn-ghost btn-sm">Cancel</button>
+                <x-btn variant="primary" wire:click="saveNotes"  class="btn-sm">Save</x-btn>
+                <x-btn variant="ghost" wire:click="$set('editMode', false)"  class="btn-sm">Cancel</x-btn>
             </div>
             @else
-            <button wire:click="$set('editMode', true)" class="btn btn-ghost btn-sm">Edit</button>
+            <x-btn variant="ghost" wire:click="$set('editMode', true)"  class="btn-sm">Edit</x-btn>
             @endif
         </div>
         <div class="card-body">

@@ -11,8 +11,8 @@
             this.toasts = this.toasts.filter(t => t.id !== id);
         }
     }"
-    x-on:toast.window="addToast($event.detail.type, $event.detail.title, $event.detail.message)"
-    x-on:notify.window="addToast($event.detail.type ?? 'info', $event.detail.title ?? '', $event.detail.message ?? '')"
+    x-on:toast.window="let d = Array.isArray($event.detail) ? $event.detail[0] : $event.detail; addToast(d.type, d.title, d.message)"
+    x-on:notify.window="let d = Array.isArray($event.detail) ? $event.detail[0] : $event.detail; addToast(d.type ?? 'info', d.title ?? '', d.message ?? '')"
     class="toast-container"
 >
     <template x-for="toast in toasts" :key="toast.id">

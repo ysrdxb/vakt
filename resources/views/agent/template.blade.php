@@ -1,4 +1,4 @@
-<?php
+{!! "<?php\n" !!}
 // ============================================================
 // SOC Agent v1.0 — Vakt Security Platform
 // Project: {{ $project->domain }}

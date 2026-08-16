@@ -73,6 +73,9 @@ Route::middleware(['auth'])->group(function () {
 
         // SQA Reports
         Route::get('/reports', SqaReport::class)->name('reports.index');
+        Route::get('/reports/view/{report}', function(\App\Models\SqaReport $report) {
+            return view('reports.show', compact('report'));
+        })->name('reports.show');
         Route::get('/reports/{project}', SqaReport::class)->name('reports.project');
 
         // Alerts

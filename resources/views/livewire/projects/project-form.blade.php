@@ -391,7 +391,7 @@
                         <label class="form-label">Agent Secret Key</label>
                         <div style="display:flex; gap:12px; max-width: 600px;">
                             <input type="text" class="form-control" wire:model="agent_secret" readonly style="background: rgba(255,255,255,0.02); color: var(--text-muted)">
-                            <button type="button" class="btn btn-secondary" wire:click="generateSecretKey" style="white-space: nowrap;">Generate New</button>
+                            <x-btn variant="secondary" type="button"  wire:click="generateSecretKey" style="white-space: nowrap;">Generate New</x-btn>
                         </div>
                         <div class="form-text">Used to authenticate the remote agent script. Keep this secret.</div>
                     </div>
@@ -430,10 +430,10 @@
                 @endif
                 
                 <div style="margin-top: 24px; padding-top: 24px; border-top: 1px solid var(--border-color);">
-                    <button type="button" class="btn btn-secondary" wire:click="runDiagnostics" wire:loading.attr="disabled" wire:target="runDiagnostics">
+                    <x-btn variant="secondary" type="button"  wire:click="runDiagnostics" >
                         <span wire:loading.remove wire:target="runDiagnostics">Test Connection</span>
                         <span wire:loading wire:target="runDiagnostics">Testing...</span>
-                    </button>
+                    </x-btn>
                     
                     @if(!empty($diagnosticResults))
                         <div style="margin-top: 16px; background: rgba(0,0,0,0.2); padding: 16px; border-radius: 8px;">
@@ -512,10 +512,9 @@
             
             <div style="display:flex; gap:16px;">
                 <a href="{{ route('projects.index') }}" class="btn btn-secondary">Cancel</a>
-                <button type="submit" class="btn btn-primary" wire:loading.attr="disabled" wire:target="saveProject" style="min-width: 140px;">
-                    <span wire:loading.remove wire:target="saveProject">Save Project</span>
-                    <span wire:loading wire:target="saveProject">Saving...</span>
-                </button>
+                <x-btn type="submit" wire:click="saveProject" variant="primary" style="min-width: 140px;">
+                    {{ $isEdit ? 'Save Changes' : 'Create Project' }}
+                </x-btn>
             </div>
         </div>
     </form>

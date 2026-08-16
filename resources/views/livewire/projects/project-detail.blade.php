@@ -21,12 +21,12 @@
                 </div>
                 
                 <div style="display:flex;gap:12px">
-                    <button wire:click="runScan" class="btn btn-primary" {{ $project->server_type !== 'same_server' ? 'disabled' : '' }}>
+                    <x-btn variant="primary" wire:click="runScan" :disabled="$project->server_type !== 'same_server'">
                         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" style="width:16px;height:16px;margin-right:6px">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
                         </svg>
                         Run Scan Now
-                    </button>
+                    </x-btn>
                     <a href="{{ route('projects.edit', $project) }}" class="btn btn-ghost">Edit Settings</a>
                 </div>
             </div>
@@ -53,7 +53,7 @@
 
     @if($project->server_type === 'external_agent')
     <div class="alert alert-info mb-6">
-        <strong>Agent Setup Required:</strong> This project uses external agent monitoring. Download the <a href="{{ route('agent.template', $project) }}" class="text-primary" style="text-decoration:underline">Agent Script Template</a> and deploy it to the target server via cron.
+        <strong>Agent Setup Required:</strong> This project uses external agent monitoring. Download the <a href="{{ route('projects.agent-download', $project) }}" class="text-primary" style="text-decoration:underline">Agent Script Template</a> and deploy it to the target server via cron.
     </div>
     @endif
 
