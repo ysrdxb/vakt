@@ -22,7 +22,7 @@ class OperatorDashboard extends Component
     public function getOpenIncidentsProperty()
     {
         return Incident::whereNotIn('status', ['resolved', 'closed'])
-            ->orderByRaw("FIELD(severity, 'p1','p2','p3','p4')")
+            ->orderByRaw("CASE severity WHEN 'p1' THEN 1 WHEN 'p2' THEN 2 WHEN 'p3' THEN 3 WHEN 'p4' THEN 4 ELSE 5 END")
             ->with('project')
             ->limit(10)
             ->get();
