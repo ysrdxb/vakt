@@ -71,10 +71,18 @@ function getLogTail(int $lines): string
     return $out;
 }
 
+function isShellEnabled(): bool
+{
+    if (!function_exists('shell_exec')) return false;
+    $disabled = explode(',', ini_get('disable_functions'));
+    return !in_array('shell_exec', array_map('trim', $disabled));
+}
+
 function getPhpErrors(): array
 {
     $errors = [];
     if (file_exists(PHP_ERROR_LOG) && is_readable(PHP_ERROR_LOG)) {
+        if (!isShellEnabled()) return ['shell_exec is disabled on this server.'];
         $tail = shell_exec('tail -50 ' . escapeshellarg(PHP_ERROR_LOG)) ?? '';
         $lines = array_filter(explode("\n", $tail));
         foreach (array_slice($lines, -20) as $line) {
@@ -86,6 +94,7 @@ function getPhpErrors(): array
 
 function getRecentFileChanges(): array
 {
+    if (!isShellEnabled()) return ['shell_exec is disabled on this server.'];
     $changes = [];
     $rootDir = __DIR__;
     try {
