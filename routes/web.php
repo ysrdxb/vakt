@@ -121,3 +121,12 @@ Route::get('/clear-cache', function() {
     \Illuminate\Support\Facades\Artisan::call('cache:clear');
     return 'Cache cleared successfully. You can now go back and refresh the page!';
 });
+
+Route::get('/run-migrations', function() {
+    try {
+        \Illuminate\Support\Facades\Artisan::call('migrate', ['--force' => true]);
+        return 'Migrations ran successfully: <br>' . nl2br(\Illuminate\Support\Facades\Artisan::output());
+    } catch (\Exception $e) {
+        return 'Error running migrations: ' . $e->getMessage();
+    }
+});
