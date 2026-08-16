@@ -52,6 +52,9 @@ curl_close($ch);
 
 if ($code !== 200) {
     error_log("SOC Agent: Failed to report. HTTP {$code}. Response: {$response}");
+    echo "ERROR: Failed to report to Vakt Hub.\nHTTP Code: {$code}\nResponse: {$response}\nEndpoint: " . SOC_ENDPOINT . "\n";
+} else {
+    echo "SUCCESS: Agent payload sent to Vakt Hub successfully.\n";
 }
 
 // ── Helper functions ──────────────────────────────────────────

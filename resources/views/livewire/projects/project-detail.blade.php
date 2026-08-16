@@ -58,7 +58,7 @@
                 <strong>Agent Setup Required:</strong> Download the <a href="{{ route('projects.agent-download', $project) }}" class="text-primary" style="text-decoration:underline">Agent Script Template</a>, upload it to the root of <b>{{ $project->domain }}</b>, and configure this cron job to run every 5 minutes:
             </div>
             <code style="display:block;background:rgba(0,0,0,0.2);padding:10px;border-radius:6px;word-break:break-all;user-select:all">
-                wget -q -O /dev/null http://{{ $project->domain }}/soc-agent-{{ $project->domain }}.php
+                curl -s http://{{ $project->domain }}/soc-agent-{{ $project->domain }}.php
             </code>
         </div>
     </div>
