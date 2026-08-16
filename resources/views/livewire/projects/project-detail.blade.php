@@ -53,7 +53,14 @@
 
     @if($project->server_type === 'external_agent' && !$project->last_checked_at)
     <div class="alert alert-info mb-6">
-        <strong>Agent Setup Required:</strong> This project uses external agent monitoring. Download the <a href="{{ route('projects.agent-download', $project) }}" class="text-primary" style="text-decoration:underline">Agent Script Template</a> and configure a cron job to run it every 5 minutes. (e.g. <code>*/5 * * * * php /path/to/soc-agent.php</code>)
+        <div style="width:100%">
+            <div style="margin-bottom:8px">
+                <strong>Agent Setup Required:</strong> Download the <a href="{{ route('projects.agent-download', $project) }}" class="text-primary" style="text-decoration:underline">Agent Script Template</a>, upload it to the root of <b>{{ $project->domain }}</b>, and configure this cron job to run every 5 minutes:
+            </div>
+            <code style="display:block;background:rgba(0,0,0,0.2);padding:10px;border-radius:6px;word-break:break-all;user-select:all">
+                wget -q -O /dev/null http://{{ $project->domain }}/soc-agent-{{ $project->domain }}.php
+            </code>
+        </div>
     </div>
     @endif
 
