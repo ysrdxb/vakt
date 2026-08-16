@@ -38,7 +38,7 @@
         @else
             <div class="grid grid-auto">
                 @foreach($projects as $project)
-                    <div class="project-card" style="{{ !$project->active ? 'opacity:0.6' : '' }}">
+                    <div class="project-card" wire:key="project-{{ $project->id }}" style="{{ !$project->active ? 'opacity:0.6' : '' }}">
                         <div class="project-card-header">
                             <a href="{{ route('projects.show', $project) }}" class="project-domain" style="text-decoration:none;">{{ $project->domain }}</a>
                             <div style="display:flex;gap:8px">
