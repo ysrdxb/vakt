@@ -10,7 +10,7 @@
 //   3. Make sure the file is NOT web-accessible
 // ============================================================
 
-define('SOC_ENDPOINT', '{{ config('app.url') }}/api/agent/report');
+define('SOC_ENDPOINT', '{{ url('/api/agent/report') }}');
 define('PROJECT_ID', '{{ $project->id }}');
 define('SECRET_KEY', '{{ $project->agent_secret }}');
 define('LOG_PATH', __DIR__ . '/storage/logs/laravel.log');
