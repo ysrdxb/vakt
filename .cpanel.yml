@@ -1,0 +1,5 @@
+---
+deployment:
+  tasks:
+    - export DEPLOYPATH=/home/u363276979/domains/muxsol.com/public_html/vakt/
+    - /usr/bin/rsync -a --exclude='.git' ./ $DEPLOYPATH
