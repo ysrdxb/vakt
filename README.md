@@ -14,8 +14,8 @@ Vakt is a centralized, premium Security Quality Assurance (SQA) and health monit
 
 ## Technology Stack
 
-- **Framework:** Laravel 11
-- **Frontend Logic:** Livewire 3 + Alpine.js
+- **Framework:** Laravel 13
+- **Frontend Logic:** Livewire 4 + Alpine.js
 - **Styling:** Vanilla CSS (Custom Design System with Dark/Light Mode support)
 - **Database:** MySQL / SQLite
 - **PHP:** 8.3+
