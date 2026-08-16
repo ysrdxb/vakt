@@ -12,8 +12,9 @@ return new class extends Migration
      */
     public function up(): void
     {
-        // Use raw SQL to alter the column type safely across different database drivers
-        DB::statement('ALTER TABLE projects MODIFY agent_secret TEXT NULL');
+        Schema::table('projects', function (Blueprint $table) {
+            $table->text('agent_secret')->nullable()->change();
+        });
     }
 
     /**
