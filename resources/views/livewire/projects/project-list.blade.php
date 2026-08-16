@@ -79,20 +79,13 @@
                                 <a href="{{ route('projects.show', $project) }}" class="btn btn-ghost btn-sm">View</a>
                                 <a href="{{ route('projects.edit', $project) }}" class="btn btn-ghost btn-sm">Edit</a>
                             </div>
-                            <div style="display:flex;gap:6px" x-data="{ openDelete: false }">
+                            <div style="display:flex;gap:6px">
                                 <button wire:click="toggleActive({{ $project->id }})" class="btn btn-ghost btn-sm" title="{{ $project->active ? 'Disable Monitoring' : 'Enable Monitoring' }}">
                                     @if($project->active) Pause @else Resume @endif
                                 </button>
-                                <x-btn variant="ghost" @click="openDelete = true"  style="color:var(--color-danger)" class="btn-sm">Delete</x-btn>
-                                
-                                <div x-show="openDelete" @click.away="openDelete = false" style="position:absolute;z-index:10;background:var(--color-surface);border:1px solid var(--color-danger);padding:16px;border-radius:8px;box-shadow:0 10px 25px rgba(0,0,0,0.5);width:260px;right:0;transform:translateY(-120%);" x-cloak>
-                                    <div style="font-weight:600;margin-bottom:8px">Delete {{ $project->domain }}?</div>
-                                    <div style="font-size:0.8rem;color:var(--color-muted);margin-bottom:12px">This will remove all logs and incidents. Cannot be undone.</div>
-                                    <div style="display:flex;gap:8px">
-                                        <button wire:click="delete({{ $project->id }})" class="btn btn-danger btn-sm" style="flex:1">Confirm</button>
-                                        <x-btn variant="ghost" @click="openDelete = false"  style="flex:1" class="btn-sm">Cancel</x-btn>
-                                    </div>
-                                </div>
+                                <button wire:click="deleteProject({{ $project->id }})" wire:confirm="Are you sure you want to delete {{ $project->domain }}? This will remove all logs and incidents and cannot be undone." class="btn btn-ghost btn-sm" style="color:var(--color-danger)">
+                                    Delete
+                                </button>
                             </div>
                         </div>
                     </div>

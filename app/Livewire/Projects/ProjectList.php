@@ -34,8 +34,10 @@ class ProjectList extends Component
         ]);
     }
 
-    public function delete(Project $project)
+    public function deleteProject(Project $project)
     {
+        \Log::info("deleteProject called for project: " . $project->id);
+        file_put_contents(storage_path('logs/debug.log'), "deleteProject called for " . $project->id . "\n", FILE_APPEND);
         $project->delete();
         $this->dispatch('toast', [
             'type' => 'success',
