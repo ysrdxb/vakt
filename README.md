@@ -1,58 +1,65 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+# Vakt - Health & Security Quality Assurance Monitor
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+Vakt is a centralized, premium Security Quality Assurance (SQA) and health monitoring platform designed to oversee the stability, security, and integrity of multiple web applications and servers.
 
-## About Laravel
+## Core Features
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+- **Continuous Uptime & Health Monitoring:** Automatically monitor the uptime and health of client projects.
+- **File Integrity Scanning:** Detect unauthorized file modifications, malware injections, and tampering on remote servers via lightweight, self-contained agent scripts.
+- **Incident Management:** Full lifecycle incident tracking (Detection, Investigation, Containment, Resolution) with dedicated Kanban boards and client alerts.
+- **Security Quality Assurance (SQA) Reports:** Generate professional, printable, automated monthly security and health reports for clients.
+- **Vulnerability Tracking:** Keep track of outdated dependencies and unpatched vulnerabilities across the portfolio.
+- **Client Dashboard:** A dedicated portal for clients to review reports, approve improvement proposals, and track incidents.
+- **Agent Architecture:** Monitor remote servers securely without requiring SSH access. Vakt deploys a highly secure, cryptographically signed standalone PHP agent to remote servers that communicates back to the central hub.
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+## Technology Stack
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+- **Framework:** Laravel 11
+- **Frontend Logic:** Livewire 3 + Alpine.js
+- **Styling:** Vanilla CSS (Custom Design System with Dark/Light Mode support)
+- **Database:** MySQL / SQLite
+- **PHP:** 8.3+
 
-## Learning Laravel
+## Installation & Setup
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework.
+1. **Clone the repository:**
+   ```bash
+   git clone https://github.com/Kunnatta-ehf/health.kunnatta.is.git
+   cd health.kunnatta.is
+   ```
 
-In addition, [Laracasts](https://laracasts.com) contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+2. **Install Dependencies:**
+   ```bash
+   composer install
+   npm install && npm run build
+   ```
 
-You can also watch bite-sized lessons with real-world projects on [Laravel Learn](https://laravel.com/learn), where you will be guided through building a Laravel application from scratch while learning PHP fundamentals.
+3. **Environment Setup:**
+   ```bash
+   cp .env.example .env
+   php artisan key:generate
+   ```
+   *Configure your database settings in the `.env` file.*
 
-## Agentic Development
+4. **Database Migration & Seeding:**
+   ```bash
+   php artisan migrate --seed
+   ```
+   *Note: This will populate the system with the default operator accounts and sample data.*
 
-Laravel's predictable structure and conventions make it ideal for AI coding agents like Claude Code, Cursor, and GitHub Copilot. Install [Laravel Boost](https://laravel.com/docs/ai) to supercharge your AI workflow:
+5. **Run the Application:**
+   ```bash
+   php artisan serve
+   ```
 
-```bash
-composer require laravel/boost --dev
+## Agent Deployment (Remote Monitoring)
 
-php artisan boost:install
-```
-
-Boost provides your agent 15+ tools and skills that help agents build Laravel applications while following best practices.
-
-## Contributing
-
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
-
-## Code of Conduct
-
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
-
-## Security Vulnerabilities
-
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+To monitor a remote website (e.g., a standard PHP or WordPress site):
+1. In the Vakt dashboard, create a new Project.
+2. Click **Download Agent** on the project page.
+3. Upload the generated `vakt-agent.php` to the public root of the target website.
+4. Vakt will now communicate with this agent securely using project-specific cryptographic signatures to check file integrity and server health.
 
 ## License
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+Proprietary Software. All rights reserved &copy; Kunnatta ehf.
