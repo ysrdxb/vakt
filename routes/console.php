@@ -13,11 +13,29 @@ Artisan::command('inspire', function () {
 
 // ─── Vakt SOC Scheduler ─────────────────────────────
 
-// Every minute — log scanning (same-server projects)
-Schedule::job(new ScanProjectLogs)->everyMinute();
+use App\Models\Project;
+use App\Jobs\CollectProjectData;
 
-// Every 5 minutes — file integrity check
-Schedule::job(new ScanFileIntegrity)->everyFiveMinutes();
+// Collect data — staggered by project ID to spread load
+// Never dispatch all projects at once
+Schedule::call(function () {
+    Project::where('active', true)
+        ->where('monitoring_interval_minutes', 1)
+        ->each(function (Project $project) {
+            // Stagger by project ID — 3 second gap between each
+            CollectProjectData::dispatch($project->id)
+                ->delay(now()->addSeconds($project->id % 20 * 3));
+        });
+})->everyMinute()->name('collect-1min')->withoutOverlapping();
+
+Schedule::call(function () {
+    Project::where('active', true)
+        ->where('monitoring_interval_minutes', 5)
+        ->each(function (Project $project) {
+            CollectProjectData::dispatch($project->id)
+                ->delay(now()->addSeconds($project->id % 20 * 5));
+        });
+})->everyFiveMinutes()->name('collect-5min')->withoutOverlapping();
 
 // Daily at 08:00 — generate daily monitoring logs
 Schedule::job(new GenerateDailyLogs)->dailyAt('08:00');

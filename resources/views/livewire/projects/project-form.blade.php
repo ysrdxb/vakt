@@ -388,6 +388,12 @@
                 @if($server_type === 'external_agent')
                 <div>
                     <div class="form-group">
+                        <label class="form-label">Agent URL</label>
+                        <input type="text" class="form-control" wire:model.blur="agent_url" placeholder="https://verk.kunnatta.is/agent.php" style="max-width: 600px;">
+                        <div class="form-text">The full URL where the agent file is hosted. The SOC will fetch data from this URL.</div>
+                        @error('agent_url') <div class="text-danger">{{ $message }}</div> @enderror
+                    </div>
+                    <div class="form-group">
                         <label class="form-label">Agent Secret Key</label>
                         <div style="display:flex; gap:12px; max-width: 600px;">
                             <input type="text" class="form-control" wire:model="agent_secret" readonly style="background: rgba(255,255,255,0.02); color: var(--text-muted)">
@@ -398,7 +404,7 @@
                     <div class="form-group">
                         <label class="form-label">IP Whitelist (Optional)</label>
                         <input type="text" class="form-control" wire:model.blur="agent_ip_whitelist" placeholder="192.168.1.1, 10.0.0.2" style="max-width: 600px;">
-                        <div class="form-text">Comma-separated IP addresses allowed to push data.</div>
+                        <div class="form-text">Comma-separated IP addresses allowed to pull data.</div>
                     </div>
                 </div>
                 @endif

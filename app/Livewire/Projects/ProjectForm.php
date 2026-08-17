@@ -24,6 +24,7 @@ class ProjectForm extends Component
     public string $log_path = 'storage/logs/laravel.log';
     public string $php_error_log_path = '';
     public string $agent_secret = '';
+    public string $agent_url = '';
     public string $agent_ip_whitelist = '';
     public string $ftp_host = '';
     public string $ftp_user = '';
@@ -65,7 +66,7 @@ class ProjectForm extends Component
             $this->project = $project;
             $this->fill($project->only([
                 'name', 'domain', 'description', 'server_type', 'server_path',
-                'agent_ip_whitelist', 'ftp_host', 'ftp_user', 'stack', 'php_version',
+                'agent_url', 'agent_ip_whitelist', 'ftp_host', 'ftp_user', 'stack', 'php_version',
                 'laravel_version', 'log_path', 'php_error_log_path', 'active',
                 'monitoring_interval_minutes', 'alert_email'
             ]));
@@ -84,45 +85,162 @@ class ProjectForm extends Component
 
     public function runDiagnostics(): void
     {
-        $this->runningDiagnostics = true;
-        $this->diagnosticResults = [];
-        $this->diagnosticStatus = null;
-        
-        sleep(1); // Simulate network/agent delay
-        
-        if ($this->server_type === 'same_server') {
-            $path = rtrim($this->server_path, '/');
-            if (empty($path)) {
-                $this->diagnosticResults[] = ['icon' => '❌', 'name' => 'Server path accessible', 'value' => 'Path missing'];
-                $this->diagnosticStatus = 'failed';
-            } else if (file_exists($path)) {
-                $this->diagnosticResults[] = ['icon' => '✅', 'name' => 'Server path accessible', 'value' => $path];
-                
-                $log = $path . '/' . ltrim($this->log_path, '/');
-                if (file_exists($log)) {
-                    $this->diagnosticResults[] = ['icon' => '✅', 'name' => 'Laravel log file found', 'value' => $this->log_path];
-                    $this->diagnosticResults[] = ['icon' => '✅', 'name' => 'Log readable', 'value' => '(last entry: just now)'];
-                } else {
-                    $this->diagnosticResults[] = ['icon' => '⚠️', 'name' => 'Laravel log file', 'value' => 'Not found at ' . $this->log_path];
-                }
-                
-                $this->diagnosticResults[] = ['icon' => '✅', 'name' => 'Write permissions', 'value' => 'Not required'];
-                $this->diagnosticResults[] = ['icon' => '✅', 'name' => 'File integrity baseline', 'value' => 'Ready to initialize'];
-                
-                $this->diagnosticStatus = 'ready';
-            } else {
-                $this->diagnosticResults[] = ['icon' => '❌', 'name' => 'Server path accessible', 'value' => 'Directory not found'];
-                $this->diagnosticStatus = 'failed';
-            }
-        } else if ($this->server_type === 'external_agent') {
-            $this->diagnosticResults[] = ['icon' => '⚠️', 'name' => 'Agent heartbeat', 'value' => 'Waiting for first ping...'];
-            $this->diagnosticStatus = 'warning';
-        } else {
-            $this->diagnosticResults[] = ['icon' => '✅', 'name' => 'FTP Connection', 'value' => 'Credentials format OK'];
-            $this->diagnosticStatus = 'warning';
+        $this->testConnection();
+    }
+
+    public function testConnection(): void
+    {
+        // Hard rate limit — once per 60 seconds per project/session
+        $cacheKey = "test_connection_{$this->project?->id}_" . session()->getId();
+        if (\Illuminate\Support\Facades\Cache::has($cacheKey)) {
+            $this->diagnosticStatus = 'failed';
+            $this->diagnosticResults = [
+                ['icon' => '⚠️', 'name' => 'Rate Limit', 'value' => 'Please wait 60 seconds before testing again.']
+            ];
+            return;
         }
-        
+        \Illuminate\Support\Facades\Cache::put($cacheKey, true, 60);
+
+        $this->runningDiagnostics = true;
+        $this->diagnosticResults  = [];
+
+        // Run checks based on server type
+        match ($this->server_type) {
+            'same_server'    => $this->testSameServer(),
+            'external_agent' => $this->testExternalAgent(),
+            'ftp'            => $this->testFtp(),
+        };
+
         $this->runningDiagnostics = false;
+        $this->diagnosticStatus = collect($this->diagnosticResults)->contains('pass', false) ? 'failed' : 'ready';
+    }
+
+    private function testSameServer(): void
+    {
+        // FILESYSTEM ONLY — zero network requests
+        $path = rtrim($this->server_path, '/');
+
+        $this->addResult(
+            check:   'Base path accessible',
+            pass:    is_dir($path),
+            value:   $path ?: 'Missing path',
+            fix:     'Check cPanel Addon Domains for the correct document root path',
+        );
+
+        $logFull = $path . '/' . ltrim($this->log_path, '/');
+        $this->addResult(
+            check: 'Log file found',
+            pass:  file_exists($logFull),
+            value: $logFull,
+            fix:   'Ensure storage/logs/laravel.log exists and is not rotated away',
+        );
+
+        if (file_exists($logFull)) {
+            $this->addResult(
+                check: 'Log file readable',
+                pass:  is_readable($logFull),
+                value: 'Permissions: ' . substr(sprintf('%o', fileperms($logFull)), -4),
+                fix:   'Run: chmod 644 ' . escapeshellarg($logFull),
+            );
+
+            $size = filesize($logFull);
+            $this->addResult(
+                check: 'Log file size',
+                pass:  $size < (50 * 1024 * 1024), // warn if over 50MB
+                value: round($size / 1024 / 1024, 2) . ' MB',
+                fix:   'Log file is very large — consider log rotation',
+            );
+
+            // Check last entry recency safely
+            $handle  = @fopen($logFull, 'r');
+            if ($handle) {
+                fseek($handle, max(0, $size - 500));
+                $tail    = fread($handle, 500);
+                fclose($handle);
+                $hasRecent = preg_match('/\[\d{4}-\d{2}-\d{2}/', $tail);
+                $this->addResult(
+                    check: 'Log has recent entries',
+                    pass:  (bool) $hasRecent,
+                    value: $hasRecent ? 'Active log detected' : 'No recent log entries',
+                    fix:   'Log may be empty or using a different path',
+                );
+            }
+        }
+
+        $envPath = $path . '/.env';
+        $this->addResult(
+            check: '.env file accessible',
+            pass:  file_exists($envPath) && is_readable($envPath),
+            value: $envPath,
+            fix:   '.env file not found — check project root path',
+        );
+    }
+
+    private function testExternalAgent(): void
+    {
+        // ONE single request — with timeout — never retries
+        if (!$this->agent_url) {
+            $this->addResult(
+                check: 'Agent URL provided',
+                pass:  false,
+                value: 'Missing URL',
+                fix:   'Please provide the URL where the agent is hosted'
+            );
+            return;
+        }
+
+        try {
+            $response = \Illuminate\Support\Facades\Http::withHeaders(['X-SOC-Key' => $this->agent_secret])
+                ->timeout(10)
+                ->retry(0)      // ZERO retries on test
+                ->get($this->agent_url);
+
+            $this->addResult(
+                check: 'Agent reachable',
+                pass:  $response->successful(),
+                value: "HTTP {$response->status()}",
+                fix:   'Verify agent URL and that agent.php is deployed',
+            );
+
+            if ($response->successful()) {
+                $data = $response->json();
+                $this->addResult(
+                    check: 'Agent authentication',
+                    pass:  isset($data['project_id']),
+                    value: isset($data['project_id']) ? 'Key valid' : 'Invalid response',
+                    fix:   'Regenerate and re-deploy agent with matching secret key',
+                );
+            }
+        } catch (\Exception $e) {
+            $this->addResult(
+                check: 'Agent reachable',
+                pass:  false,
+                value: $e->getMessage(),
+                fix:   'Check agent URL and server connectivity',
+            );
+        }
+    }
+    
+    private function testFtp(): void
+    {
+        $this->addResult(
+            check: 'FTP Connection Testing',
+            pass:  true,
+            value: 'Not fully implemented in test UI yet',
+            fix:   '',
+        );
+    }
+
+    private function addResult(string $check, bool $pass, string $value, string $fix = ''): void
+    {
+        // Transform to the UI format expected by the frontend
+        $this->diagnosticResults[] = [
+            'icon' => $pass ? '✅' : '❌',
+            'name' => $check,
+            'value' => $value,
+            'pass' => $pass,
+            'fix' => $fix
+        ];
     }
 
     public function updatedDomain(): void
@@ -164,6 +282,7 @@ class ProjectForm extends Component
             'stack' => 'required',
             'monitoring_interval_minutes' => 'required|in:1,5,15,30,60',
             'server_path' => 'required_if:server_type,same_server',
+            'agent_url' => 'required_if:server_type,external_agent',
             'agent_secret' => 'required_if:server_type,external_agent',
             'ftp_host' => 'required_if:server_type,ftp',
             'ftp_user' => 'required_if:server_type,ftp',
@@ -183,7 +302,7 @@ class ProjectForm extends Component
         
         $data = $this->only([
             'name', 'domain', 'description', 'server_type', 'server_path',
-            'agent_ip_whitelist', 'ftp_host', 'ftp_user', 'stack', 'php_version',
+            'agent_url', 'agent_ip_whitelist', 'ftp_host', 'ftp_user', 'stack', 'php_version',
             'laravel_version', 'log_path', 'php_error_log_path', 'active',
             'monitoring_interval_minutes', 'alert_email', 'modules', 'incident_rules'
         ]);

@@ -14,6 +14,12 @@ class ProjectDetail extends Component
         $this->project = $project;
     }
 
+    public function confirmWhitelist(): void
+    {
+        $this->project->update(['firewall_whitelist_confirmed' => true]);
+        $this->dispatch('toast', ['type' => 'success', 'title' => 'Confirmed', 'message' => 'Firewall whitelist confirmed. You may now deploy the agent.']);
+    }
+
     public function runScan(): void
     {
         if ($this->project->server_type !== 'same_server') {

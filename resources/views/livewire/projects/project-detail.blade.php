@@ -51,15 +51,25 @@
         </div>
     </div>
 
-    @if($project->server_type === 'external_agent' && !$project->last_checked_at)
+    @if($project->server_type === 'external_agent' && !$project->firewall_whitelist_confirmed)
+    <div class="alert alert-warning mb-6" style="background: rgba(245, 158, 11, 0.1); border: 1px solid var(--warning); color: #fcd34d;">
+        <div style="width:100%">
+            <div style="margin-bottom:8px">
+                <strong>FIREWALL WHITELIST REQUIRED:</strong> To prevent this SOC server from being blocked, you MUST whitelist our IP (`{{ request()->ip() }}`) on the target server's firewall (e.g. CSF) BEFORE deploying the agent.
+            </div>
+            <div style="display: flex; gap: 12px; margin-top: 12px;">
+                <button wire:click="confirmWhitelist" class="btn btn-primary btn-sm">I have whitelisted the IP</button>
+            </div>
+        </div>
+    </div>
+    @endif
+
+    @if($project->server_type === 'external_agent' && !$project->last_checked_at && $project->firewall_whitelist_confirmed)
     <div class="alert alert-info mb-6">
         <div style="width:100%">
             <div style="margin-bottom:8px">
-                <strong>Agent Setup Required:</strong> Download the <a href="{{ route('projects.agent-download', $project) }}" class="text-primary" style="text-decoration:underline">Agent Script Template</a>, upload it to the root of <b>{{ $project->domain }}</b>, and configure this cron job to run every 5 minutes:
+                <strong>Agent Setup Required:</strong> Download the <a href="{{ route('projects.agent-download', $project) }}" class="text-primary" style="text-decoration:underline">Agent Script Template</a>, upload it to the root of <b>{{ $project->domain }}</b>. Ensure it is accessible at the URL you provided.
             </div>
-            <code style="display:block;background:rgba(0,0,0,0.2);padding:10px;border-radius:6px;word-break:break-all;user-select:all">
-                curl -sL https://{{ $project->domain }}/soc-agent-{{ $project->domain }}.php
-            </code>
         </div>
     </div>
     @endif

@@ -12,7 +12,7 @@ class Project extends Model
 
     protected $fillable = [
         'name', 'domain', 'description', 'server_type', 'server_path',
-        'agent_secret', 'agent_ip_whitelist', 'ftp_host', 'ftp_user', 'ftp_password',
+        'agent_secret', 'agent_url', 'firewall_whitelist_confirmed', 'agent_ip_whitelist', 'ftp_host', 'ftp_user', 'ftp_password',
         'stack', 'php_version', 'laravel_version', 'log_path', 'php_error_log_path',
         'active', 'monitoring_interval_minutes', 'alert_email', 'status', 'last_checked_at',
         'modules', 'incident_rules'
@@ -20,6 +20,7 @@ class Project extends Model
 
     protected $casts = [
         'active' => 'boolean',
+        'firewall_whitelist_confirmed' => 'boolean',
         'last_checked_at' => 'datetime',
         'ftp_password' => 'encrypted',
         'agent_secret' => 'encrypted',
