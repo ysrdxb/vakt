@@ -130,3 +130,7 @@ Route::get('/run-migrations', function() {
         return 'Error running migrations: ' . $e->getMessage();
     }
 });
+
+Route::get('/server-path', function() {
+    return 'Absolute path of this project: ' . base_path();
+});
