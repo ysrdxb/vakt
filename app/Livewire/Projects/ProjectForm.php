@@ -20,15 +20,15 @@ class ProjectForm extends Component
 
     // Connection
     public string $server_type = 'same_server';
-    public string $server_path = '';
+    public ?string $server_path = '';
     public string $log_path = 'storage/logs/laravel.log';
-    public string $php_error_log_path = '';
+    public ?string $php_error_log_path = '';
     public string $agent_secret = '';
-    public string $agent_url = '';
-    public string $agent_ip_whitelist = '';
-    public string $ftp_host = '';
-    public string $ftp_user = '';
-    public string $ftp_password = '';
+    public ?string $agent_url = '';
+    public ?string $agent_ip_whitelist = '';
+    public ?string $ftp_host = '';
+    public ?string $ftp_user = '';
+    public ?string $ftp_password = '';
 
     // Surveillance scope
     public array $modules = [
