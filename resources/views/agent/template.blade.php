@@ -15,7 +15,7 @@ ini_set('display_startup_errors', 1);
 error_reporting(E_ALL);
 
 try {
-    define('SOC_ENDPOINT', '{{ url('/api/agent/report') }}');
+    define('SOC_ENDPOINT', '{{ route('api.agent.report') }}');
     define('PROJECT_ID', '{{ $project->id }}');
     define('SECRET_KEY', '{{ $project->agent_secret }}');
     define('LOG_PATH', __DIR__ . '/storage/logs/laravel.log');
