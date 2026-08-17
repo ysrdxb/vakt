@@ -24,6 +24,12 @@ Route::middleware('guest')->group(function () {
     require __DIR__.'/auth.php';
 });
 
+// Temporary route to fix the database on shared hosting
+Route::get('/fix-db', function () {
+    \Illuminate\Support\Facades\Artisan::call('migrate', ['--force' => true]);
+    return 'Database Fixed! You can now go back to the dashboard.';
+});
+
 // ─── Authenticated ────────────────────────────────────
 Route::middleware(['auth'])->group(function () {
 
