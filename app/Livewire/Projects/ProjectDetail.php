@@ -24,7 +24,7 @@ class ProjectDetail extends Component
     {
         try {
             // Run the exact same collection pipeline that the cron job uses, but synchronously.
-            \App\Jobs\CollectProjectData::dispatchSync($this->project);
+            \App\Jobs\CollectProjectData::dispatchSync($this->project->id);
             $this->dispatch('toast', ['type' => 'success', 'title' => 'Scan Complete', 'message' => 'Data pulled successfully from agent.']);
         } catch (\Exception $e) {
             $this->dispatch('toast', ['type' => 'error', 'title' => 'Scan Failed', 'message' => $e->getMessage()]);
