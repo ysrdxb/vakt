@@ -22,17 +22,10 @@ class ProjectDetail extends Component
 
     public function runScan(): void
     {
-        if ($this->project->server_type !== 'same_server') {
-            $this->dispatch('toast', ['type' => 'warning', 'title' => 'N/A', 'message' => 'Manual scan is only for same-server projects.']);
-            return;
-        }
-
         try {
-            $parser = app(\App\Services\LogParserService::class);
-            $check  = $parser->parseFile($this->project);
-
-            $this->dispatch('toast', ['type' => 'success', 'title' => 'Scan Complete',
-                'message' => "{$check->errors_found} errors, {$check->warnings_found} warnings found."]);
+            // Run the exact same collection pipeline that the cron job uses, but synchronously.
+            \App\Jobs\CollectProjectData::dispatchSync($this->project);
+            $this->dispatch('toast', ['type' => 'success', 'title' => 'Scan Complete', 'message' => 'Data pulled successfully from agent.']);
         } catch (\Exception $e) {
             $this->dispatch('toast', ['type' => 'error', 'title' => 'Scan Failed', 'message' => $e->getMessage()]);
         }
