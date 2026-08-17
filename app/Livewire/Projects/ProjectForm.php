@@ -127,8 +127,18 @@ class ProjectForm extends Component
 
     public function updatedDomain(): void
     {
+        // Auto-clean the domain before validation
+        $cleaned = trim($this->domain);
+        $cleaned = preg_replace('#^https?://#', '', $cleaned);
+        $cleaned = rtrim($cleaned, '/');
+        if ($this->domain !== $cleaned) {
+            $this->domain = $cleaned;
+        }
+
         $this->validateOnly('domain', [
             'domain' => ['required', 'regex:/^[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/i', Rule::unique('projects', 'domain')->ignore($this->project?->id)]
+        ], [
+            'domain.regex' => 'Please enter a valid domain (e.g. verk.kunnatta.is) without http:// or spaces.'
         ]);
     }
 
@@ -157,6 +167,13 @@ class ProjectForm extends Component
             'agent_secret' => 'required_if:server_type,external_agent',
             'ftp_host' => 'required_if:server_type,ftp',
             'ftp_user' => 'required_if:server_type,ftp',
+        ];
+    }
+
+    public function messages()
+    {
+        return [
+            'domain.regex' => 'Please enter a valid domain (e.g. verk.kunnatta.is) without http:// or spaces.',
         ];
     }
 
