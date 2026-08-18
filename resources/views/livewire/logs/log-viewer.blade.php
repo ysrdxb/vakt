@@ -93,7 +93,14 @@
                                     <div style="flex:1;min-width:300px;">
                                         <div style="font-size:0.75rem;text-transform:uppercase;color:var(--color-muted);margin-bottom:8px">Full Message</div>
                                         <div style="background:var(--color-background);padding:12px;border-radius:6px;font-family:var(--font-mono);font-size:0.85rem;color:var(--color-text);white-space:pre-wrap;max-height:300px;overflow-y:auto;border:1px solid var(--color-border)">
-                                            {{ $entry->message }}
+                                            @php
+                                                $formattedMessage = $entry->message;
+                                                $decoded = json_decode($entry->message, true);
+                                                if (is_array($decoded)) {
+                                                    $formattedMessage = implode("\n", $decoded);
+                                                }
+                                            @endphp
+                                            {{ $formattedMessage }}
                                         </div>
                                     </div>
                                     <div style="flex:1;min-width:300px;">
