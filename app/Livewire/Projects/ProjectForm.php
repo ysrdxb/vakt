@@ -17,6 +17,8 @@ class ProjectForm extends Component
     public string $laravel_version = '';
     public int $monitoring_interval_minutes = 5;
     public string $alert_email = '';
+    public ?string $slack_webhook_url = '';
+    public ?string $discord_webhook_url = '';
 
     // Connection
     public string $server_type = 'same_server';
@@ -68,7 +70,7 @@ class ProjectForm extends Component
                 'name', 'domain', 'description', 'server_type', 'server_path',
                 'agent_url', 'agent_ip_whitelist', 'ftp_host', 'ftp_user', 'stack', 'php_version',
                 'laravel_version', 'log_path', 'php_error_log_path', 'active',
-                'monitoring_interval_minutes', 'alert_email'
+                'monitoring_interval_minutes', 'alert_email', 'slack_webhook_url', 'discord_webhook_url'
             ]));
             
             if ($project->modules) $this->modules = array_merge($this->modules, $project->modules);
@@ -304,7 +306,7 @@ class ProjectForm extends Component
             'name', 'domain', 'description', 'server_type', 'server_path',
             'agent_url', 'agent_ip_whitelist', 'ftp_host', 'ftp_user', 'stack', 'php_version',
             'laravel_version', 'log_path', 'php_error_log_path', 'active',
-            'monitoring_interval_minutes', 'alert_email', 'modules', 'incident_rules'
+            'monitoring_interval_minutes', 'alert_email', 'slack_webhook_url', 'discord_webhook_url', 'modules', 'incident_rules'
         ]);
         
         if ($this->ftp_password) {

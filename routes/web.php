@@ -99,6 +99,9 @@ Route::middleware(['auth'])->group(function () {
             ]);
         })->name('projects.agent-download');
 
+        // SOC2 Monthly Report
+        Route::get('/projects/{project}/report/monthly', [\App\Http\Controllers\ReportController::class, 'downloadMonthly'])->name('projects.report.monthly');
+
     });
 
     // ─── CLIENT ROUTES ────────────────────────────────

@@ -331,6 +331,19 @@
                     <input type="email" class="form-control" wire:model.blur="alert_email" placeholder="alerts@example.com" style="max-width: 400px;">
                     <div class="form-text">Leave blank to use the system default email for alerts.</div>
                 </div>
+
+                <div class="grid-2" style="margin-top: 16px; border-top: 1px solid var(--border-color); padding-top: 16px;">
+                    <div class="form-group">
+                        <label class="form-label">Slack Webhook URL (Optional)</label>
+                        <input type="text" class="form-control" wire:model.blur="slack_webhook_url" placeholder="https://hooks.slack.com/services/...">
+                        <div class="form-text">Receive instant Slack alerts for Critical/High incidents.</div>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Discord Webhook URL (Optional)</label>
+                        <input type="text" class="form-control" wire:model.blur="discord_webhook_url" placeholder="https://discord.com/api/webhooks/...">
+                        <div class="form-text">Receive instant Discord alerts for Critical/High incidents.</div>
+                    </div>
+                </div>
             </div>
         </div>
 

@@ -15,7 +15,7 @@ class Project extends Model
         'agent_secret', 'agent_url', 'firewall_whitelist_confirmed', 'agent_ip_whitelist', 'ftp_host', 'ftp_user', 'ftp_password',
         'stack', 'php_version', 'laravel_version', 'log_path', 'php_error_log_path',
         'active', 'monitoring_interval_minutes', 'alert_email', 'status', 'last_checked_at',
-        'modules', 'incident_rules'
+        'modules', 'incident_rules', 'slack_webhook_url', 'discord_webhook_url'
     ];
 
     protected $casts = [

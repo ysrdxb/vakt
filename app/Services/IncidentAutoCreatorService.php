@@ -80,6 +80,11 @@ class IncidentAutoCreatorService
             \Log::warning("Could not send incident alert email: " . $e->getMessage());
         }
 
+        // Trigger Webhooks for High/Critical incidents
+        if (in_array($severity, ['p1', 'p2'])) {
+            app(\App\Services\NotificationService::class)->notifyIncidentCreated($incident);
+        }
+
         // Trigger AI Analysis
         \App\Jobs\AnalyzeIncidentWithAI::dispatch($incident->id);
 
