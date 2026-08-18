@@ -80,6 +80,9 @@ class IncidentAutoCreatorService
             \Log::warning("Could not send incident alert email: " . $e->getMessage());
         }
 
+        // Trigger AI Analysis
+        \App\Jobs\AnalyzeIncidentWithAI::dispatch($incident->id);
+
         return $incident;
     }
 }

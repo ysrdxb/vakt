@@ -85,7 +85,38 @@
         @endif
         <x-btn variant="ghost" wire:click="$set('editMode', true)" >Edit Notes</x-btn>
     </div>
+    </div>
 </div>
+
+@if($incident->ai_summary || $incident->ai_diagnosis)
+<div class="card mb-6" style="border: 1px solid rgba(139, 92, 246, 0.3); background: linear-gradient(145deg, rgba(17, 24, 39, 1) 0%, rgba(30, 27, 75, 0.4) 100%); position: relative; overflow: hidden;">
+    <div style="position: absolute; top: -10px; right: -10px; opacity: 0.05;">
+        <svg xmlns="http://www.w3.org/2000/svg" width="120" height="120" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+    </div>
+    <div class="card-header" style="border-bottom: 1px solid rgba(139, 92, 246, 0.1);">
+        <div class="card-title" style="display: flex; align-items: center; gap: 8px; color: #a78bfa;">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" style="width: 18px; height: 18px;">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
+            </svg>
+            AI Executive Summary
+        </div>
+    </div>
+    <div class="card-body">
+        @if($incident->ai_summary)
+        <div style="margin-bottom: 20px;">
+            <p style="font-size: 1.05rem; line-height: 1.6; color: #e2e8f0;">{{ $incident->ai_summary }}</p>
+        </div>
+        @endif
+        
+        @if($incident->ai_diagnosis)
+        <div style="background: rgba(0, 0, 0, 0.2); border-radius: 6px; padding: 16px; border-left: 3px solid #8b5cf6;">
+            <div style="font-size: 0.72rem; text-transform: uppercase; letter-spacing: .06em; color: #a78bfa; margin-bottom: 8px;">Technical Diagnosis</div>
+            <div style="font-size: 0.875rem; color: #cbd5e1; line-height: 1.5; white-space: pre-wrap;">{{ $incident->ai_diagnosis }}</div>
+        </div>
+        @endif
+    </div>
+</div>
+@endif
 
 <div class="grid grid-2 gap-6">
 

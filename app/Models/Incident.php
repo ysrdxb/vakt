@@ -10,7 +10,7 @@ use Carbon\Carbon;
 class Incident extends Model
 {
     protected $fillable = [
-        'project_id', 'title', 'description', 'severity', 'status', 'source',
+        'project_id', 'title', 'description', 'ai_summary', 'ai_diagnosis', 'severity', 'status', 'source',
         'detected_at', 'responded_at', 'resolved_at', 'closed_at',
         'assigned_to', 'affected_component', 'impact_description',
         'root_cause', 'resolution_notes', 'prevention_notes',

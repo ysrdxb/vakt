@@ -236,7 +236,7 @@ class FileIntegrityService
             ->exists();
 
         if (!$existing) {
-            Incident::create([
+            $incident = Incident::create([
                 'project_id'  => $project->id,
                 'title'       => $title,
                 'severity'    => $severity,
@@ -244,6 +244,8 @@ class FileIntegrityService
                 'source'      => 'auto_detected',
                 'detected_at' => now(),
             ]);
+
+            \App\Jobs\AnalyzeIncidentWithAI::dispatch($incident->id);
         }
     }
 }
