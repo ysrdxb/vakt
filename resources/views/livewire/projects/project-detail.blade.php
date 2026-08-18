@@ -33,6 +33,9 @@
                         </svg>
                         Run Scan Now
                     </x-btn>
+                    <x-btn variant="ghost" wire:click="sendTestReport">
+                        Test Daily Report
+                    </x-btn>
                     <a href="{{ route('projects.edit', $project) }}" class="btn btn-ghost">Edit Settings</a>
                 </div>
             </div>
@@ -141,6 +144,42 @@
                         </div>
                     </div>
                     @endif
+                </div>
+            @endif
+
+            @if($latestReport && isset($latestReport->payload['backup_status']))
+                @php
+                    $backupStatus = $latestReport->payload['backup_status'];
+                    $backupHealthy = $backupStatus['healthy'] ?? false;
+                    $backupTime = isset($backupStatus['latest_time']) && $backupStatus['latest_time'] > 0 
+                        ? \Carbon\Carbon::createFromTimestamp($backupStatus['latest_time'])->diffForHumans() 
+                        : 'No recent backup';
+                @endphp
+                <div style="flex: 1; min-width: 200px;">
+                    <div style="font-size:0.75rem; text-transform:uppercase; color:var(--color-muted); margin-bottom:8px;">Backup Validation</div>
+                    <div style="display:flex;align-items:center;gap:12px;">
+                        @if($backupHealthy)
+                            <div style="color:var(--color-success);">
+                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" style="width:32px;height:32px;">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                </svg>
+                            </div>
+                            <div>
+                                <div style="font-weight:600;font-size:0.9rem;">Verified</div>
+                                <div style="font-size:0.7rem;color:var(--color-muted)">{{ $backupTime }}</div>
+                            </div>
+                        @else
+                            <div style="color:var(--color-danger);">
+                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" style="width:32px;height:32px;">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                                </svg>
+                            </div>
+                            <div>
+                                <div style="font-weight:600;font-size:0.9rem;">Missing / Failed</div>
+                                <div style="font-size:0.7rem;color:var(--color-muted)">Over 24h old</div>
+                            </div>
+                        @endif
+                    </div>
                 </div>
             @endif
         </div>
