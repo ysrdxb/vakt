@@ -6,7 +6,7 @@ use App\Models\Project;
 use App\Models\UptimeLog;
 use App\Models\Incident;
 use Illuminate\Console\Command;
-use Illuminate\Support\Facades\Http;
+use App\Jobs\PingSingleProject;
 
 class PingProjects extends Command
 {
@@ -22,45 +22,56 @@ class PingProjects extends Command
      *
      * @var string
      */
-    protected $description = 'Pings all active projects to record uptime and response time.';
+    protected $description = 'Pings all active projects to record uptime and response time safely without bursting.';
 
     /**
      * Execute the console command.
      */
     public function handle()
     {
-        $projects = Project::all();
+        $projects = Project::where('active', true)->get();
+        $delayCounter = 0;
 
         foreach ($projects as $project) {
-            $url = $project->domain;
-            if (!str_starts_with($url, 'http')) {
-                $url = 'https://' . $url;
+            if ($project->server_type === 'same_server') {
+                $this->handleSameServerProject($project);
+                continue;
             }
 
-            $startTime = microtime(true);
-            $statusCode = null;
-            $errorMessage = null;
+            // Stagger by 2 seconds to prevent burst firewall bans
+            PingSingleProject::dispatch($project->id)->delay(now()->addSeconds($delayCounter * 2));
+            $delayCounter++;
+        }
+    }
 
-            try {
-                $response = Http::timeout(10)->get($url);
-                $statusCode = $response->status();
-            } catch (\Exception $e) {
-                $errorMessage = $e->getMessage();
-            }
+    private function handleSameServerProject(Project $project): void
+    {
+        // Safe local filesystem check instead of HTTP network request
+        $basePath = rtrim($project->server_path, '/');
+        
+        // Ensure path safety before checking
+        $real = realpath($basePath);
+        $isSafe = $real !== false && (str_starts_with($real, '/home/') || str_starts_with($real, '/Users/') || str_starts_with($real, 'C:\\'));
 
-            $responseTimeMs = (int) ((microtime(true) - $startTime) * 1000);
+        $statusCode = null;
+        $errorMessage = null;
 
-            UptimeLog::create([
-                'project_id' => $project->id,
-                'status_code' => $statusCode,
-                'response_time_ms' => $responseTimeMs,
-                'error_message' => $errorMessage,
-            ]);
+        if ($isSafe && is_dir($basePath)) {
+            $statusCode = 200; // Local directory exists, consider site healthy
+        } else {
+            $statusCode = 500;
+            $errorMessage = 'Base path is inaccessible or violates security rules';
+        }
 
-            // If it failed, check if we need to create an incident
-            if (!$statusCode || $statusCode >= 500) {
-                $this->handleDownProject($project, $statusCode, $errorMessage);
-            }
+        UptimeLog::create([
+            'project_id' => $project->id,
+            'status_code' => $statusCode,
+            'response_time_ms' => 0, // Instant
+            'error_message' => $errorMessage,
+        ]);
+
+        if ($statusCode === 500) {
+            $this->handleDownProject($project, $statusCode, $errorMessage);
         }
     }
 
