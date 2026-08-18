@@ -110,10 +110,6 @@
                         <p class="text-sm text-muted mt-1">Manage portal credentials for your clients and stakeholders.</p>
                     </div>
                     <div class="card-body">
-                        <div class="alert info-glass mb-6">
-                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" style="width:20px;height:20px"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
-                            <div>Provide these credentials to your clients so they can securely view their reports and live uptime status.</div>
-                        </div>
                         
                         @if($clientUser)
                             <div class="mb-6 max-w-lg">
