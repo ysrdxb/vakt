@@ -38,6 +38,11 @@ class Project extends Model
         return $this->hasMany(MonitoringCheck::class);
     }
 
+    public function uptimeLogs(): HasMany
+    {
+        return $this->hasMany(UptimeLog::class);
+    }
+
     public function fileSnapshots(): HasMany
     {
         return $this->hasMany(FileSnapshot::class);
