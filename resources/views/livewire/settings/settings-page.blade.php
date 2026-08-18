@@ -52,7 +52,6 @@
                 <div class="card premium-card">
                     <div class="card-header premium-header">
                         <div class="card-title">Profile Information</div>
-                        <p class="text-sm text-muted mt-1">Update your account's profile information and email address.</p>
                     </div>
                     <form wire:submit="saveProfile">
                         <div class="card-body">
@@ -78,7 +77,6 @@
                 <div class="card premium-card">
                     <div class="card-header premium-header">
                         <div class="card-title">Update Password</div>
-                        <p class="text-sm text-muted mt-1">Maintain account security by updating your password regularly.</p>
                     </div>
                     <form wire:submit="changePassword">
                         <div class="card-body">
@@ -107,7 +105,6 @@
                 <div class="card premium-card">
                     <div class="card-header premium-header">
                         <div class="card-title">Client Portal Access</div>
-                        <p class="text-sm text-muted mt-1">Manage portal credentials for your clients and stakeholders.</p>
                     </div>
                     <div class="card-body">
                         
