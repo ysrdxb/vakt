@@ -85,7 +85,7 @@ class LogViewer extends Component
             
             $response = \Illuminate\Support\Facades\Http::withHeaders([
                 'Content-Type' => 'application/json',
-            ])->post('https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-pro:generateContent?key=' . env('GEMINI_API_KEY'), [
+            ])->post('https://generativelanguage.googleapis.com/v1beta/models/gemini-3.1-pro-preview:generateContent?key=' . env('GEMINI_API_KEY'), [
                 'contents' => [
                     [
                         'parts' => [
