@@ -75,6 +75,11 @@ class LogViewer extends Component
             return; // Already analyzed
         }
 
+        if (empty(config('openai.api_key'))) {
+            $entry->update(['ai_explanation' => "System Error: OpenAI API Key is missing on this server. Please configure OPENAI_API_KEY in the .env file."]);
+            return;
+        }
+
         try {
             $prompt = "Explain this application log message in simple English and provide a quick fix hint or solution. Be concise. \n\nLog Level: {$entry->level}\nMessage: {$entry->message}";
             
@@ -97,11 +102,7 @@ class LogViewer extends Component
             ]);
         } catch (\Exception $e) {
             \Illuminate\Support\Facades\Log::error("Log AI Analysis failed: " . $e->getMessage());
-            $this->dispatch('toast', [
-                'type' => 'error',
-                'title' => 'Analysis Failed',
-                'message' => 'Could not generate AI explanation. ' . $e->getMessage()
-            ]);
+            $entry->update(['ai_explanation' => "AI Analysis Failed: " . $e->getMessage()]);
         }
     }
 
