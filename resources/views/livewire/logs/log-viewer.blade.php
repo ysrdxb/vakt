@@ -110,7 +110,7 @@
                                     <div style="flex:1;min-width:300px;">
                                         <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
                                             <div style="font-size:0.75rem;text-transform:uppercase;color:var(--color-muted);">AI Diagnostics</div>
-                                            @if(!$entry->ai_explanation)
+                                            @if(!$entry->ai_explanation || str_starts_with($entry->ai_explanation, 'System Error') || str_starts_with($entry->ai_explanation, 'AI Analysis Failed'))
                                                 <button wire:click="analyzeWithAI({{ $entry->id }})" class="btn btn-primary btn-sm" wire:loading.attr="disabled">
                                                     <span wire:loading.remove wire:target="analyzeWithAI({{ $entry->id }})">Ask AI for Quick Fix</span>
                                                     <span wire:loading wire:target="analyzeWithAI({{ $entry->id }})">Analyzing...</span>

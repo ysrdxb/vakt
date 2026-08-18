@@ -71,8 +71,8 @@ class LogViewer extends Component
 
     public function analyzeWithAI(LogEntry $entry)
     {
-        if ($entry->ai_explanation) {
-            return; // Already analyzed
+        if ($entry->ai_explanation && !str_starts_with($entry->ai_explanation, 'System Error') && !str_starts_with($entry->ai_explanation, 'AI Analysis Failed')) {
+            return; // Already analyzed successfully
         }
 
         if (empty(config('openai.api_key'))) {
