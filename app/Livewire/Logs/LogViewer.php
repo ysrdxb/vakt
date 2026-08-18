@@ -76,10 +76,17 @@ class LogViewer extends Component
         }
 
         try {
-            $openAi = app(\App\Services\OpenAIService::class);
             $prompt = "Explain this application log message in simple English and provide a quick fix hint or solution. Be concise. \n\nLog Level: {$entry->level}\nMessage: {$entry->message}";
             
-            $explanation = $openAi->analyzeIncident($prompt);
+            $response = \OpenAI\Laravel\Facades\OpenAI::chat()->create([
+                'model' => 'gpt-4o-mini',
+                'messages' => [
+                    ['role' => 'system', 'content' => 'You are an elite Security Operations Center (SOC) AI analyst. Your job is to explain server errors in simple terms and provide a quick fix.'],
+                    ['role' => 'user', 'content' => $prompt],
+                ],
+            ]);
+
+            $explanation = $response->choices[0]->message->content;
 
             $entry->update(['ai_explanation' => $explanation]);
 
@@ -89,10 +96,11 @@ class LogViewer extends Component
                 'message' => 'AI explanation generated successfully.'
             ]);
         } catch (\Exception $e) {
+            \Illuminate\Support\Facades\Log::error("Log AI Analysis failed: " . $e->getMessage());
             $this->dispatch('toast', [
                 'type' => 'error',
                 'title' => 'Analysis Failed',
-                'message' => 'Could not generate AI explanation.'
+                'message' => 'Could not generate AI explanation. ' . $e->getMessage()
             ]);
         }
     }
