@@ -37,7 +37,7 @@
         @else
             <x-table :headers="['Timestamp', 'Level', 'Project', 'Message', 'Patterns', 'IP', 'Actions']">
                 @foreach($entries as $entry)
-                    <x-table-row class="{{ in_array($entry->level, ['critical', 'error']) ? 'row-critical' : ($entry->level === 'warning' ? 'row-warning' : '') }}">
+                    <x-table-row wire:key="log-row-{{ $entry->id }}" class="{{ in_array($entry->level, ['critical', 'error']) ? 'row-critical' : ($entry->level === 'warning' ? 'row-warning' : '') }}">
                         <td>
                             <span class="text-mono" style="font-size:0.82rem">{{ $entry->occurred_at->format('M d, H:i:s') }}</span>
                         </td>
@@ -87,7 +87,7 @@
                     </x-table-row>
                     
                     @if($expandedLog === $entry->id)
-                        <tr style="background:var(--color-surface-2);">
+                        <tr wire:key="log-expanded-{{ $entry->id }}" style="background:var(--color-surface-2);">
                             <td colspan="7" style="padding:16px 20px;">
                                 <div style="display:flex;gap:24px;flex-wrap:wrap">
                                     <div style="flex:1;min-width:300px;">
@@ -98,6 +98,10 @@
                                                 $decoded = json_decode($entry->message, true);
                                                 if (is_array($decoded)) {
                                                     $formattedMessage = implode("\n", $decoded);
+                                                } else {
+                                                    // Fallback cleanup if json_decode fails on strictness
+                                                    $formattedMessage = str_replace('","', "\n", $formattedMessage);
+                                                    $formattedMessage = str_replace(['["', '"]', '\/'], ['', '', '/'], $formattedMessage);
                                                 }
                                             @endphp
                                             {{ $formattedMessage }}
