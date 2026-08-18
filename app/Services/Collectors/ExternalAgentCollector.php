@@ -70,6 +70,7 @@ class ExternalAgentCollector
                 envStatus:   $data['env_status'] ?? [],
                 phpErrors:   $data['php_errors'] ?? [],
                 uploadScan:  [],
+                systemMetrics: $data['system_metrics'] ?? [],
                 source:      'agent',
             );
 

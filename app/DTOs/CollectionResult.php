@@ -14,6 +14,7 @@ class CollectionResult
         public readonly array   $envStatus,
         public readonly array   $phpErrors,
         public readonly array   $uploadScan,
+        public readonly array   $systemMetrics,
         public readonly string  $source,         // filesystem|agent|ftp
         public readonly bool    $skipped = false,
         public readonly bool    $failed  = false,
@@ -30,6 +31,7 @@ class CollectionResult
             envStatus:   [],
             phpErrors:   [],
             uploadScan:  [],
+            systemMetrics: [],
             source:      'none',
             skipped:     true,
             error:       $reason,
@@ -46,6 +48,7 @@ class CollectionResult
             envStatus:   [],
             phpErrors:   [],
             uploadScan:  [],
+            systemMetrics: [],
             source:      'none',
             failed:      true,
             error:       $reason,

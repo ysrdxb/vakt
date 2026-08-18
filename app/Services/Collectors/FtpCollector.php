@@ -59,6 +59,7 @@ class FtpCollector
             envStatus:   [],
             phpErrors:   [],
             uploadScan:  [],
+            systemMetrics: [],
             source:      'ftp',
         );
     }

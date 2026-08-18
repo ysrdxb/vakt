@@ -56,7 +56,7 @@ echo json_encode([
     'env_status'   => getEnvStatus(),
     'file_changes' => getRecentFileChanges(),
     'php_errors'   => getPhpErrors(),
-    'disk_free'    => disk_free_space(__DIR__),
+    'system_metrics' => getSystemMetrics(),
 ]);
 exit;
 
@@ -136,4 +136,32 @@ function getPhpErrors(): array
     fclose($handle);
 
     return array_slice(explode("\n", $content), -100);
+}
+
+function getSystemMetrics(): array
+{
+    $metrics = [
+        'disk_free_bytes'  => disk_free_space(__DIR__),
+        'disk_total_bytes' => disk_total_space(__DIR__),
+        'cpu_load'         => null,
+        'memory_usage_mb'  => memory_get_usage(true) / 1024 / 1024,
+        'memory_total_mb'  => null,
+    ];
+
+    if (function_exists('sys_getloadavg')) {
+        $load = sys_getloadavg();
+        $metrics['cpu_load'] = $load[0] ?? null;
+    }
+
+    if (is_readable('/proc/meminfo')) {
+        $meminfo = file_get_contents('/proc/meminfo');
+        if (preg_match('/MemTotal:\s+(\d+)\s+kB/i', $meminfo, $matches)) {
+            $metrics['memory_total_mb'] = round($matches[1] / 1024, 2);
+        }
+        if (preg_match('/MemAvailable:\s+(\d+)\s+kB/i', $meminfo, $matches)) {
+            $metrics['memory_free_mb'] = round($matches[1] / 1024, 2);
+        }
+    }
+
+    return $metrics;
 }

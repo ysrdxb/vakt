@@ -25,6 +25,7 @@ class SameServerCollector
             envStatus:    $this->checkEnv(),
             phpErrors:    $this->readPhpErrors(),
             uploadScan:   $this->scanUploads(),
+            systemMetrics: [],
             source:       'filesystem',
         );
     }

@@ -13,6 +13,8 @@ Artisan::command('inspire', function () {
 
 // ─── Vakt SOC Scheduler ─────────────────────────────
 
+Schedule::command('vakt:ping-projects')->everyMinute()->withoutOverlapping();
+
 use App\Models\Project;
 use App\Jobs\CollectProjectData;
 

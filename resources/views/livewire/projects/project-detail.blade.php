@@ -74,6 +74,73 @@
     </div>
     @endif
 
+    {{-- Uptime & System Metrics --}}
+    @if($uptimeLogs->isNotEmpty() || ($latestReport && isset($latestReport->payload['system_metrics'])))
+    <div class="card mb-6">
+        <div class="card-header">
+            <div class="card-title">System Health & Uptime</div>
+        </div>
+        <div class="card-body" style="display:flex; gap: 32px; flex-wrap: wrap;">
+            
+            <div style="flex: 1; min-width: 250px;">
+                <div style="font-size:0.75rem; text-transform:uppercase; color:var(--color-muted); margin-bottom:8px;">Recent Uptime (Last Hour)</div>
+                <div style="display: flex; gap: 4px; align-items: flex-end; height: 40px;">
+                    @foreach($uptimeLogs->take(30)->reverse() as $log)
+                        @php
+                            $color = $log->status_code == 200 ? 'var(--color-success)' : 'var(--color-danger)';
+                            $height = $log->status_code == 200 ? '100%' : '30%';
+                        @endphp
+                        <div style="flex: 1; background: {{ $color }}; height: {{ $height }}; border-radius: 2px;" title="{{ $log->created_at->format('H:i') }} - HTTP {{ $log->status_code ?? 'Error' }}"></div>
+                    @endforeach
+                </div>
+                <div style="display: flex; justify-content: space-between; margin-top: 4px; font-size: 0.7rem; color: var(--color-muted);">
+                    <span>30m ago</span>
+                    <span>Now</span>
+                </div>
+            </div>
+
+            @if($latestReport && isset($latestReport->payload['system_metrics']))
+                @php
+                    $metrics = $latestReport->payload['system_metrics'];
+                    $diskFree = $metrics['disk_free_bytes'] ?? 0;
+                    $diskTotal = $metrics['disk_total_bytes'] ?? 1;
+                    $diskUsedPct = $diskTotal > 0 ? (($diskTotal - $diskFree) / $diskTotal) * 100 : 0;
+                    
+                    $memFree = $metrics['memory_free_mb'] ?? 0;
+                    $memTotal = $metrics['memory_total_mb'] ?? 1;
+                    $memUsedPct = $memTotal > 0 ? (($memTotal - $memFree) / $memTotal) * 100 : 0;
+                @endphp
+                
+                <div style="flex: 1; min-width: 250px;">
+                    <div style="font-size:0.75rem; text-transform:uppercase; color:var(--color-muted); margin-bottom:8px;">Server Resources</div>
+                    
+                    <div style="margin-bottom: 12px;">
+                        <div style="display: flex; justify-content: space-between; font-size: 0.8rem; margin-bottom: 4px;">
+                            <span>Disk Usage</span>
+                            <span>{{ number_format($diskUsedPct, 1) }}%</span>
+                        </div>
+                        <div style="height: 6px; background: var(--color-surface-2); border-radius: 3px; overflow: hidden;">
+                            <div style="height: 100%; width: {{ min($diskUsedPct, 100) }}%; background: {{ $diskUsedPct > 90 ? 'var(--color-danger)' : 'var(--color-primary)' }};"></div>
+                        </div>
+                    </div>
+
+                    @if(isset($metrics['memory_total_mb']))
+                    <div>
+                        <div style="display: flex; justify-content: space-between; font-size: 0.8rem; margin-bottom: 4px;">
+                            <span>Memory Usage</span>
+                            <span>{{ number_format($memUsedPct, 1) }}% ({{ number_format($memTotal) }} MB)</span>
+                        </div>
+                        <div style="height: 6px; background: var(--color-surface-2); border-radius: 3px; overflow: hidden;">
+                            <div style="height: 100%; width: {{ min($memUsedPct, 100) }}%; background: {{ $memUsedPct > 85 ? 'var(--color-warning)' : 'var(--color-success)' }};"></div>
+                        </div>
+                    </div>
+                    @endif
+                </div>
+            @endif
+        </div>
+    </div>
+    @endif
+
     <div class="grid grid-2 gap-6">
         {{-- Recent Incidents --}}
         <div class="card">

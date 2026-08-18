@@ -37,7 +37,18 @@ class ProjectDetail extends Component
     {
         $this->project->load(['incidents' => fn($q) => $q->orderByDesc('detected_at')->limit(10), 'monitoringChecks' => fn($q) => $q->orderByDesc('checked_at')->limit(5), 'logEntries' => fn($q) => $q->orderByDesc('occurred_at')->limit(10)]);
 
-        return view('livewire.projects.project-detail')
-            ->layout('layouts.app', ['title' => $this->project->domain]);
+        $latestReport = \App\Models\AgentReport::where('project_id', $this->project->id)
+                            ->orderByDesc('received_at')
+                            ->first();
+
+        $uptimeLogs = \App\Models\UptimeLog::where('project_id', $this->project->id)
+                            ->orderByDesc('created_at')
+                            ->limit(60)
+                            ->get();
+
+        return view('livewire.projects.project-detail', [
+            'latestReport' => $latestReport,
+            'uptimeLogs' => $uptimeLogs,
+        ])->layout('layouts.app', ['title' => $this->project->domain]);
     }
 }
