@@ -110,7 +110,7 @@
                                     <div style="flex:1;min-width:300px;">
                                         <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
                                             <div style="font-size:0.75rem;text-transform:uppercase;color:var(--color-muted);">AI Diagnostics</div>
-                                            @if(!$entry->ai_explanation || str_starts_with($entry->ai_explanation, 'System Error') || str_starts_with($entry->ai_explanation, 'AI Analysis Failed'))
+                                            @if(!$entry->ai_explanation)
                                                 <button wire:click="analyzeWithAI({{ $entry->id }})" class="btn btn-primary btn-sm" wire:loading.attr="disabled">
                                                     <span wire:loading.remove wire:target="analyzeWithAI({{ $entry->id }})">Ask AI for Quick Fix</span>
                                                     <span wire:loading wire:target="analyzeWithAI({{ $entry->id }})">Analyzing...</span>
@@ -118,16 +118,28 @@
                                             @endif
                                         </div>
                                         
-                                        @if($entry->ai_explanation)
-                                            <div style="background:rgba(139, 92, 246, 0.05);padding:16px;border-radius:6px;border:1px solid rgba(139, 92, 246, 0.2);color:var(--color-text);">
-                                                <div style="display:flex;gap:8px;margin-bottom:12px;color:#a78bfa">
-                                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" style="width:20px;height:20px"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" /></svg>
-                                                    <strong style="font-size:0.9rem">AI Quick Fix Hint</strong>
+                                        @if(isset($aiErrors[$entry->id]))
+                                            <div style="background:rgba(239, 68, 68, 0.05);padding:16px;border-radius:6px;border:1px solid rgba(239, 68, 68, 0.2);color:var(--color-text);margin-bottom:12px">
+                                                <div style="display:flex;gap:8px;margin-bottom:8px;color:#ef4444">
+                                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" style="width:20px;height:20px"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" /></svg>
+                                                    <strong style="font-size:0.9rem">Analysis Error</strong>
                                                 </div>
-                                                <div style="font-size:0.9rem;line-height:1.6;white-space:pre-wrap">{{ $entry->ai_explanation }}</div>
+                                                <div style="font-size:0.85rem;line-height:1.5;white-space:pre-wrap">{{ $aiErrors[$entry->id] }}</div>
                                             </div>
-                                        @elseif(!$entry->ai_explanation)
-                                            <div style="padding:24px;border:1px dashed var(--color-border);border-radius:6px;text-align:center;color:var(--color-text-dim);font-size:0.9rem">
+                                        @endif
+                                        
+                                        @if($entry->ai_explanation)
+                                            <div style="background:rgba(139, 92, 246, 0.05);padding:20px;border-radius:8px;border:1px solid rgba(139, 92, 246, 0.2);color:var(--color-text);">
+                                                <div style="display:flex;gap:8px;margin-bottom:16px;color:#a78bfa;align-items:center">
+                                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" style="width:22px;height:22px"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" /></svg>
+                                                    <strong style="font-size:1rem;letter-spacing:0.5px">AI Quick Fix Hint</strong>
+                                                </div>
+                                                <div class="prose prose-sm prose-invert" style="font-size:0.95rem;line-height:1.7;max-width:none">
+                                                    {!! \Illuminate\Support\Str::markdown($entry->ai_explanation) !!}
+                                                </div>
+                                            </div>
+                                        @elseif(!$entry->ai_explanation && !isset($aiErrors[$entry->id]))
+                                            <div style="padding:24px;border:1px dashed var(--color-border);border-radius:8px;text-align:center;color:var(--color-text-dim);font-size:0.9rem;background:var(--color-surface)">
                                                 Not analyzed yet. Click the button to generate a human-readable explanation and solution hint.
                                             </div>
                                         @endif

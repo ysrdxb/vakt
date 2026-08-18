@@ -45,6 +45,7 @@ class LogViewer extends Component
     }
 
     public ?int $expandedLog = null;
+    public array $aiErrors = [];
 
     public function toggleExpand(int $logId)
     {
@@ -71,12 +72,18 @@ class LogViewer extends Component
 
     public function analyzeWithAI(LogEntry $entry)
     {
-        if ($entry->ai_explanation && !str_starts_with($entry->ai_explanation, 'System Error') && !str_starts_with($entry->ai_explanation, 'AI Analysis Failed')) {
+        // Clear any previously saved error strings from the database so they don't persist
+        if ($entry->ai_explanation && (str_starts_with($entry->ai_explanation, 'System Error') || str_starts_with($entry->ai_explanation, 'AI Analysis Failed'))) {
+            $entry->update(['ai_explanation' => null]);
+            $entry->refresh();
+        }
+
+        if ($entry->ai_explanation) {
             return; // Already analyzed successfully
         }
 
         if (empty(env('GEMINI_API_KEY'))) {
-            $entry->update(['ai_explanation' => "System Error: GEMINI_API_KEY is missing. Please configure it in the .env file."]);
+            $this->aiErrors[$entry->id] = "System Error: GEMINI_API_KEY is missing. Please configure it in the .env file.";
             return;
         }
 
@@ -109,6 +116,7 @@ class LogViewer extends Component
             }
 
             $entry->update(['ai_explanation' => $explanation]);
+            $this->aiErrors[$entry->id] = null;
 
             $this->dispatch('toast', [
                 'type' => 'success',
@@ -117,7 +125,7 @@ class LogViewer extends Component
             ]);
         } catch (\Exception $e) {
             \Illuminate\Support\Facades\Log::error("Log AI Analysis failed: " . $e->getMessage());
-            $entry->update(['ai_explanation' => "AI Analysis Failed: " . $e->getMessage()]);
+            $this->aiErrors[$entry->id] = "AI Analysis Failed: " . $e->getMessage();
         }
     }
 
