@@ -71,15 +71,60 @@
                             @endif
                         </td>
                         <td>
-                            @if(!$entry->is_reviewed)
-                                <button wire:click="markReviewed({{ $entry->id }})" class="btn btn-ghost btn-sm" title="Mark as reviewed">
-                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" style="width:16px;height:16px"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" /></svg>
+                            <div style="display:flex;gap:4px">
+                                @if(!$entry->is_reviewed)
+                                    <button wire:click="markReviewed({{ $entry->id }})" class="btn btn-ghost btn-sm" title="Mark as reviewed">
+                                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" style="width:16px;height:16px"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" /></svg>
+                                    </button>
+                                @else
+                                    <span class="text-muted text-sm">Reviewed</span>
+                                @endif
+                                <button wire:click="toggleExpand({{ $entry->id }})" class="btn btn-ghost btn-sm" title="View Details">
+                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" style="width:16px;height:16px"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" /></svg>
                                 </button>
-                            @else
-                                <span class="text-muted text-sm">Reviewed</span>
-                            @endif
+                            </div>
                         </td>
                     </x-table-row>
+                    
+                    @if($expandedLog === $entry->id)
+                        <tr style="background:var(--color-surface-2);">
+                            <td colspan="7" style="padding:16px 20px;">
+                                <div style="display:flex;gap:24px;flex-wrap:wrap">
+                                    <div style="flex:1;min-width:300px;">
+                                        <div style="font-size:0.75rem;text-transform:uppercase;color:var(--color-muted);margin-bottom:8px">Full Message</div>
+                                        <div style="background:var(--color-background);padding:12px;border-radius:6px;font-family:var(--font-mono);font-size:0.85rem;color:var(--color-text);white-space:pre-wrap;max-height:300px;overflow-y:auto;border:1px solid var(--color-border)">
+                                            {{ $entry->message }}
+                                        </div>
+                                    </div>
+                                    <div style="flex:1;min-width:300px;">
+                                        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+                                            <div style="font-size:0.75rem;text-transform:uppercase;color:var(--color-muted);">AI Diagnostics</div>
+                                            @if(!$entry->ai_explanation)
+                                                <button wire:click="analyzeWithAI({{ $entry->id }})" class="btn btn-primary btn-sm" wire:loading.attr="disabled">
+                                                    <span wire:loading.remove wire:target="analyzeWithAI({{ $entry->id }})">Ask AI for Quick Fix</span>
+                                                    <span wire:loading wire:target="analyzeWithAI({{ $entry->id }})">Analyzing...</span>
+                                                </button>
+                                            @endif
+                                        </div>
+                                        
+                                        @if($entry->ai_explanation)
+                                            <div style="background:rgba(139, 92, 246, 0.05);padding:16px;border-radius:6px;border:1px solid rgba(139, 92, 246, 0.2);color:var(--color-text);">
+                                                <div style="display:flex;gap:8px;margin-bottom:12px;color:#a78bfa">
+                                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" style="width:20px;height:20px"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" /></svg>
+                                                    <strong style="font-size:0.9rem">AI Quick Fix Hint</strong>
+                                                </div>
+                                                <div style="font-size:0.9rem;line-height:1.6;white-space:pre-wrap">{{ $entry->ai_explanation }}</div>
+                                            </div>
+                                        @elseif(!$entry->ai_explanation)
+                                            <div style="padding:24px;border:1px dashed var(--color-border);border-radius:6px;text-align:center;color:var(--color-text-dim);font-size:0.9rem">
+                                                Not analyzed yet. Click the button to generate a human-readable explanation and solution hint.
+                                            </div>
+                                        @endif
+                                    </div>
+                                </div>
+                            </td>
+                        </tr>
+                    @endif
                 @endforeach
             </x-table>
             <div style="padding:16px 20px">

@@ -44,6 +44,17 @@ class LogViewer extends Component
             ->paginate($this->perPage);
     }
 
+    public ?int $expandedLog = null;
+
+    public function toggleExpand(int $logId)
+    {
+        if ($this->expandedLog === $logId) {
+            $this->expandedLog = null;
+        } else {
+            $this->expandedLog = $logId;
+        }
+    }
+
     public function markReviewed(LogEntry $entry)
     {
         $entry->update([
@@ -56,6 +67,34 @@ class LogViewer extends Component
             'title' => 'Marked',
             'message' => 'Entry marked as reviewed'
         ]);
+    }
+
+    public function analyzeWithAI(LogEntry $entry)
+    {
+        if ($entry->ai_explanation) {
+            return; // Already analyzed
+        }
+
+        try {
+            $openAi = app(\App\Services\OpenAIService::class);
+            $prompt = "Explain this application log message in simple English and provide a quick fix hint or solution. Be concise. \n\nLog Level: {$entry->level}\nMessage: {$entry->message}";
+            
+            $explanation = $openAi->analyzeIncident($prompt);
+
+            $entry->update(['ai_explanation' => $explanation]);
+
+            $this->dispatch('toast', [
+                'type' => 'success',
+                'title' => 'Analysis Complete',
+                'message' => 'AI explanation generated successfully.'
+            ]);
+        } catch (\Exception $e) {
+            $this->dispatch('toast', [
+                'type' => 'error',
+                'title' => 'Analysis Failed',
+                'message' => 'Could not generate AI explanation.'
+            ]);
+        }
     }
 
     public function render()

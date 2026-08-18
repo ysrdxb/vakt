@@ -10,7 +10,7 @@ class LogEntry extends Model
     protected $fillable = [
         'project_id', 'level', 'message', 'context', 'detected_patterns',
         'ip_address', 'user_agent', 'url', 'occurred_at',
-        'is_reviewed', 'reviewed_by', 'reviewed_at',
+        'is_reviewed', 'reviewed_by', 'reviewed_at', 'ai_explanation'
     ];
 
     protected $casts = [
