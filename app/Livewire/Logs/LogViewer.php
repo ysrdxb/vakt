@@ -75,23 +75,35 @@ class LogViewer extends Component
             return; // Already analyzed successfully
         }
 
-        if (empty(config('openai.api_key'))) {
-            $entry->update(['ai_explanation' => "System Error: OpenAI API Key is missing on this server. Please configure OPENAI_API_KEY in the .env file."]);
+        if (empty(env('GEMINI_API_KEY'))) {
+            $entry->update(['ai_explanation' => "System Error: GEMINI_API_KEY is missing. Please configure it in the .env file."]);
             return;
         }
 
         try {
-            $prompt = "Explain this application log message in simple English and provide a quick fix hint or solution. Be concise. \n\nLog Level: {$entry->level}\nMessage: {$entry->message}";
+            $prompt = "You are an elite Security Operations Center (SOC) AI analyst. Your job is to explain server errors in simple terms and provide a quick fix. \n\nExplain this application log message in simple English and provide a quick fix hint or solution. Be concise. \n\nLog Level: {$entry->level}\nMessage: {$entry->message}";
             
-            $response = \OpenAI\Laravel\Facades\OpenAI::chat()->create([
-                'model' => 'gpt-4o-mini',
-                'messages' => [
-                    ['role' => 'system', 'content' => 'You are an elite Security Operations Center (SOC) AI analyst. Your job is to explain server errors in simple terms and provide a quick fix.'],
-                    ['role' => 'user', 'content' => $prompt],
-                ],
+            $response = \Illuminate\Support\Facades\Http::withHeaders([
+                'Content-Type' => 'application/json',
+            ])->post('https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=' . env('GEMINI_API_KEY'), [
+                'contents' => [
+                    [
+                        'parts' => [
+                            ['text' => $prompt]
+                        ]
+                    ]
+                ]
             ]);
 
-            $explanation = $response->choices[0]->message->content;
+            if ($response->failed()) {
+                throw new \Exception('Gemini API Error: ' . $response->body());
+            }
+
+            $explanation = $response->json('candidates.0.content.parts.0.text');
+
+            if (!$explanation) {
+                throw new \Exception('Unexpected Gemini API response format: ' . $response->body());
+            }
 
             $entry->update(['ai_explanation' => $explanation]);
 

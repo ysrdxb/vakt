@@ -19,8 +19,8 @@ class AnalyzeIncidentWithAI implements ShouldQueue
 
     public function handle(): void
     {
-        if (empty(config('openai.api_key'))) {
-            Log::warning("OpenAI API Key not set. Skipping AI analysis for Incident {$this->incidentId}");
+        if (empty(env('GEMINI_API_KEY'))) {
+            Log::warning("GEMINI_API_KEY not set. Skipping AI analysis for Incident {$this->incidentId}");
             return;
         }
 
@@ -30,19 +30,36 @@ class AnalyzeIncidentWithAI implements ShouldQueue
         }
 
         try {
-            $prompt = $this->buildPrompt($incident);
+            $prompt = "You are an elite Security Operations Center (SOC) AI analyst. Your job is to analyze server incidents, logs, and security events. You must output raw JSON only without markdown code blocks.\n\n" . $this->buildPrompt($incident);
 
-            $response = OpenAI::chat()->create([
-                'model' => 'gpt-4o-mini',
-                'messages' => [
-                    ['role' => 'system', 'content' => 'You are an elite Security Operations Center (SOC) AI analyst. Your job is to analyze server incidents, logs, and security events. You must output raw JSON only.'],
-                    ['role' => 'user', 'content' => $prompt],
-                ],
-                'response_format' => ['type' => 'json_object'],
+            $response = \Illuminate\Support\Facades\Http::withHeaders([
+                'Content-Type' => 'application/json',
+            ])->post('https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=' . env('GEMINI_API_KEY'), [
+                'contents' => [
+                    [
+                        'parts' => [
+                            ['text' => $prompt]
+                        ]
+                    ]
+                ]
             ]);
 
-            $content = $response->choices[0]->message->content;
-            $data = json_decode($content, true);
+            if ($response->failed()) {
+                throw new \Exception('Gemini API Error: ' . $response->body());
+            }
+
+            $content = trim($response->json('candidates.0.content.parts.0.text'));
+            
+            // Clean markdown json block if Gemini includes it
+            if (str_starts_with($content, '```json')) {
+                $content = substr($content, 7);
+                $content = substr($content, 0, -3);
+            } elseif (str_starts_with($content, '```')) {
+                $content = substr($content, 3);
+                $content = substr($content, 0, -3);
+            }
+            
+            $data = json_decode(trim($content), true);
 
             if ($data && isset($data['ai_summary'], $data['ai_diagnosis'])) {
                 $incident->update([
@@ -56,6 +73,8 @@ class AnalyzeIncidentWithAI implements ShouldQueue
                     'performed_by' => 'System (AI)',
                     'notes' => 'AI incident analysis completed successfully.',
                 ]);
+            } else {
+                throw new \Exception('Invalid JSON returned by Gemini: ' . $content);
             }
         } catch (\Exception $e) {
             Log::error("Failed to analyze incident with AI: " . $e->getMessage());
