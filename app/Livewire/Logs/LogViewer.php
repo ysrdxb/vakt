@@ -85,7 +85,7 @@ class LogViewer extends Component
             
             $response = \Illuminate\Support\Facades\Http::withHeaders([
                 'Content-Type' => 'application/json',
-            ])->post('https://generativelanguage.googleapis.com/v1beta/models/gemini-3.1-pro-preview:generateContent?key=' . env('GEMINI_API_KEY'), [
+            ])->post('https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=' . env('GEMINI_API_KEY'), [
                 'contents' => [
                     [
                         'parts' => [
@@ -96,6 +96,9 @@ class LogViewer extends Component
             ]);
 
             if ($response->failed()) {
+                if ($response->status() === 429) {
+                    throw new \Exception('AI analysis unavailable — quota exceeded, will retry later');
+                }
                 throw new \Exception('Gemini API Error: ' . $response->body());
             }
 
