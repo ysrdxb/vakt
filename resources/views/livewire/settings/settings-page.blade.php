@@ -36,7 +36,7 @@
                         </div>
                         <div class="tab-content">
                             <div class="tab-title">Client Access</div>
-                            <div class="tab-sub">Shared view-only account</div>
+                            <div class="tab-sub">Client portal credentials</div>
                         </div>
                     </button>
                 </nav>
@@ -78,7 +78,7 @@
                 <div class="card premium-card">
                     <div class="card-header premium-header">
                         <div class="card-title">Update Password</div>
-                        <p class="text-sm text-muted mt-1">Ensure your account is using a long, random password to stay secure.</p>
+                        <p class="text-sm text-muted mt-1">Maintain account security by updating your password regularly.</p>
                     </div>
                     <form wire:submit="changePassword">
                         <div class="card-body">
@@ -106,13 +106,13 @@
             <div class="tab-pane">
                 <div class="card premium-card">
                     <div class="card-header premium-header">
-                        <div class="card-title">Client Dashboard Access</div>
-                        <p class="text-sm text-muted mt-1">Manage the credentials for the read-only client dashboard.</p>
+                        <div class="card-title">Client Portal Access</div>
+                        <p class="text-sm text-muted mt-1">Manage portal credentials for your clients and stakeholders.</p>
                     </div>
                     <div class="card-body">
                         <div class="alert info-glass mb-6">
                             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" style="width:20px;height:20px"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
-                            <div>This is the shared account your clients use to access the Security Dashboard without modifying settings.</div>
+                            <div>Provide these credentials to your clients so they can securely view their reports and live uptime status.</div>
                         </div>
                         
                         @if($clientUser)
