@@ -97,8 +97,10 @@ echo json_encode([
     'log_tail'     => getLogTail(),
     'env_status'   => getEnvStatus(),
     'file_changes' => getRecentFileChanges(),
-    'php_errors'   => getPhpErrors(),
-    'system_metrics' => getSystemMetrics(),
+    'php_errors'       => getPhpErrors(),
+    'system_metrics'   => getSystemMetrics(),
+    'backup_status'    => getBackupStatus(),
+    'secrets_exposure' => getSecretsExposure(),
 ]);
 exit;
 
@@ -206,4 +208,73 @@ function getSystemMetrics(): array
     }
 
     return $metrics;
+}
+
+function getBackupStatus(): array
+{
+    $basePath = dirname(VAKT_LOG_PATH, 3);
+    $backupDirs = [
+        $basePath . '/storage/app/backups',
+        $basePath . '/storage/app/Laravel',
+        $basePath . '/storage/app',
+        $basePath . '/storage/backups',
+    ];
+
+    $latestBackupTime = 0;
+    $latestBackupFile = null;
+
+    foreach ($backupDirs as $dir) {
+        if (!is_dir($dir)) continue;
+
+        $iterator = new RecursiveIteratorIterator(
+            new RecursiveDirectoryIterator($dir, FilesystemIterator::SKIP_DOTS)
+        );
+
+        foreach ($iterator as $file) {
+            $ext = strtolower($file->getExtension());
+            if ($ext === 'zip' || $ext === 'sql') {
+                // Ignore small files (less than 100KB), valid backups are usually larger
+                if ($file->getSize() > 102400 && $file->getMTime() > $latestBackupTime) {
+                    $latestBackupTime = $file->getMTime();
+                    $latestBackupFile = $file->getPathname();
+                }
+            }
+        }
+    }
+
+    $isHealthy = $latestBackupTime > (time() - 86400); // Created in last 24 hours
+
+    return [
+        'healthy'     => $isHealthy,
+        'latest_time' => $latestBackupTime,
+        'latest_file' => $latestBackupFile ? basename($latestBackupFile) : null,
+    ];
+}
+
+function getSecretsExposure(): array
+{
+    $logTail = getLogTail();
+    if (isset($logTail['error'])) return ['exposed' => false, 'matches' => []];
+
+    // Check last 200 lines for common API key patterns (OpenAI, Stripe, etc)
+    // Stripe: sk_live_... or rk_live_...
+    // OpenAI: sk-...
+    $pattern = '/(sk_live_[0-9a-zA-Z]{24,}|rk_live_[0-9a-zA-Z]{24,}|sk-[a-zA-Z0-9]{32,}|sk-proj-[a-zA-Z0-9_-]{32,})/';
+    
+    $matches = [];
+    foreach ($logTail as $line) {
+        if (preg_match_all($pattern, $line, $found)) {
+            foreach ($found[0] as $key) {
+                // Return masked version so the agent doesn't send the full key over the wire
+                $matches[] = substr($key, 0, 8) . '***'; 
+            }
+        }
+    }
+
+    $matches = array_unique($matches);
+
+    return [
+        'exposed' => count($matches) > 0,
+        'matches' => array_values($matches),
+    ];
 }

@@ -26,6 +26,8 @@ class SameServerCollector
             phpErrors:    $this->readPhpErrors(),
             uploadScan:   $this->scanUploads(),
             systemMetrics: [],
+            backupStatus: $this->checkBackupStatus(),
+            secretsExposure: $this->checkSecretsExposure(),
             source:       'filesystem',
         );
     }
@@ -217,5 +219,73 @@ class SameServerCollector
     {
         $lines = explode("\n", $content);
         return array_slice(array_filter($lines), -100);
+    }
+
+    private function checkBackupStatus(): array
+    {
+        $backupDirs = [
+            $this->basePath . '/storage/app/backups',
+            $this->basePath . '/storage/app/Laravel',
+            $this->basePath . '/storage/app',
+            $this->basePath . '/storage/backups',
+        ];
+
+        $latestBackupTime = 0;
+        $latestBackupFile = null;
+
+        foreach ($backupDirs as $dir) {
+            if (!is_dir($dir)) continue;
+
+            $iterator = new \RecursiveIteratorIterator(
+                new \RecursiveDirectoryIterator($dir, \FilesystemIterator::SKIP_DOTS)
+            );
+
+            foreach ($iterator as $file) {
+                $ext = strtolower($file->getExtension());
+                if ($ext === 'zip' || $ext === 'sql') {
+                    if ($file->getSize() > 102400 && $file->getMTime() > $latestBackupTime) {
+                        $latestBackupTime = $file->getMTime();
+                        $latestBackupFile = $file->getPathname();
+                    }
+                }
+            }
+        }
+
+        return [
+            'healthy'     => $latestBackupTime > (time() - 86400),
+            'latest_time' => $latestBackupTime,
+            'latest_file' => $latestBackupFile ? basename($latestBackupFile) : null,
+        ];
+    }
+
+    private function checkSecretsExposure(): array
+    {
+        $path = $this->resolvePath($this->project->log_path);
+        if (!$this->pathSafe($path) || !is_readable($path)) {
+            return ['exposed' => false, 'matches' => []];
+        }
+
+        $size   = filesize($path);
+        $offset = max(0, $size - (512 * 1024)); // 512KB tail
+        $handle = fopen($path, 'r');
+        fseek($handle, $offset);
+        $content = fread($handle, $size - $offset);
+        fclose($handle);
+
+        $pattern = '/(sk_live_[0-9a-zA-Z]{24,}|rk_live_[0-9a-zA-Z]{24,}|sk-[a-zA-Z0-9]{32,}|sk-proj-[a-zA-Z0-9_-]{32,})/';
+        
+        $matches = [];
+        if (preg_match_all($pattern, $content, $found)) {
+            foreach ($found[0] as $key) {
+                $matches[] = substr($key, 0, 8) . '***'; 
+            }
+        }
+
+        $matches = array_unique($matches);
+
+        return [
+            'exposed' => count($matches) > 0,
+            'matches' => array_values($matches),
+        ];
     }
 }

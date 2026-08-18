@@ -38,5 +38,27 @@ class AnalyzerService
             $content = is_array($result->logEntries) ? json_encode($result->logEntries) : $result->logEntries;
             $this->parser->parseRawContent($project, $content);
         }
+
+        // Process Phase 5 Proactive Scans
+        $incidentCreator = app(\App\Services\IncidentAutoCreatorService::class);
+
+        if (isset($result->backupStatus['healthy']) && !$result->backupStatus['healthy']) {
+            $incidentCreator->createIfNotExists(
+                $project,
+                "Database backup missing or failed",
+                "p1",
+                "No database backups were detected in the last 24 hours. Verify your automated backup schedule immediately."
+            );
+        }
+
+        if (isset($result->secretsExposure['exposed']) && $result->secretsExposure['exposed']) {
+            $keys = implode(', ', $result->secretsExposure['matches'] ?? []);
+            $incidentCreator->createIfNotExists(
+                $project,
+                "Exposed API Key detected on server",
+                "p1",
+                "The secrets scanner detected exposed keys: {$keys}. Check your log files and .env exposures."
+            );
+        }
     }
 }

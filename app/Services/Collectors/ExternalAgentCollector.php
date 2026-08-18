@@ -71,6 +71,8 @@ class ExternalAgentCollector
                 phpErrors:   $data['php_errors'] ?? [],
                 uploadScan:  [],
                 systemMetrics: $data['system_metrics'] ?? [],
+                backupStatus:  $data['backup_status'] ?? [],
+                secretsExposure: $data['secrets_exposure'] ?? [],
                 source:      'agent',
             );
 

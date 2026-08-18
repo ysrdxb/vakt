@@ -111,4 +111,97 @@ class NotificationService
             Log::error("Failed to send Discord notification for incident {$incident->id}: " . $e->getMessage());
         }
     }
+
+    public function notifyDailyReport(Project $project, array $stats): void
+    {
+        if ($project->slack_webhook_url) {
+            $this->sendDailySlack($project->slack_webhook_url, $project, $stats);
+        }
+
+        if ($project->discord_webhook_url) {
+            $this->sendDailyDiscord($project->discord_webhook_url, $project, $stats);
+        }
+    }
+
+    private function sendDailySlack(string $webhookUrl, Project $project, array $stats): void
+    {
+        $payload = [
+            'attachments' => [
+                [
+                    'fallback' => "Daily SOC Report for {$project->domain}",
+                    'color'    => '#10b981', // green
+                    'pretext'  => "📊 *Daily Security Briefing*",
+                    'title'    => "Status Report: {$project->domain}",
+                    'title_link' => route('projects.show', $project),
+                    'text'     => "All checks completed for the last 24 hours.",
+                    'fields'   => [
+                        [
+                            'title' => 'Uptime',
+                            'value' => "{$stats['uptime_percentage']}%",
+                            'short' => true,
+                        ],
+                        [
+                            'title' => 'Open Incidents',
+                            'value' => (string) $stats['open_incidents'],
+                            'short' => true,
+                        ],
+                        [
+                            'title' => 'Backup Status',
+                            'value' => $stats['backup_healthy'] ? '✅ Verified' : '❌ Missing/Failed',
+                            'short' => false,
+                        ]
+                    ],
+                    'footer' => 'Vakt SOC Platform',
+                    'ts'     => now()->timestamp
+                ]
+            ]
+        ];
+
+        try {
+            Http::timeout(5)->post($webhookUrl, $payload);
+        } catch (\Exception $e) {
+            Log::error("Failed to send Daily Slack notification: " . $e->getMessage());
+        }
+    }
+
+    private function sendDailyDiscord(string $webhookUrl, Project $project, array $stats): void
+    {
+        $payload = [
+            'embeds' => [
+                [
+                    'title'       => "📊 Daily Security Briefing: " . $project->domain,
+                    'description' => "All systematic checks completed for the last 24 hours.",
+                    'url'         => route('projects.show', $project),
+                    'color'       => 1095945, // #10b981
+                    'fields'      => [
+                        [
+                            'name'   => 'Uptime',
+                            'value'  => "{$stats['uptime_percentage']}%",
+                            'inline' => true,
+                        ],
+                        [
+                            'name'   => 'Open Incidents',
+                            'value'  => (string) $stats['open_incidents'],
+                            'inline' => true,
+                        ],
+                        [
+                            'name'   => 'Backup Status',
+                            'value'  => $stats['backup_healthy'] ? '✅ Verified' : '❌ Missing/Failed',
+                            'inline' => false,
+                        ]
+                    ],
+                    'footer' => [
+                        'text' => 'Vakt SOC Platform'
+                    ],
+                    'timestamp' => now()->toIso8601String(),
+                ]
+            ]
+        ];
+
+        try {
+            Http::timeout(5)->post($webhookUrl, $payload);
+        } catch (\Exception $e) {
+            Log::error("Failed to send Daily Discord notification: " . $e->getMessage());
+        }
+    }
 }

@@ -15,6 +15,8 @@ class CollectionResult
         public readonly array   $phpErrors,
         public readonly array   $uploadScan,
         public readonly array   $systemMetrics,
+        public readonly array   $backupStatus,
+        public readonly array   $secretsExposure,
         public readonly string  $source,         // filesystem|agent|ftp
         public readonly bool    $skipped = false,
         public readonly bool    $failed  = false,
@@ -32,6 +34,8 @@ class CollectionResult
             phpErrors:   [],
             uploadScan:  [],
             systemMetrics: [],
+            backupStatus: [],
+            secretsExposure: [],
             source:      'none',
             skipped:     true,
             error:       $reason,
@@ -49,6 +53,8 @@ class CollectionResult
             phpErrors:   [],
             uploadScan:  [],
             systemMetrics: [],
+            backupStatus: [],
+            secretsExposure: [],
             source:      'none',
             failed:      true,
             error:       $reason,
@@ -75,6 +81,9 @@ class CollectionResult
         foreach ($this->logEntries as $entry) {
             if (str_contains($entry['level'] ?? '', 'error')) return 'warning';
         }
+
+        if (isset($this->backupStatus['healthy']) && !$this->backupStatus['healthy']) return 'critical';
+        if (isset($this->secretsExposure['exposed']) && $this->secretsExposure['exposed']) return 'critical';
 
         return 'healthy';
     }

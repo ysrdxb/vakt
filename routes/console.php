@@ -42,6 +42,9 @@ Schedule::call(function () {
 // Daily at 08:00 — generate daily monitoring logs
 Schedule::job(new GenerateDailyLogs)->dailyAt('08:00');
 
+// Daily at 08:15 — send daily SOC security briefing to webhooks
+Schedule::command('vakt:daily-report')->dailyAt('08:15');
+
 // Daily at 08:30 — send daily digest email
 Schedule::command('vakt:send-digest')->dailyAt('08:30');
 
