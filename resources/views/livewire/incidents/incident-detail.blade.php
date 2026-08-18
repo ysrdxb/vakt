@@ -115,6 +115,24 @@
         </div>
         @endif
     </div>
+
+    @if($incident->project->server_type === 'external_agent')
+    <div class="card-footer" style="background: rgba(139, 92, 246, 0.05); border-top: 1px solid rgba(139, 92, 246, 0.1); display: flex; gap: 8px; flex-wrap: wrap;" x-data>
+        <div style="font-size: 0.75rem; color: #a78bfa; width: 100%; margin-bottom: 4px;"><strong>Auto-Remediation:</strong> Push commands directly to the agent.</div>
+        <button class="btn btn-sm" style="background: rgba(220, 38, 38, 0.2); color: #fca5a5; border: 1px solid rgba(220, 38, 38, 0.4);"
+            @click="let ip = prompt('Enter IP address to block:'); if(ip) $wire.executeAgentCommand('block_ip', ip)">
+            Block IP in Firewall
+        </button>
+        <button class="btn btn-sm" style="background: rgba(59, 130, 246, 0.2); color: #93c5fd; border: 1px solid rgba(59, 130, 246, 0.4);"
+            wire:click="executeAgentCommand('fix_permissions')">
+            Fix Storage Permissions
+        </button>
+        <button class="btn btn-sm" style="background: rgba(16, 185, 129, 0.2); color: #6ee7b7; border: 1px solid rgba(16, 185, 129, 0.4);"
+            wire:click="executeAgentCommand('clear_cache')">
+            Clear App Cache
+        </button>
+    </div>
+    @endif
 </div>
 @endif
 

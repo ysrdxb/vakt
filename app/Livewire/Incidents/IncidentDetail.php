@@ -79,6 +79,33 @@ class IncidentDetail extends Component
         return redirect()->route('incidents.show', $this->incident);
     }
 
+    public function executeAgentCommand(string $commandName, string $ip = null): void
+    {
+        $service = app(\App\Services\AgentCommandService::class);
+        $result = ['status' => 'error', 'message' => 'Invalid command'];
+
+        if ($commandName === 'block_ip' && $ip) {
+            $result = $service->blockIp($this->incident->project, $ip);
+        } elseif ($commandName === 'fix_permissions') {
+            $result = $service->fixPermissions($this->incident->project);
+        } elseif ($commandName === 'clear_cache') {
+            $result = $service->clearCache($this->incident->project);
+        }
+
+        $type = $result['status'] === 'success' ? 'success' : 'error';
+        $this->dispatch('toast', ['type' => $type, 'title' => 'Command Executed', 'message' => $result['message']]);
+
+        IncidentTimeline::create([
+            'incident_id'  => $this->incident->id,
+            'action'       => "Executed remote command: {$commandName}",
+            'description'  => "Result: " . $result['message'],
+            'performed_by' => auth()->user()->name,
+            'performed_at' => now(),
+        ]);
+        
+        $this->incident->refresh();
+    }
+
     public function render()
     {
         $this->incident->load(['project', 'timeline']);

@@ -47,7 +47,49 @@ if (file_exists($rateLimitFile)) {
 }
 file_put_contents($rateLimitFile, time());
 
-// Collect and respond
+// ── COMMAND EXECUTION (POST) ────────────────────────────────────────────────
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    $input = file_get_contents('php://input');
+    $data = json_decode($input, true);
+    $command = $data['command'] ?? '';
+    
+    header('Content-Type: application/json');
+    
+    if ($command === 'block_ip') {
+        $ip = $data['ip'] ?? '';
+        if (filter_var($ip, FILTER_VALIDATE_IP)) {
+            $htaccessPath = dirname(VAKT_LOG_PATH, 3) . '/public/.htaccess';
+            if (!file_exists($htaccessPath)) {
+                $htaccessPath = dirname(VAKT_LOG_PATH, 3) . '/.htaccess';
+            }
+            $rule = "\n# VAKT AUTO-BLOCK\nRequire not ip {$ip}\nDeny from {$ip}\n";
+            file_put_contents($htaccessPath, $rule, FILE_APPEND);
+            echo json_encode(['status' => 'success', 'message' => "IP {$ip} blocked in .htaccess"]);
+            exit;
+        }
+        echo json_encode(['error' => 'Invalid IP']);
+        exit;
+    }
+    
+    if ($command === 'fix_permissions') {
+        $path = dirname(VAKT_LOG_PATH, 2); // storage/
+        exec("chmod -R 775 " . escapeshellarg($path));
+        echo json_encode(['status' => 'success', 'message' => 'Permissions fixed on storage/']);
+        exit;
+    }
+    
+    if ($command === 'clear_cache') {
+        $base = dirname(VAKT_LOG_PATH, 3);
+        exec("cd " . escapeshellarg($base) . " && php artisan optimize:clear");
+        echo json_encode(['status' => 'success', 'message' => 'Cache cleared']);
+        exit;
+    }
+
+    echo json_encode(['error' => 'Unknown command']);
+    exit;
+}
+
+// ── COLLECTION (GET) ───────────────────────────────────────────────────────
 header('Content-Type: application/json');
 echo json_encode([
     'project_id'   => VAKT_PROJECT_ID,
