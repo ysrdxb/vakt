@@ -1,0 +1,109 @@
+#
+# Auto-deploy to health.kunnatta.is (1984.is shared hosting) on every push
+# to main. Mirrors the manual deploy.sh flow: build locally, upload the app
+# into the web root over SFTP, then run migrations and clear caches via the
+# app's own maintenance routes (the server has no shell access).
+#
+# Required repository secrets:
+#   DEPLOY_HOST  ruby.shared.1984.is
+#   DEPLOY_PORT  2222
+#   DEPLOY_USER  SFTP username
+#   DEPLOY_PASS  SFTP password
+#   DEPLOY_PATH  /health/htdocs
+#
+# The server's .env and SQLite database are never touched by this workflow.
+# vendor/ is synced by file size (fast); use "Run workflow" with
+# full_vendor=true to force a complete vendor re-upload if it drifts.
+#
+name: Deploy
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+    inputs:
+      full_vendor:
+        description: Re-upload all of vendor/ instead of only changed files
+        type: boolean
+        default: false
+
+concurrency:
+  group: deploy-production
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.4'
+          extensions: mbstring, intl, gd, zip, pdo_sqlite
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+
+      - name: Install PHP dependencies
+        run: composer install --no-dev --optimize-autoloader --no-interaction --no-progress
+
+      - name: Build assets
+        run: |
+          npm ci
+          npm run build
+
+      - name: Stage deployment
+        run: |
+          mkdir -p .deploy-stage
+          rsync -a \
+            --exclude public --exclude node_modules --exclude .git --exclude .github \
+            --exclude tests --exclude .env --exclude .env.example --exclude .env.deploy \
+            --exclude database/database.sqlite \
+            --exclude deploy.sh --exclude deploy --exclude .deploy-stage \
+            ./ .deploy-stage/
+          rsync -a public/ .deploy-stage/
+          cp deploy/index.php .deploy-stage/index.php
+          cp deploy/htaccess .deploy-stage/.htaccess
+
+      - name: Install lftp
+        run: sudo apt-get update -qq && sudo apt-get install -y -qq lftp
+
+      - name: Upload via SFTP
+        env:
+          DEPLOY_HOST: ${{ secrets.DEPLOY_HOST }}
+          DEPLOY_PORT: ${{ secrets.DEPLOY_PORT }}
+          DEPLOY_USER: ${{ secrets.DEPLOY_USER }}
+          DEPLOY_PASS: ${{ secrets.DEPLOY_PASS }}
+          DEPLOY_PATH: ${{ secrets.DEPLOY_PATH }}
+          FULL_VENDOR: ${{ inputs.full_vendor && 'true' || 'false' }}
+        run: |
+          # vendor/: compare by size only (checkout timestamps are always fresh,
+          # so time-based comparison would re-upload everything on every run)
+          VENDOR_FLAGS="--only-newer --ignore-time"
+          if [ "$FULL_VENDOR" = "true" ]; then VENDOR_FLAGS=""; fi
+          lftp -p "$DEPLOY_PORT" -u "$DEPLOY_USER,$DEPLOY_PASS" "sftp://$DEPLOY_HOST" -e "
+          set sftp:auto-confirm yes;
+          set net:max-retries 2;
+          mirror -R --parallel=8 --no-perms $VENDOR_FLAGS \
+            .deploy-stage/vendor/ $DEPLOY_PATH/vendor;
+          mirror -R --parallel=8 --no-perms \
+            --exclude ^vendor/ \
+            --exclude-glob .env \
+            --exclude-glob database/database.sqlite \
+            --exclude-glob storage/framework/cache/* \
+            --exclude-glob storage/framework/sessions/* \
+            --exclude-glob storage/framework/views/* \
+            --exclude-glob storage/logs/* \
+            .deploy-stage/ $DEPLOY_PATH;
+          bye"
+
+      - name: Run migrations and clear caches
+        run: |
+          curl -fsS https://health.kunnatta.is/run-migrations
+          echo
+          curl -fsS https://health.kunnatta.is/clear-cache
+          echo
+          curl -fsS -o /dev/null -w 'Site check: HTTP %{http_code}\n' https://health.kunnatta.is/login
