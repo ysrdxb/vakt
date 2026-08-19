@@ -256,9 +256,9 @@ class ProjectForm extends Component
         }
 
         $this->validateOnly('domain', [
-            'domain' => ['required', 'regex:/^[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/i', Rule::unique('projects', 'domain')->ignore($this->project?->id)]
+            'domain' => ['required', 'regex:/^[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}(\/.*)?$/i', Rule::unique('projects', 'domain')->ignore($this->project?->id)]
         ], [
-            'domain.regex' => 'Please enter a valid domain (e.g. verk.kunnatta.is) without http:// or spaces.'
+            'domain.regex' => 'Please enter a valid domain (e.g. verk.kunnatta.is or domain.com/folder) without http:// or spaces.'
         ]);
     }
 
@@ -279,7 +279,7 @@ class ProjectForm extends Component
     {
         return [
             'name' => 'required|min:2',
-            'domain' => ['required', 'regex:/^[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/i', Rule::unique('projects', 'domain')->ignore($this->project?->id)],
+            'domain' => ['required', 'regex:/^[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}(\/.*)?$/i', Rule::unique('projects', 'domain')->ignore($this->project?->id)],
             'server_type' => 'required|in:same_server,external_agent,ftp',
             'stack' => 'required',
             'monitoring_interval_minutes' => 'required|in:1,5,15,30,60',
@@ -294,7 +294,7 @@ class ProjectForm extends Component
     public function messages()
     {
         return [
-            'domain.regex' => 'Please enter a valid domain (e.g. verk.kunnatta.is) without http:// or spaces.',
+            'domain.regex' => 'Please enter a valid domain (e.g. verk.kunnatta.is or domain.com/folder) without http:// or spaces.',
         ];
     }
 
