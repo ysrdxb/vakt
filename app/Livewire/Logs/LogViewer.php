@@ -88,7 +88,7 @@ class LogViewer extends Component
         }
 
         try {
-            $prompt = "You are an elite Security Operations Center (SOC) AI analyst. Your job is to explain server errors in simple terms and provide a quick fix. \n\nExplain this application log message in simple English and provide a quick fix hint or solution. Be concise. \n\nLog Level: {$entry->level}\nMessage: {$entry->message}";
+            $prompt = "You are an elite Security Operations Center (SOC) AI analyst. Analyze the following log message. Provide a concise, professional explanation of what the error means, its potential impact, and a recommended quick fix. Do not use labels like '(Simple English)' in your response. Structure it cleanly.\n\nLog Level: {$entry->level}\nMessage: {$entry->message}";
             
             $response = \Illuminate\Support\Facades\Http::withHeaders([
                 'Content-Type' => 'application/json',

@@ -136,7 +136,9 @@ Route::get('/clear-cache', function() {
 Route::get('/pull-updates', function() {
     try {
         $output = shell_exec('git pull origin main 2>&1');
-        return 'Git Pull Output: <br><pre>' . htmlspecialchars($output) . '</pre>';
+        \Illuminate\Support\Facades\Artisan::call('migrate', ['--force' => true]);
+        $migrateOutput = \Illuminate\Support\Facades\Artisan::output();
+        return 'Git Pull Output: <br><pre>' . htmlspecialchars($output) . '</pre><br>Migration Output:<br><pre>' . htmlspecialchars($migrateOutput) . '</pre>';
     } catch (\Exception $e) {
         return 'Error: ' . $e->getMessage();
     }
