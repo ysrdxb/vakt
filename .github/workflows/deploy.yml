@@ -88,7 +88,13 @@ jobs:
           set sftp:auto-confirm yes;
           set net:max-retries 2;
           mirror -R --parallel=8 --no-perms $VENDOR_FLAGS \
+            --exclude ^composer/ \
             .deploy-stage/vendor/ $DEPLOY_PATH/vendor;
+          # composer's generated autoloader files change content (hash suffix)
+          # without changing size, so they must always be uploaded in full
+          mirror -R --parallel=8 --no-perms \
+            .deploy-stage/vendor/composer/ $DEPLOY_PATH/vendor/composer;
+          put -O $DEPLOY_PATH/vendor .deploy-stage/vendor/autoload.php;
           mirror -R --parallel=8 --no-perms \
             --exclude ^vendor/ \
             --exclude-glob .env \
