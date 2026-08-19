@@ -133,6 +133,15 @@ Route::get('/clear-cache', function() {
     return 'Cache, config, and views cleared successfully! You can now go back and refresh the page.';
 });
 
+Route::get('/pull-updates', function() {
+    try {
+        $output = shell_exec('git pull origin main 2>&1');
+        return 'Git Pull Output: <br><pre>' . htmlspecialchars($output) . '</pre>';
+    } catch (\Exception $e) {
+        return 'Error: ' . $e->getMessage();
+    }
+});
+
 Route::get('/run-migrations', function() {
     try {
         \Illuminate\Support\Facades\Artisan::call('migrate', ['--force' => true]);
