@@ -86,7 +86,6 @@
         <x-btn variant="ghost" wire:click="$set('editMode', true)" >Edit Notes</x-btn>
     </div>
     </div>
-</div>
 
 @if($incident->ai_summary || $incident->ai_diagnosis)
 <div class="card mb-6" style="border: 1px solid rgba(139, 92, 246, 0.3); background: linear-gradient(145deg, rgba(17, 24, 39, 1) 0%, rgba(30, 27, 75, 0.4) 100%); position: relative; overflow: hidden;">
