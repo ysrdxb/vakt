@@ -31,10 +31,18 @@
 </head>
 <body>
 
-<div class="app-layout">
+<div class="app-layout" x-data="{ sidebarOpen: false }">
+
+    {{-- Mobile Sidebar Backdrop --}}
+    <div class="sidebar-backdrop" 
+         x-show="sidebarOpen" 
+         x-transition.opacity.duration.300ms
+         @click="sidebarOpen = false" 
+         x-cloak>
+    </div>
 
     {{-- ===================== SIDEBAR ===================== --}}
-    <aside class="sidebar" id="sidebar">
+    <aside class="sidebar" id="sidebar" :class="{ 'open': sidebarOpen }">
         <div class="sidebar-logo">
             <div class="logo-icon">🛡️</div>
             <div>
@@ -182,6 +190,13 @@
 
         {{-- Topbar --}}
         <header class="topbar">
+            {{-- Mobile Hamburger --}}
+            <button class="mobile-menu-btn" @click="sidebarOpen = true" title="Menu">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
+                </svg>
+            </button>
+
             <div class="topbar-search-wrap topbar-search">
                 <svg class="topbar-search-icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />

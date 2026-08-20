@@ -1,7 +1,7 @@
 <div>
     <x-page-header title="System Settings" subtitle="Manage your profile, security, and client access." icon="cog" />
 
-    <div class="grid" style="grid-template-columns: 280px 1fr; gap: 32px; align-items: flex-start">
+    <div class="grid-sidebar-layout">
         
         {{-- Premium Sidebar Tabs --}}
         <div style="position: sticky; top: 24px;">

@@ -197,7 +197,8 @@
                 @if($project->incidents->isEmpty())
                     <div style="padding:24px"><x-empty-state icon="shield-check" title="No incidents" message="Clean record." /></div>
                 @else
-                    <table class="table">
+                    <div class="table-wrapper" style="border:none; border-radius:0;">
+                    <table class="table vakt-table">
                         <tbody>
                             @foreach($project->incidents as $incident)
                                 <tr>
@@ -215,6 +216,7 @@
                             @endforeach
                         </tbody>
                     </table>
+                    </div>
                 @endif
             </div>
         </div>
@@ -229,7 +231,8 @@
                     @if($project->monitoringChecks->isEmpty())
                         <div style="padding:24px"><x-empty-state icon="clock" title="No checks yet" message="Monitoring history will appear here." /></div>
                     @else
-                        <table class="table">
+                        <div class="table-wrapper" style="border:none; border-radius:0;">
+                        <table class="table vakt-table">
                             <thead>
                                 <tr>
                                     <th>Time</th>
@@ -252,6 +255,7 @@
                                 @endforeach
                             </tbody>
                         </table>
+                        </div>
                     @endif
                 </div>
             </div>
@@ -266,7 +270,8 @@
                     @if($project->logEntries->isEmpty())
                         <div style="padding:24px"><x-empty-state icon="document-text" title="No logs captured" /></div>
                     @else
-                        <table class="table">
+                        <div class="table-wrapper" style="border:none; border-radius:0;">
+                        <table class="table vakt-table">
                             <tbody>
                                 @foreach($project->logEntries as $log)
                                     <tr>
@@ -281,6 +286,7 @@
                                 @endforeach
                             </tbody>
                         </table>
+                        </div>
                     @endif
                 </div>
             </div>
