@@ -138,7 +138,10 @@ Route::get('/pull-updates', function() {
         $output = shell_exec('git pull origin main 2>&1');
         \Illuminate\Support\Facades\Artisan::call('migrate', ['--force' => true]);
         $migrateOutput = \Illuminate\Support\Facades\Artisan::output();
-        return 'Git Pull Output: <br><pre>' . htmlspecialchars($output) . '</pre><br>Migration Output:<br><pre>' . htmlspecialchars($migrateOutput) . '</pre>';
+        \Illuminate\Support\Facades\Artisan::call('view:clear');
+        $viewOutput = \Illuminate\Support\Facades\Artisan::output();
+        
+        return 'Git Pull Output: <br><pre>' . htmlspecialchars($output) . '</pre><br>Migration Output:<br><pre>' . htmlspecialchars($migrateOutput) . '</pre><br>View Cache Clear:<br><pre>' . htmlspecialchars($viewOutput) . '</pre>';
     } catch (\Exception $e) {
         return 'Error: ' . $e->getMessage();
     }

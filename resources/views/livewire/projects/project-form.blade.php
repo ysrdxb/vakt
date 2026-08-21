@@ -379,7 +379,7 @@
                 @if($server_type === 'same_server')
                 <div>
                     <div class="form-group">
-                        <label class="form-label">Absolute Server Path</label>
+                        <label class="form-label">Absolute Server Path (Server)</label>
                         <input type="text" class="form-control" wire:model.blur="server_path" placeholder="/var/www/example.com">
                         <div class="form-text">The full directory path to the project on this server.</div>
                         @error('server_path') <div class="text-danger">{{ $message }}</div> @enderror
