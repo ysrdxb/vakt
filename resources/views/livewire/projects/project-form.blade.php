@@ -282,7 +282,7 @@
                         @error('name') <div class="text-danger">{{ $message }}</div> @enderror
                     </div>
                     <div class="form-group">
-                        <label class="form-label">Domain</label>
+                        <label class="form-label">Domain (*)</label>
                         <input type="text" class="form-control" wire:model.blur="domain" placeholder="e.g. example.com">
                         @error('domain') <div class="text-danger">{{ $message }}</div> @enderror
                     </div>
@@ -366,20 +366,38 @@
                 @if($server_type === 'same_server')
                 <div>
                     <div class="form-group">
-                        <label class="form-label">Absolute Server Path</label>
+                        <label class="form-label">Absolute Server Path (Server)</label>
                         <input type="text" class="form-control" wire:model.blur="server_path" placeholder="/var/www/example.com">
                         <div class="form-text">The full directory path to the project on this server.</div>
                         @error('server_path') <div class="text-danger">{{ $message }}</div> @enderror
                     </div>
                     <div class="grid-2">
                         <div class="form-group">
-                            <label class="form-label">Relative Log Path</label>
+                            <div style="display:flex; justify-content:space-between; align-items:flex-end; margin-bottom: 8px;">
+                                <label class="form-label" style="margin-bottom:0;">Relative Log Path</label>
+                                <button type="button" wire:click="autoDetectLogPath" class="btn btn-secondary" style="padding: 2px 8px; font-size: 11px; height: 22px;">
+                                    <span wire:loading.remove wire:target="autoDetectLogPath">✨ Auto-Detect</span>
+                                    <span wire:loading wire:target="autoDetectLogPath">Searching...</span>
+                                </button>
+                            </div>
                             <input type="text" class="form-control" wire:model.blur="log_path" placeholder="storage/logs/laravel.log">
                         </div>
                         <div class="form-group">
                             <label class="form-label">PHP Error Log Path (Optional)</label>
                             <input type="text" class="form-control" wire:model.blur="php_error_log_path" placeholder="/var/log/php_errors.log">
                         </div>
+                    </div>
+
+                    <!-- Debugger Output Box -->
+                    <div class="form-group" style="margin-top: 16px; border-top: 1px dashed #475569; padding-top: 16px;">
+                        <button type="button" wire:click="runPathDebugger" class="btn btn-secondary" style="font-size:12px; background:#334155;">
+                            <span wire:loading.remove wire:target="runPathDebugger">🔍 Run Path Debugger</span>
+                            <span wire:loading wire:target="runPathDebugger">Testing Paths...</span>
+                        </button>
+
+                        @if($debugOutput)
+                            {!! $debugOutput !!}
+                        @endif
                     </div>
                 </div>
                 @endif

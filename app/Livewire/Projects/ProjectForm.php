@@ -53,6 +53,7 @@ class ProjectForm extends Component
     // State
     public bool $active = true;
     public ?Project $project = null;
+    public string $debugOutput = '';
 
     // Diagnostic results
     public array $diagnosticResults = [];
@@ -149,7 +150,7 @@ class ProjectForm extends Component
     {
         return [
             'name' => 'required|min:2',
-            'domain' => ['required', 'regex:/^[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/i', Rule::unique('projects', 'domain')->ignore($this->project?->id)],
+            'domain' => ['required', 'regex:/^[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}(\/.*)?$/i', Rule::unique('projects', 'domain')->ignore($this->project?->id)],
             'server_type' => 'required|in:same_server,external_agent,ftp',
             'stack' => 'required',
             'monitoring_interval_minutes' => 'required|in:1,5,15,30,60',
@@ -158,6 +159,92 @@ class ProjectForm extends Component
             'ftp_host' => 'required_if:server_type,ftp',
             'ftp_user' => 'required_if:server_type,ftp',
         ];
+    }
+
+    public function autoDetectLogPath($showErrorToast = true)
+    {
+        $base = rtrim($this->server_path, '/');
+        if (empty($base) || empty($this->domain)) {
+            if ($showErrorToast) $this->dispatch('toast', message: 'Please enter Domain and Server Path first.', type: 'warning');
+            return;
+        }
+
+        $levels = ['', '/..', '/../..', '/../../..'];
+        $domainFolder = explode('/', $this->domain)[0];
+
+        $possibleFiles = [
+            "/logs/{$domainFolder}/error.log",
+            "/logs/{$domainFolder}/access.log",
+            "/logs/{$domainFolder}.log",
+            "/{$domainFolder}.log",
+            "/error.log"
+        ];
+
+        foreach ($levels as $level) {
+            $checkDir = $base . $level;
+            $realDir = realpath($checkDir);
+            if (!$realDir) continue;
+            foreach ($possibleFiles as $file) {
+                if (file_exists($realDir . $file) && is_readable($realDir . $file)) {
+                    $relativePath = $level . $file;
+                    if (str_starts_with($relativePath, '/')) {
+                        $relativePath = substr($relativePath, 1);
+                    }
+                    $this->log_path = $relativePath;
+                    $this->dispatch('toast', message: 'Log path auto-detected!', type: 'success');
+                    return;
+                }
+            }
+        }
+
+        if ($showErrorToast) {
+            $this->dispatch('toast', message: 'Could not auto-detect log path. Please enter it manually.', type: 'warning');
+        }
+    }
+
+    public function runPathDebugger()
+    {
+        $this->debugOutput = '';
+        $base = rtrim($this->server_path, '/');
+        if (empty($base) || empty($this->domain)) {
+            $this->debugOutput = "<div style='color:red;'>Please enter Domain and Server Path first.</div>";
+            return;
+        }
+
+        $levels = ['', '/..', '/../..', '/../../..', '/../../../..'];
+        $domainFolder = explode('/', $this->domain)[0];
+
+        $possibleFiles = [
+            "/logs/{$domainFolder}/error.log",
+            "/logs/{$domainFolder}/access.log",
+            "/logs/{$domainFolder}.log",
+            "/{$domainFolder}.log",
+            "/error.log"
+        ];
+
+        $output = "<div style='font-family:monospace; font-size:12px; background:#1e293b; color:#cbd5e1; padding:16px; border-radius:6px; margin-top:10px;'>";
+        foreach ($levels as $level) {
+            $checkDir = $base . $level;
+            $output .= "<strong style='color:#fff;'>Testing Level: '$level'</strong><br>";
+            $output .= "Path: <code>$checkDir</code><br>";
+            $realDir = realpath($checkDir);
+            if (!$realDir) {
+                $output .= "<span style='color:#ef4444;'>&#10060; realpath() blocked or not found.</span><br><br>";
+                continue;
+            }
+            $output .= "<span style='color:#10b981;'>&#9989; Accessible: <code>$realDir</code></span><br>";
+            foreach ($possibleFiles as $file) {
+                $fullPath = $realDir . $file;
+                if (file_exists($fullPath)) {
+                    $output .= "<span style='color:#60a5fa;'>&#127881; FOUND: <code>$fullPath</code></span><br>";
+                } else {
+                    $output .= "<span style='color:#64748b;'>- Checked: $fullPath (Not found)</span><br>";
+                }
+            }
+            $output .= "<br>";
+        }
+        $output .= "</div>";
+        $this->debugOutput = $output;
     }
 
     public function saveProject()
