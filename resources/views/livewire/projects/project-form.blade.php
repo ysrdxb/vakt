@@ -386,7 +386,13 @@
                     </div>
                     <div class="grid-2">
                         <div class="form-group">
-                            <label class="form-label">Relative Log Path</label>
+                            <div style="display:flex; justify-content:space-between; align-items:flex-end; margin-bottom: 8px;">
+                                <label class="form-label" style="margin-bottom:0;">Relative Log Path</label>
+                                <button type="button" wire:click="autoDetectLogPath" class="btn btn-secondary" style="padding: 2px 8px; font-size: 11px; height: 22px;">
+                                    <span wire:loading.remove wire:target="autoDetectLogPath">✨ Auto-Detect</span>
+                                    <span wire:loading wire:target="autoDetectLogPath">Searching...</span>
+                                </button>
+                            </div>
                             <input type="text" class="form-control" wire:model.blur="log_path" placeholder="storage/logs/laravel.log">
                         </div>
                         <div class="form-group">

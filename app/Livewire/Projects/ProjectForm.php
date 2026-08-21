@@ -298,6 +298,65 @@ class ProjectForm extends Component
         ];
     }
 
+    public function updatedServerPath()
+    {
+        if ($this->server_type === 'same_server' && !empty($this->server_path) && !empty($this->domain)) {
+            $this->autoDetectLogPath(false);
+        }
+    }
+
+    public function updatedDomain()
+    {
+        if ($this->server_type === 'same_server' && !empty($this->server_path) && !empty($this->domain)) {
+            $this->autoDetectLogPath(false);
+        }
+    }
+
+    public function autoDetectLogPath($showErrorToast = true)
+    {
+        $base = rtrim($this->server_path, '/');
+        if (empty($base) || empty($this->domain)) {
+            if ($showErrorToast) $this->dispatch('toast', message: 'Please enter Domain and Server Path first.', type: 'warning');
+            return;
+        }
+
+        // Parent directories to check: same dir, up to 3 levels up
+        $levels = ['', '/..', '/../..', '/../../..'];
+        $domainParts = explode('/', $this->domain);
+        $domainFolder = $domainParts[0];
+
+        $possibleFiles = [
+            "/logs/{$domainFolder}/error.log",
+            "/logs/{$domainFolder}/access.log",
+            "/logs/{$domainFolder}.log",
+            "/{$domainFolder}.log",
+            "/error.log"
+        ];
+
+        foreach ($levels as $level) {
+            $checkDir = $base . $level;
+            $realDir = realpath($checkDir);
+            
+            if (!$realDir) continue;
+
+            foreach ($possibleFiles as $file) {
+                if (file_exists($realDir . $file) && is_readable($realDir . $file)) {
+                    $relativePath = $level . $file;
+                    if (str_starts_with($relativePath, '/')) {
+                        $relativePath = substr($relativePath, 1);
+                    }
+                    $this->log_path = $relativePath;
+                    $this->dispatch('toast', message: 'Log path auto-detected!', type: 'success');
+                    return;
+                }
+            }
+        }
+        
+        if ($showErrorToast) {
+            $this->dispatch('toast', message: 'Could not auto-detect log path. Please enter it manually.', type: 'warning');
+        }
+    }
+
     public function saveProject()
     {
         $this->validate();
