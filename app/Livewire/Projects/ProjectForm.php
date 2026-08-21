@@ -251,15 +251,13 @@ class ProjectForm extends Component
         $cleaned = trim($this->domain);
         $cleaned = preg_replace('#^https?://#', '', $cleaned);
         $cleaned = rtrim($cleaned, '/');
-        if ($this->domain !== $cleaned) {
-            $this->domain = $cleaned;
-        }
+        
+        $this->domain = $cleaned;
+        $this->validateOnly('domain');
 
-        $this->validateOnly('domain', [
-            'domain' => ['required', 'regex:/^[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}(\/.*)?$/i', Rule::unique('projects', 'domain')->ignore($this->project?->id)]
-        ], [
-            'domain.regex' => 'Please enter a valid domain (e.g. verk.kunnatta.is or domain.com/folder) without http:// or spaces.'
-        ]);
+        if ($this->server_type === 'same_server' && !empty($this->server_path) && !empty($this->domain)) {
+            $this->autoDetectLogPath(false);
+        }
     }
 
     public function updatedServerPath(): void
@@ -303,12 +301,7 @@ class ProjectForm extends Component
 
 
 
-    public function updatedDomain()
-    {
-        if ($this->server_type === 'same_server' && !empty($this->server_path) && !empty($this->domain)) {
-            $this->autoDetectLogPath(false);
-        }
-    }
+
 
     public function autoDetectLogPath($showErrorToast = true)
     {
