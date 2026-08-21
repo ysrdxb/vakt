@@ -198,20 +198,55 @@ class SameServerCollector
 
     private function parseLogContent(string $content): array 
     {
-        // Simple log parser for now
         $lines = explode("\n", $content);
         $entries = [];
+        
         foreach ($lines as $line) {
-            if (empty(trim($line))) continue;
+            $line = trim($line);
+            if (empty($line)) continue;
+            
+            // 1. Try Laravel Format: [2023-01-01 12:00:00] local.ERROR: message
             if (preg_match('/^\[(.*?)\] (.*?)\.(.*?): (.*)/', $line, $matches)) {
                 $entries[] = [
                     'timestamp' => $matches[1],
-                    'env' => $matches[2],
-                    'level' => strtolower($matches[3]),
-                    'message' => $matches[4]
+                    'env'       => $matches[2],
+                    'level'     => strtolower($matches[3]),
+                    'message'   => $matches[4]
                 ];
+                continue;
             }
+
+            // 2. Try Apache Error Log Format: [Wed Oct 11 14:32:52 2023] [error] [client 127.0.0.1] message
+            if (preg_match('/^\[(.*?)\] \[([a-z]+)\] (?:\[client .*?\] )?(.*)/', $line, $matches)) {
+                $entries[] = [
+                    'timestamp' => $matches[1],
+                    'env'       => 'apache',
+                    'level'     => strtolower($matches[2]),
+                    'message'   => $matches[3]
+                ];
+                continue;
+            }
+
+            // 3. Try Nginx Error Log Format: 2023/10/11 14:32:52 [error] 1234#0: *5678 message
+            if (preg_match('/^([0-9]{4}\/[0-9]{2}\/[0-9]{2} [0-9]{2}:[0-9]{2}:[0-9]{2}) \[([a-z]+)\] (.*)/', $line, $matches)) {
+                $entries[] = [
+                    'timestamp' => $matches[1],
+                    'env'       => 'nginx',
+                    'level'     => strtolower($matches[2]),
+                    'message'   => $matches[3]
+                ];
+                continue;
+            }
+            
+            // 4. Fallback for unknown formats (just display as info)
+            $entries[] = [
+                'timestamp' => now()->toDateTimeString(),
+                'env'       => 'unknown',
+                'level'     => 'info',
+                'message'   => $line
+            ];
         }
+        
         return array_slice($entries, -200); // Last 200 entries
     }
 
