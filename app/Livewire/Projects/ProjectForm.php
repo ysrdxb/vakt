@@ -270,7 +270,10 @@ class ProjectForm extends Component
             } else {
                 // Clear error if it's fine
                 $this->resetValidation('server_path');
-                // Could emit a small session flash or something, but clearing error is enough
+                
+                if (!empty($this->domain)) {
+                    $this->autoDetectLogPath(false);
+                }
             }
         }
     }
@@ -298,12 +301,7 @@ class ProjectForm extends Component
         ];
     }
 
-    public function updatedServerPath()
-    {
-        if ($this->server_type === 'same_server' && !empty($this->server_path) && !empty($this->domain)) {
-            $this->autoDetectLogPath(false);
-        }
-    }
+
 
     public function updatedDomain()
     {
