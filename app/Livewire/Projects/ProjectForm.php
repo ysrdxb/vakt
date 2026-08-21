@@ -56,6 +56,7 @@ class ProjectForm extends Component
     // State
     public bool $active = true;
     public ?Project $project = null;
+    public string $debugOutput = '';
 
     // Diagnostic results
     public array $diagnosticResults = [];
@@ -346,6 +347,54 @@ class ProjectForm extends Component
         if ($showErrorToast) {
             $this->dispatch('toast', message: 'Could not auto-detect log path. Please enter it manually.', type: 'warning');
         }
+    }
+
+    public function runPathDebugger()
+    {
+        $this->debugOutput = '';
+        $base = rtrim($this->server_path, '/');
+        if (empty($base) || empty($this->domain)) {
+            $this->debugOutput = "<div style='color:red;'>Please enter Domain and Server Path first.</div>";
+            return;
+        }
+
+        $levels = ['', '/..', '/../..', '/../../..', '/../../../..'];
+        $domainFolder = explode('/', $this->domain)[0];
+
+        $possibleFiles = [
+            "/logs/{$domainFolder}/error.log",
+            "/logs/{$domainFolder}/access.log",
+            "/logs/{$domainFolder}.log",
+            "/{$domainFolder}.log",
+            "/error.log"
+        ];
+
+        $output = "<div style='font-family:monospace; font-size:12px; background:#1e293b; color:#cbd5e1; padding:16px; border-radius:6px; margin-top:10px;'>";
+        foreach ($levels as $level) {
+            $checkDir = $base . $level;
+            $output .= "<strong style='color:#fff;'>Testing Level: '$level'</strong><br>";
+            $output .= "Path: <code>$checkDir</code><br>";
+            
+            $realDir = realpath($checkDir);
+            if (!$realDir) {
+                $output .= "<span style='color:#ef4444;'>❌ realpath() blocked or not found.</span><br><br>";
+                continue;
+            }
+            
+            $output .= "<span style='color:#10b981;'>✅ Accessible Folder: <code>$realDir</code></span><br>";
+            
+            foreach ($possibleFiles as $file) {
+                $fullPath = $realDir . $file;
+                if (file_exists($fullPath)) {
+                    $output .= "<span style='color:#60a5fa;'>🎉 FOUND LOG FILE: <code>$fullPath</code></span><br>";
+                } else {
+                    $output .= "<span style='color:#64748b;'>- Checked: $fullPath (Not found)</span><br>";
+                }
+            }
+            $output .= "<br>";
+        }
+        $output .= "</div>";
+        $this->debugOutput = $output;
     }
 
     public function saveProject()

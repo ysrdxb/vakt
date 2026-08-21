@@ -400,6 +400,18 @@
                             <input type="text" class="form-control" wire:model.blur="php_error_log_path" placeholder="/var/log/php_errors.log">
                         </div>
                     </div>
+                    
+                    <!-- Debugger Output Box -->
+                    <div class="form-group" style="grid-column: span 2; margin-top: 16px; border-top: 1px dashed #475569; padding-top: 16px;">
+                        <button type="button" wire:click="runPathDebugger" class="btn btn-secondary" style="font-size:12px; background:#334155;">
+                            <span wire:loading.remove wire:target="runPathDebugger">🔍 Run Path Debugger</span>
+                            <span wire:loading wire:target="runPathDebugger">Testing Paths...</span>
+                        </button>
+                        
+                        @if($debugOutput)
+                            {!! $debugOutput !!}
+                        @endif
+                    </div>
                 </div>
                 @endif
 
