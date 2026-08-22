@@ -77,9 +77,9 @@ class LogParserService
         ]);
     }
 
-    public function parseRawContent(Project $project, string $content): void
+    public function parseRawContent(Project $project, string $content): array
     {
-        $this->parseContent($project, $content);
+        return $this->parseContent($project, $content);
     }
 
     protected function parseContent(Project $project, string $content): array
