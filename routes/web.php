@@ -139,36 +139,10 @@ Route::get('/clear-cache', function() {
 
     try {
         \Illuminate\Support\Facades\Artisan::call('package:discover');
+        \Illuminate\Support\Facades\Artisan::call('livewire:publish', ['--assets' => true, '--force' => true]);
     } catch (\Throwable $e) {}
 
     return 'Cache, config, package discovery, and views cleared successfully! You can now go back and refresh the page.';
-});
-
-Route::get('/check-livewire-route', function() {
-    $routes = \Illuminate\Support\Facades\Route::getRoutes();
-    $livewireRoutes = [];
-    foreach ($routes as $route) {
-        if (str_contains($route->uri(), 'livewire')) {
-            $livewireRoutes[] = $route->methods()[0] . ' ' . $route->uri();
-        }
-    }
-    return [
-        'script_path' => \Livewire\Mechanisms\HandleRequests\EndpointResolver::scriptPath(),
-        'update_path' => \Livewire\Mechanisms\HandleRequests\EndpointResolver::updatePath(),
-        'routes' => $livewireRoutes,
-    ];
-});
-
-Route::get('/check-env-url', function() {
-    return [
-        'app_url_env' => env('APP_URL'),
-        'app_url_config' => config('app.url'),
-        'scheme_host' => request()->getSchemeAndHttpHost(),
-        'base_url' => request()->getBaseUrl(),
-        'full_url' => request()->fullUrl(),
-        'is_secure' => request()->secure(),
-        'livewire_base' => rtrim(request()->getSchemeAndHttpHost() . request()->getBaseUrl(), '/'),
-    ];
 });
 
 Route::get('/pull-updates', function() {
