@@ -296,7 +296,7 @@
                 <div class="grid-3">
                     <div class="form-group">
                         <label class="form-label">Technology Stack</label>
-                        <select class="form-select" wire:model.live="stack">
+                        <select class="form-select" wire:model="stack">
                             <option value="laravel">Laravel</option>
                             <option value="php">Native PHP</option>
                             <option value="wordpress">WordPress</option>
