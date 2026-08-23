@@ -143,6 +143,21 @@ Route::get('/clear-cache', function() {
     return 'Cache, config, package discovery, and views cleared successfully! You can now go back and refresh the page.';
 });
 
+Route::get('/check-livewire-route', function() {
+    $routes = \Illuminate\Support\Facades\Route::getRoutes();
+    $livewireRoutes = [];
+    foreach ($routes as $route) {
+        if (str_contains($route->uri(), 'livewire')) {
+            $livewireRoutes[] = $route->methods()[0] . ' ' . $route->uri();
+        }
+    }
+    return [
+        'script_path' => \Livewire\Mechanisms\HandleRequests\EndpointResolver::scriptPath(),
+        'update_path' => \Livewire\Mechanisms\HandleRequests\EndpointResolver::updatePath(),
+        'routes' => $livewireRoutes,
+    ];
+});
+
 Route::get('/pull-updates', function() {
     try {
         $output = shell_exec('git pull origin main 2>&1');
