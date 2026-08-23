@@ -55,6 +55,7 @@ class ProjectForm extends Component
 
     // State
     public bool $active = true;
+    public bool $isEdit = false;
     public ?Project $project = null;
     public string $debugOutput = '';
 
@@ -66,6 +67,7 @@ class ProjectForm extends Component
     public function mount(?Project $project = null)
     {
         if ($project && $project->exists) {
+            $this->isEdit = true;
             $this->project = $project;
             $this->fill($project->only([
                 'name', 'domain', 'description', 'server_type', 'server_path',
