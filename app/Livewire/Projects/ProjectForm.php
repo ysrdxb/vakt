@@ -133,12 +133,12 @@ class ProjectForm extends Component
         $logFull = $path . '/' . ltrim($this->log_path, '/');
         $this->addResult(
             check: 'Log file found',
-            pass:  file_exists($logFull),
+            pass:  $this->safeFileExists($logFull),
             value: $logFull,
             fix:   'Ensure storage/logs/laravel.log exists and is not rotated away',
         );
 
-        if (file_exists($logFull)) {
+        if ($this->safeFileExists($logFull)) {
             $this->addResult(
                 check: 'Log file readable',
                 pass:  is_readable($logFull),
@@ -173,7 +173,7 @@ class ProjectForm extends Component
         $envPath = $path . '/.env';
         $this->addResult(
             check: '.env file accessible',
-            pass:  file_exists($envPath) && is_readable($envPath),
+            pass:  $this->safeFileExists($envPath) && is_readable($envPath),
             value: $envPath,
             fix:   '.env file not found — check project root path',
         );
@@ -264,7 +264,7 @@ class ProjectForm extends Component
     public function updatedServerPath(): void
     {
         if ($this->server_type === 'same_server' && !empty($this->server_path)) {
-            if (!file_exists($this->server_path)) {
+            if (!$this->safeFileExists($this->server_path)) {
                 $this->addError('server_path', '❌ Path not found — check cPanel Addon Domains');
             } else {
                 // Clear error if it's fine
@@ -327,12 +327,12 @@ class ProjectForm extends Component
 
         foreach ($levels as $level) {
             $checkDir = $base . $level;
-            $realDir = realpath($checkDir);
+            $realDir = $this->safeRealpath($checkDir);
             
             if (!$realDir) continue;
 
             foreach ($possibleFiles as $file) {
-                if (file_exists($realDir . $file) && is_readable($realDir . $file)) {
+                if ($this->safeFileExists($realDir . $file) && is_readable($realDir . $file)) {
                     $relativePath = $level . $file;
                     if (str_starts_with($relativePath, '/')) {
                         $relativePath = substr($relativePath, 1);
@@ -375,7 +375,7 @@ class ProjectForm extends Component
             $output .= "<strong style='color:#fff;'>Testing Level: '$level'</strong><br>";
             $output .= "Path: <code>$checkDir</code><br>";
             
-            $realDir = realpath($checkDir);
+            $realDir = $this->safeRealpath($checkDir);
             if (!$realDir) {
                 $output .= "<span style='color:#ef4444;'>❌ realpath() blocked or not found.</span><br><br>";
                 continue;
@@ -385,7 +385,7 @@ class ProjectForm extends Component
             
             foreach ($possibleFiles as $file) {
                 $fullPath = $realDir . $file;
-                if (file_exists($fullPath)) {
+                if ($this->safeFileExists($fullPath)) {
                     $output .= "<span style='color:#60a5fa;'>🎉 FOUND LOG FILE: <code>$fullPath</code></span><br>";
                 } else {
                     $output .= "<span style='color:#64748b;'>- Checked: $fullPath (Not found)</span><br>";
@@ -437,6 +437,24 @@ class ProjectForm extends Component
         $isEdit = $this->project && $this->project->exists;
         return view('livewire.projects.project-form', compact('isEdit'))
             ->layout('layouts.app', ['title' => $isEdit ? 'Modify Asset Configuration' : 'Configure Monitoring Target']);
+    }
+
+    private function safeFileExists(string $path): bool
+    {
+        try {
+            return file_exists($path);
+        } catch (\ErrorException $e) {
+            return false;
+        }
+    }
+
+    private function safeRealpath(string $path): string|false
+    {
+        try {
+            return realpath($path);
+        } catch (\ErrorException $e) {
+            return false;
+        }
     }
 }
 
