@@ -131,7 +131,16 @@ Route::get('/clear-cache', function() {
     \Illuminate\Support\Facades\Artisan::call('config:clear');
     \Illuminate\Support\Facades\Artisan::call('route:clear');
 
-    return 'Cache, config, and views cleared successfully! You can now go back and refresh the page.';
+    @unlink(base_path('bootstrap/cache/packages.php'));
+    @unlink(base_path('bootstrap/cache/services.php'));
+    @unlink(base_path('bootstrap/cache/config.php'));
+    @unlink(base_path('bootstrap/cache/routes.php'));
+
+    try {
+        \Illuminate\Support\Facades\Artisan::call('package:discover');
+    } catch (\Throwable $e) {}
+
+    return 'Cache, config, package discovery, and views cleared successfully! You can now go back and refresh the page.';
 });
 
 Route::get('/pull-updates', function() {
