@@ -19,8 +19,6 @@ use App\Livewire\DailyLogs\DailyLogCalendar;
 use App\Livewire\Settings\SettingsPage;
 use App\Livewire\Alerts\AlertLog;
 
-
-
 // ─── Guest ───────────────────────────────────────────
 Route::middleware('guest')->group(function () {
     require __DIR__.'/auth.php';
@@ -133,23 +131,7 @@ Route::get('/clear-cache', function() {
     \Illuminate\Support\Facades\Artisan::call('config:clear');
     \Illuminate\Support\Facades\Artisan::call('route:clear');
 
-    @unlink(base_path('bootstrap/cache/packages.php'));
-    @unlink(base_path('bootstrap/cache/services.php'));
-    @unlink(base_path('bootstrap/cache/config.php'));
-    @unlink(base_path('bootstrap/cache/routes.php'));
-    @unlink(base_path('bootstrap/cache/routes-v7.php'));
-
-    try {
-        \Illuminate\Support\Facades\Artisan::call('package:discover');
-        
-        // Force delete the vendor/livewire directory to bypass server 403 blocks
-        $livewireVendorPath = public_path('vendor/livewire');
-        if (is_dir($livewireVendorPath)) {
-            \Illuminate\Support\Facades\File::deleteDirectory($livewireVendorPath);
-        }
-    } catch (\Throwable $e) {}
-
-    return 'Cache, config, package discovery, and views cleared successfully! [v24aug-01] You can now go back and refresh the page.';
+    return 'Cache, config, and views cleared successfully! You can now go back and refresh the page.';
 });
 
 Route::get('/pull-updates', function() {
