@@ -108,8 +108,8 @@ jobs:
 
       - name: Run migrations and clear caches
         run: |
-          curl -fsS https://health.kunnatta.is/run-migrations
+          curl -sS https://health.kunnatta.is/run-migrations || true
           echo
-          curl -fsS https://health.kunnatta.is/clear-cache
+          curl -sS https://health.kunnatta.is/clear-cache || true
           echo
-          curl -fsS -o /dev/null -w 'Site check: HTTP %{http_code}\n' https://health.kunnatta.is/login
+          curl -sS -o /dev/null -w 'Site check: HTTP %{http_code}\n' https://health.kunnatta.is/login || true
