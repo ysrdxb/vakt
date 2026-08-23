@@ -150,7 +150,12 @@ Route::get('/clear-cache', function() {
 
     try {
         \Illuminate\Support\Facades\Artisan::call('package:discover');
-        \Illuminate\Support\Facades\Artisan::call('livewire:publish', ['--assets' => true, '--force' => true]);
+        
+        // Force delete the vendor/livewire directory to bypass server 403 blocks
+        $livewireVendorPath = public_path('vendor/livewire');
+        if (is_dir($livewireVendorPath)) {
+            \Illuminate\Support\Facades\File::deleteDirectory($livewireVendorPath);
+        }
     } catch (\Throwable $e) {}
 
     return 'Cache, config, package discovery, and views cleared successfully! [v24aug-01] You can now go back and refresh the page.';
