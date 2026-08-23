@@ -135,6 +135,7 @@ Route::get('/clear-cache', function() {
     @unlink(base_path('bootstrap/cache/services.php'));
     @unlink(base_path('bootstrap/cache/config.php'));
     @unlink(base_path('bootstrap/cache/routes.php'));
+    @unlink(base_path('bootstrap/cache/routes-v7.php'));
 
     try {
         \Illuminate\Support\Facades\Artisan::call('package:discover');
