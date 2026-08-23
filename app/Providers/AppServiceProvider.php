@@ -22,5 +22,14 @@ class AppServiceProvider extends ServiceProvider
         if (config('app.env') !== 'local') {
             \Illuminate\Support\Facades\URL::forceScheme('https');
         }
+
+        if ($prefix = env('LIVEWIRE_ROUTE_PREFIX')) {
+            \Livewire\Livewire::setUpdateRoute(function ($handle) use ($prefix) {
+                return \Illuminate\Support\Facades\Route::post($prefix . '/livewire/update', $handle);
+            });
+            \Livewire\Livewire::setScriptRoute(function ($handle) use ($prefix) {
+                return \Illuminate\Support\Facades\Route::get($prefix . '/livewire/livewire.js', $handle);
+            });
+        }
     }
 }
