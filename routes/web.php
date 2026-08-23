@@ -159,6 +159,18 @@ Route::get('/check-livewire-route', function() {
     ];
 });
 
+Route::get('/check-env-url', function() {
+    return [
+        'app_url_env' => env('APP_URL'),
+        'app_url_config' => config('app.url'),
+        'scheme_host' => request()->getSchemeAndHttpHost(),
+        'base_url' => request()->getBaseUrl(),
+        'full_url' => request()->fullUrl(),
+        'is_secure' => request()->secure(),
+        'livewire_base' => rtrim(request()->getSchemeAndHttpHost() . request()->getBaseUrl(), '/'),
+    ];
+});
+
 Route::get('/pull-updates', function() {
     try {
         $output = shell_exec('git pull origin main 2>&1');
