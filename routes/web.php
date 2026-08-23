@@ -130,6 +130,13 @@ Route::get('/clear-cache', function() {
     \Illuminate\Support\Facades\Artisan::call('cache:clear');
     \Illuminate\Support\Facades\Artisan::call('config:clear');
     \Illuminate\Support\Facades\Artisan::call('route:clear');
+    
+    // Clean up orphaned published Livewire assets that cause 404s/blocking on shared hosting
+    $livewireVendorPath = public_path('vendor/livewire');
+    if (file_exists($livewireVendorPath)) {
+        \Illuminate\Support\Facades\File::deleteDirectory($livewireVendorPath);
+    }
+
     return 'Cache, config, and views cleared successfully! You can now go back and refresh the page.';
 });
 
