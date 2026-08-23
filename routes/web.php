@@ -142,7 +142,7 @@ Route::get('/clear-cache', function() {
         \Illuminate\Support\Facades\Artisan::call('livewire:publish', ['--assets' => true, '--force' => true]);
     } catch (\Throwable $e) {}
 
-    return 'Cache, config, package discovery, and views cleared successfully! You can now go back and refresh the page.';
+    return 'Cache, config, package discovery, and views cleared successfully! [v24aug-01] You can now go back and refresh the page.';
 });
 
 Route::get('/pull-updates', function() {
