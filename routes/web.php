@@ -19,6 +19,17 @@ use App\Livewire\DailyLogs\DailyLogCalendar;
 use App\Livewire\Settings\SettingsPage;
 use App\Livewire\Alerts\AlertLog;
 
+use Livewire\Livewire;
+
+// ─── Custom Livewire Routes ───────────────────────────────────────────
+// These bypass server static file interception and reserved path blocks
+Livewire::setUpdateRoute(function ($handle) {
+    return Route::post('/livewire-api-update', $handle);
+});
+Livewire::setScriptRoute(function ($handle) {
+    return Route::get('/livewire-js-asset', $handle);
+});
+
 // ─── Guest ───────────────────────────────────────────
 Route::middleware('guest')->group(function () {
     require __DIR__.'/auth.php';

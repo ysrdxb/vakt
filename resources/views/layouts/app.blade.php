@@ -243,16 +243,6 @@
 {{-- Toast notifications --}}
 <x-toast />
 
-@php
-    $livewireBase = rtrim(request()->getSchemeAndHttpHost() . request()->getBaseUrl(), '/');
-@endphp
-
-<script
-    src="{{ $livewireBase }}/vendor/livewire/livewire.min.js"
-    data-csrf="{{ csrf_token() }}"
-    data-update-uri="{{ $livewireBase }}/livewire/update"
-    data-navigate-once="true"
-></script>
 @stack('scripts')
 
 </body>
