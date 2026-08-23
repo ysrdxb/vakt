@@ -87,7 +87,6 @@ jobs:
           lftp -p "$DEPLOY_PORT" -u "$DEPLOY_USER,$DEPLOY_PASS" "sftp://$DEPLOY_HOST" -e "
           set sftp:auto-confirm yes;
           set net:max-retries 2;
-          -rm -r $DEPLOY_PATH/public/vendor/livewire;
           mirror -R --parallel=8 --no-perms $VENDOR_FLAGS \
             --exclude ^composer/ \
             .deploy-stage/vendor/ $DEPLOY_PATH/vendor;
