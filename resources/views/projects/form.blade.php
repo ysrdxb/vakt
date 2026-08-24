@@ -1,6 +1,183 @@
 @extends('layouts.app')
 
 @section('content')
+<style>
+    /* Professional Clean SaaS Theme (Dark) */
+    :root {
+        --bg-color: #0f172a;
+        --surface-color: #1e293b;
+        --border-color: #334155;
+        --text-main: #f8fafc;
+        --text-muted: #94a3b8;
+        --primary: #3b82f6;
+        --primary-hover: #2563eb;
+        --danger: #ef4444;
+        --success: #10b981;
+        --warning: #f59e0b;
+        --radius: 8px;
+    }
+
+    .page-container {
+        width: 100%;
+        padding: 24px;
+    }
+
+    .page-title {
+        font-size: 24px;
+        font-weight: 600;
+        margin-bottom: 8px;
+        color: #f8fafc;
+    }
+
+    .page-subtitle {
+        color: var(--text-muted);
+        font-size: 14px;
+        margin-bottom: 32px;
+    }
+
+    .card {
+        background: var(--surface-color);
+        border: 1px solid var(--border-color);
+        border-radius: var(--radius);
+        margin-bottom: 24px;
+        overflow: hidden;
+    }
+
+    .card-header {
+        padding: 20px 24px;
+        border-bottom: 1px solid var(--border-color);
+        background: rgba(255, 255, 255, 0.02);
+    }
+
+    .card-title {
+        font-size: 16px;
+        font-weight: 600;
+        margin: 0;
+        color: #f8fafc;
+    }
+
+    .card-body {
+        padding: 24px;
+    }
+
+    .form-group {
+        margin-bottom: 20px;
+    }
+
+    .form-label {
+        display: block;
+        font-size: 13px;
+        font-weight: 500;
+        color: var(--text-muted);
+        margin-bottom: 8px;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+    }
+
+    .form-control, .form-select {
+        width: 100%;
+        background: var(--bg-color);
+        border: 1px solid var(--border-color);
+        color: var(--text-main);
+        padding: 10px 12px;
+        border-radius: 6px;
+        font-size: 14px;
+        transition: border-color 0.2s;
+    }
+
+    .form-control:focus, .form-select:focus {
+        outline: none;
+        border-color: var(--primary);
+    }
+
+    .form-text {
+        font-size: 12px;
+        color: var(--text-muted);
+        margin-top: 6px;
+    }
+
+    .grid-2 {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 24px;
+    }
+
+    .grid-3 {
+        display: grid;
+        grid-template-columns: 1fr 1fr 1fr;
+        gap: 24px;
+    }
+
+    .option-cards {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 20px;
+        margin-bottom: 24px;
+    }
+
+    .option-card {
+        border: 1px solid var(--border-color);
+        border-radius: 8px;
+        padding: 16px;
+        cursor: pointer;
+        background: var(--bg-color);
+        transition: all 0.2s;
+        display: flex;
+        align-items: flex-start;
+        gap: 12px;
+    }
+
+    .option-card:hover {
+        border-color: #475569;
+    }
+
+    .option-card.selected {
+        border-color: var(--primary);
+        background: rgba(59, 130, 246, 0.1);
+    }
+
+    .option-card input[type="radio"] {
+        margin-top: 4px;
+        accent-color: var(--primary);
+        width: 16px;
+        height: 16px;
+    }
+
+    .btn {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        padding: 10px 18px;
+        border-radius: 6px;
+        font-size: 14px;
+        font-weight: 500;
+        cursor: pointer;
+        border: 1px solid transparent;
+        transition: all 0.2s;
+        text-decoration: none;
+    }
+
+    .btn-primary {
+        background: var(--primary);
+        color: #fff;
+    }
+
+    .btn-primary:hover {
+        background: var(--primary-hover);
+    }
+
+    .btn-secondary {
+        background: rgba(255, 255, 255, 0.05);
+        border-color: var(--border-color);
+        color: var(--text-main);
+    }
+
+    .btn-secondary:hover {
+        background: rgba(255, 255, 255, 0.1);
+        border-color: #475569;
+    }
+</style>
+
 <div class="page-container" x-data="{
     serverType: '{{ old('server_type', $project->server_type ?? 'same_server') }}',
     runningDiagnostics: false,
@@ -86,7 +263,7 @@
     <div class="page-subtitle">Configure asset properties, surveillance scope, and connection parameters.</div>
 
     @if ($errors->any())
-        <div style="background: rgba(239, 68, 68, 0.1); border: 1px solid var(--danger); color: var(--danger); padding: 16px; border-radius: var(--radius); margin-bottom: 24px;">
+        <div style="background: rgba(239, 68, 68, 0.15); border: 1px solid var(--danger); color: #f87171; padding: 16px; border-radius: var(--radius); margin-bottom: 24px;">
             <strong style="display: block; margin-bottom: 8px;">Please fix the following validation errors:</strong>
             <ul style="margin: 0; padding-left: 20px;">
                 @foreach ($errors->all() as $error)
@@ -101,6 +278,9 @@
         @if($isEdit)
             @method('PUT')
         @endif
+
+        {{-- Hidden Server Type Input to guarantee POST data --}}
+        <input type="hidden" name="server_type" :value="serverType" />
 
         {{-- Section 1: Basic Information --}}
         <div class="card">
@@ -162,27 +342,27 @@
             </div>
             <div class="card-body">
                 <div class="option-cards">
-                    <label class="option-card" :class="{ 'selected': serverType === 'same_server' }">
-                        <input type="radio" name="server_type" value="same_server" x-model="serverType" />
+                    <label class="option-card" :class="{ 'selected': serverType === 'same_server' }" @click="serverType = 'same_server'">
+                        <input type="radio" value="same_server" x-model="serverType" />
                         <div>
-                            <div style="font-weight: 600; color: #fff;">Same Server Direct Access</div>
-                            <div style="font-size: 12px; color: var(--text-muted);">Direct filesystem log reading (No Agent required).</div>
+                            <div style="font-weight: 600; color: #fff; font-size: 15px;">Same Server Direct Access</div>
+                            <div style="font-size: 13px; color: var(--text-muted);">Direct filesystem log reading (No Agent required).</div>
                         </div>
                     </label>
 
-                    <label class="option-card" :class="{ 'selected': serverType === 'external_agent' }">
-                        <input type="radio" name="server_type" value="external_agent" x-model="serverType" />
+                    <label class="option-card" :class="{ 'selected': serverType === 'external_agent' }" @click="serverType = 'external_agent'">
+                        <input type="radio" value="external_agent" x-model="serverType" />
                         <div>
-                            <div style="font-weight: 600; color: #fff;">Remote SOC Agent</div>
-                            <div style="font-size: 12px; color: var(--text-muted);">Single-file agent PHP bridge over HTTPS.</div>
+                            <div style="font-weight: 600; color: #fff; font-size: 15px;">Remote SOC Agent</div>
+                            <div style="font-size: 13px; color: var(--text-muted);">Single-file agent PHP bridge over HTTPS.</div>
                         </div>
                     </label>
 
-                    <label class="option-card" :class="{ 'selected': serverType === 'ftp' }">
-                        <input type="radio" name="server_type" value="ftp" x-model="serverType" />
+                    <label class="option-card" :class="{ 'selected': serverType === 'ftp' }" @click="serverType = 'ftp'">
+                        <input type="radio" value="ftp" x-model="serverType" />
                         <div>
-                            <div style="font-weight: 600; color: #fff;">FTP / SFTP Bridge</div>
-                            <div style="font-size: 12px; color: var(--text-muted);">Remote log monitoring via FTP credentials.</div>
+                            <div style="font-weight: 600; color: #fff; font-size: 15px;">FTP / SFTP Bridge</div>
+                            <div style="font-size: 13px; color: var(--text-muted);">Remote log monitoring via FTP credentials.</div>
                         </div>
                     </label>
                 </div>
