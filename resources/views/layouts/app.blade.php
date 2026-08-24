@@ -242,11 +242,12 @@
 
 {{-- Toast notifications --}}
 @php
-    $livewireScriptUrl = url('/livewire/livewire.js');
-    $livewireUpdateUrl = url('/livewire/update');
+    $baseUrl = rtrim(request()->getBaseUrl(), '/');
+    $livewireScriptUrl = $baseUrl . '/livewire/livewire.js';
+    $livewireUpdateUrl = $baseUrl . '/livewire/update';
 @endphp
 
-@livewireScriptConfig(['url' => url('/')])
+@livewireScriptConfig(['url' => $baseUrl ?: '/'])
 <script src="{{ $livewireScriptUrl }}" data-csrf="{{ csrf_token() }}" data-update-uri="{{ $livewireUpdateUrl }}" data-navigate-once="true"></script>
 
 @stack('scripts')
