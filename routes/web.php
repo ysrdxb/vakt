@@ -50,8 +50,12 @@ Route::middleware(['auth'])->group(function () {
 
         // Projects
         Route::get('/projects', ProjectList::class)->name('projects.index');
-        Route::get('/projects/create', ProjectForm::class)->name('projects.create');
-        Route::get('/projects/{project}/edit', ProjectForm::class)->name('projects.edit');
+        Route::get('/projects/create', [\App\Http\Controllers\ProjectController::class, 'create'])->name('projects.create');
+        Route::post('/projects', [\App\Http\Controllers\ProjectController::class, 'store'])->name('projects.store');
+        Route::get('/projects/{project}/edit', [\App\Http\Controllers\ProjectController::class, 'edit'])->name('projects.edit');
+        Route::put('/projects/{project}', [\App\Http\Controllers\ProjectController::class, 'update'])->name('projects.update');
+        Route::post('/projects/test-connection', [\App\Http\Controllers\ProjectController::class, 'testConnection'])->name('projects.test-connection');
+        Route::post('/projects/auto-detect-log', [\App\Http\Controllers\ProjectController::class, 'autoDetectLogPath'])->name('projects.auto-detect-log');
         Route::get('/projects/{project}', ProjectDetail::class)->name('projects.show');
 
         // Incidents
