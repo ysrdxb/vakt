@@ -3,11 +3,13 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="csrf-token" content="{{ csrf_token() }}" />
     <title>Vakt SOC — Secure Login</title>
 
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Space+Mono:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet" />
-    <script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
+
+    @vite(['resources/css/app.css', 'resources/js/app.js'])
 
     <style>
         :root {
@@ -41,7 +43,6 @@
             position: relative;
         }
 
-        /* Dynamic animated background */
         .bg-animated {
             position: absolute;
             inset: 0;
@@ -79,7 +80,6 @@
             100% { transform: translate(30px, -50px) scale(1.1); }
         }
 
-        /* Glassmorphism login card */
         .login-card {
             position: relative;
             z-index: 10;
@@ -155,7 +155,6 @@
             opacity: 0.9;
         }
 
-        /* Form elements */
         .form-group {
             margin-bottom: 24px;
             position: relative;
@@ -193,11 +192,6 @@
             color: var(--primary);
         }
 
-        .form-control::placeholder {
-            color: rgba(255, 255, 255, 0.2);
-        }
-
-        /* Password input specific */
         .pw-wrap {
             position: relative;
         }
@@ -220,7 +214,6 @@
             color: var(--primary);
         }
 
-        /* Checkbox */
         .checkbox-wrap {
             display: flex;
             align-items: center;
@@ -269,7 +262,6 @@
             color: var(--text-main);
         }
 
-        /* Button */
         .btn-submit {
             width: 100%;
             background: linear-gradient(135deg, var(--primary), var(--secondary));
@@ -291,27 +283,9 @@
             box-shadow: 0 8px 25px rgba(0, 242, 254, 0.4);
         }
 
-        .btn-submit:active {
-            transform: translateY(1px);
-        }
-
-        .btn-submit::after {
-            content: '';
-            position: absolute;
-            top: 0; left: -100%; width: 100%; height: 100%;
-            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
-            transition: left 0.5s;
-        }
-
-        .btn-submit:hover::after {
-            left: 100%;
-        }
-
         .btn-submit:disabled {
             opacity: 0.7;
             cursor: not-allowed;
-            transform: none !important;
-            box-shadow: none !important;
         }
 
         .spinner {
@@ -330,7 +304,6 @@
             to { transform: rotate(360deg); }
         }
 
-        /* Footer */
         .login-footer {
             margin-top: 32px;
             text-align: center;
@@ -352,7 +325,6 @@
             flex: 1;
         }
 
-        /* Error/Alert */
         .alert {
             padding: 12px 16px;
             border-radius: 8px;
@@ -366,20 +338,13 @@
         .alert.danger {
             background: rgba(239, 68, 68, 0.1);
             border: 1px solid rgba(239, 68, 68, 0.2);
-            color: #dc2626;
+            color: #ff4757;
         }
         
         .alert.success {
             background: rgba(16, 185, 129, 0.1);
             border: 1px solid rgba(16, 185, 129, 0.2);
-            color: #059669;
-        }
-        
-        .form-error {
-            color: #dc2626;
-            font-size: 0.75rem;
-            margin-top: 6px;
-            display: block;
+            color: #2ed573;
         }
     </style>
 </head>
@@ -391,97 +356,15 @@
     <div class="blob blob-3"></div>
 </div>
 
-<div class="login-card" x-data="{ showPw: false }">
-
-    <div class="login-logo">
-        <div class="login-logo-icon">
-            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" style="width:32px;height:32px;color:#fff">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
-            </svg>
-        </div>
-        <h1>Vakt</h1>
-        <p>Security Operations Center</p>
-    </div>
-
-    @if(session('status'))
-    <div class="alert success">
-        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" style="width:16px;height:16px"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" /></svg>
-        {{ session('status') }}
-    </div>
-    @endif
-
-    @if($errors->has('email'))
-    <div class="alert danger">
-        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" style="width:16px;height:16px"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" /></svg>
-        {{ $errors->first('email') }}
-    </div>
-    @endif
-
-    <form method="POST" action="{{ route('login') }}" x-data="{ isSubmitting: false }" @submit="isSubmitting = true">
-        @csrf
-
-        <div class="form-group">
-            <label class="form-label" for="email">Email Address</label>
-            <input
-                id="email"
-                type="email"
-                name="email"
-                value="{{ old('email') }}"
-                class="form-control"
-                placeholder="operator@vakt.is"
-                required
-                autocomplete="email"
-                autofocus
-            />
-        </div>
-
-        <div class="form-group">
-            <label class="form-label" for="password">Password</label>
-            <div class="pw-wrap">
-                <input
-                    id="password"
-                    :type="showPw ? 'text' : 'password'"
-                    name="password"
-                    class="form-control"
-                    placeholder="••••••••"
-                    required
-                    autocomplete="current-password"
-                    style="padding-right: 48px; font-family: monospace; font-size: 1.2rem; letter-spacing: 2px;"
-                />
-                <button type="button" class="pw-toggle" x-on:click="showPw = !showPw">
-                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" style="width:18px;height:18px">
-                        <template x-if="!showPw">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
-                        </template>
-                        <template x-if="showPw">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21" />
-                        </template>
-                    </svg>
-                </button>
-            </div>
-            @error('password')
-            <div class="form-error">{{ $message }}</div>
-            @enderror
-        </div>
-
-        <label class="checkbox-wrap">
-            <input type="checkbox" name="remember" />
-            <span>Remember me</span>
-        </label>
-
-        <button type="submit" class="btn-submit" :disabled="isSubmitting">
-            <span x-show="!isSubmitting">Sign In</span>
-            <span x-show="isSubmitting" style="display:none;">
-                <span class="spinner"></span> Authenticating...
-            </span>
-        </button>
-    </form>
-
-    <div class="login-footer">
-        Authorized Access Only
-    </div>
+<div id="app">
+    <login-form
+        action-url="{{ route('login') }}"
+        csrf-token="{{ csrf_token() }}"
+        old-email="{{ old('email') }}"
+        error-message="{{ $errors->first('email') }}"
+        status-message="{{ session('status') }}"
+    ></login-form>
 </div>
 
 </body>
 </html>
-
