@@ -243,11 +243,7 @@
 {{-- Toast notifications --}}
 <x-toast />
 
-@php
-    $livewireBase = rtrim(request()->getSchemeAndHttpHost() . request()->getBaseUrl(), '/');
-@endphp
-
-@livewireScriptConfig(['url' => $livewireBase])
+@livewireScripts
 @stack('scripts')
 
 </body>
