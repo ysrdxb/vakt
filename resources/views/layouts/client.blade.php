@@ -54,7 +54,7 @@
 @php
     $baseUrl = rtrim(request()->getBaseUrl(), '/');
     $livewireScriptUrl = $baseUrl . '/livewire/livewire.js';
-    $livewireUpdateUrl = $baseUrl . '/livewire/update';
+    $livewireUpdateUrl = url(app('livewire')->getUpdateUri());
 @endphp
 
 @livewireScriptConfig(['url' => $baseUrl ?: '/'])
