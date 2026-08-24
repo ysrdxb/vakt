@@ -48,7 +48,7 @@
 </header>
 
 <div class="client-layout" style="padding-top:32px;padding-bottom:48px">
-    {{ $slot }}
+    @yield('content', $slot ?? '')
 </div>
 
 @php

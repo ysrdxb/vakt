@@ -234,7 +234,7 @@
 
         {{-- Page Content --}}
         <div class="page-body">
-            {{ $slot }}
+            @yield('content', $slot ?? '')
         </div>
     </main>
 
