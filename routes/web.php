@@ -67,19 +67,23 @@ Route::middleware(['auth'])->group(function () {
         Route::post('/incidents/{incident}/command', [\App\Http\Controllers\IncidentController::class, 'executeCommand'])->name('incidents.command');
 
         // Logs
-        Route::get('/logs', LogViewer::class)->name('logs.index');
-        Route::get('/logs/{project}', LogViewer::class)->name('logs.project');
+        Route::get('/logs', [\App\Http\Controllers\LogViewerController::class, 'index'])->name('logs.index');
+        Route::post('/logs/{entry}/review', [\App\Http\Controllers\LogViewerController::class, 'markReviewed'])->name('logs.review');
+        Route::post('/logs/{entry}/analyze', [\App\Http\Controllers\LogViewerController::class, 'analyzeWithAI'])->name('logs.analyze');
+
+        // Audit Tracker
+        Route::get('/audit', [\App\Http\Controllers\AuditController::class, 'index'])->name('audit.index');
+        Route::post('/audit/seed', [\App\Http\Controllers\AuditController::class, 'seed'])->name('audit.seed');
+        Route::post('/audit/{item}/status', [\App\Http\Controllers\AuditController::class, 'updateStatus'])->name('audit.update-status');
+        Route::post('/audit/{item}/notes', [\App\Http\Controllers\AuditController::class, 'updateNotes'])->name('audit.update-notes');
 
         // File Integrity
-        Route::get('/file-integrity', FileIntegrityView::class)->name('file-integrity.index');
-        Route::get('/file-integrity/{project}', FileIntegrityView::class)->name('file-integrity.project');
+        Route::get('/file-integrity', [\App\Http\Controllers\FileIntegrityController::class, 'index'])->name('file-integrity.index');
+        Route::post('/file-integrity/scan', [\App\Http\Controllers\FileIntegrityController::class, 'initScan'])->name('file-integrity.scan');
+        Route::post('/file-integrity/{snapshot}/approve', [\App\Http\Controllers\FileIntegrityController::class, 'approveChange'])->name('file-integrity.approve');
 
         // Daily Logs
         Route::get('/daily-logs', DailyLogCalendar::class)->name('daily-logs.index');
-
-        // Security Audit
-        Route::get('/audit', AuditTracker::class)->name('audit.index');
-        Route::get('/audit/{project}', AuditTracker::class)->name('audit.project');
 
         // Vulnerabilities
         Route::get('/vulnerabilities', [\App\Http\Controllers\VulnerabilityController::class, 'index'])->name('vulnerabilities.index');

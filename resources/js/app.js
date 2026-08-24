@@ -12,6 +12,9 @@ import ProjectList from './components/ProjectList.vue';
 import ProjectDetail from './components/ProjectDetail.vue';
 import IncidentList from './components/IncidentList.vue';
 import IncidentDetail from './components/IncidentDetail.vue';
+import LogViewer from './components/LogViewer.vue';
+import FileIntegrityView from './components/FileIntegrityView.vue';
+import AuditTracker from './components/AuditTracker.vue';
 
 const PAGE_COMPONENTS = {
     'vue-login-form':   LoginForm,
@@ -21,6 +24,9 @@ const PAGE_COMPONENTS = {
     'vue-project-detail': ProjectDetail,
     'vue-incident-list': IncidentList,
     'vue-incident-detail': IncidentDetail,
+    'vue-log-viewer': LogViewer,
+    'vue-file-integrity-view': FileIntegrityView,
+    'vue-audit-tracker': AuditTracker,
 };
 
 window.addEventListener('DOMContentLoaded', () => {
