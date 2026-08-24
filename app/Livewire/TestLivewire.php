@@ -15,6 +15,7 @@ class TestLivewire extends Component
 
     public function render()
     {
-        return view('livewire.test-livewire');
+        return view('livewire.test-livewire')
+            ->layout('layouts.app', ['title' => 'Livewire Diagnostic Page']);
     }
 }
