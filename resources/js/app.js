@@ -7,12 +7,16 @@ import { createApp, defineAsyncComponent } from 'vue';
 
 import LoginForm from './components/LoginForm.vue';
 import ProjectForm from './components/ProjectForm.vue';
-import VueCounter from './components/VueCounter.vue';
+import OperatorDashboard from './components/OperatorDashboard.vue';
+import ProjectList from './components/ProjectList.vue';
+import ProjectDetail from './components/ProjectDetail.vue';
 
 const PAGE_COMPONENTS = {
     'vue-login-form':   LoginForm,
     'vue-project-form': ProjectForm,
-    'vue-counter':      VueCounter,
+    'vue-operator-dashboard': OperatorDashboard,
+    'vue-project-list': ProjectList,
+    'vue-project-detail': ProjectDetail,
 };
 
 window.addEventListener('DOMContentLoaded', () => {

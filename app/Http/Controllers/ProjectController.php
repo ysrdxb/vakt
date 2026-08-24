@@ -10,6 +10,122 @@ use Illuminate\Support\Facades\Http;
 
 class ProjectController extends Controller
 {
+    public function index(Request $request)
+    {
+        $search = $request->input('search');
+        $filterStatus = $request->input('filterStatus');
+
+        $projects = Project::when($search, function ($q) use ($search) {
+                $q->where('domain', 'like', '%' . $search . '%')
+                  ->orWhere('name', 'like', '%' . $search . '%');
+            })
+            ->when($filterStatus, function ($q) use ($filterStatus) {
+                $q->where('status', $filterStatus);
+            })
+            ->orderBy('status')
+            ->orderBy('domain')
+            ->get();
+
+        if ($request->wantsJson()) {
+            return response()->json($projects);
+        }
+
+        return view('projects.index', compact('projects'));
+    }
+
+    public function show(Project $project)
+    {
+        $project->load([
+            'incidents' => fn($q) => $q->orderByDesc('detected_at')->limit(10),
+            'monitoringChecks' => fn($q) => $q->orderByDesc('checked_at')->limit(5),
+            'logEntries' => fn($q) => $q->orderByDesc('occurred_at')->limit(10)
+        ]);
+
+        $latestReport = \App\Models\AgentReport::where('project_id', $project->id)
+                            ->orderByDesc('received_at')
+                            ->first();
+
+        $uptimeLogs = \App\Models\UptimeLog::where('project_id', $project->id)
+                            ->orderByDesc('created_at')
+                            ->limit(60)
+                            ->get();
+
+        return view('projects.show', compact('project', 'latestReport', 'uptimeLogs'));
+    }
+
+    public function confirmWhitelist(Request $request, Project $project)
+    {
+        $project->update(['firewall_whitelist_confirmed' => true]);
+        return response()->json(['success' => true, 'message' => 'Firewall whitelist confirmed. You may now deploy the agent.']);
+    }
+
+    public function runScan(Request $request, Project $project)
+    {
+        try {
+            \App\Jobs\CollectProjectData::dispatchSync($project->id);
+            return response()->json(['success' => true, 'message' => 'Data pulled successfully from agent.']);
+        } catch (\Exception $e) {
+            return response()->json(['success' => false, 'message' => $e->getMessage()], 500);
+        }
+    }
+
+    public function testReport(Request $request, Project $project)
+    {
+        try {
+            $startDate = now()->subDays(1);
+            $endDate = now();
+
+            $uptimeLogs = $project->uptimeLogs()
+                ->whereBetween('created_at', [$startDate, $endDate])
+                ->get();
+
+            $totalPings = $uptimeLogs->count();
+            $successfulPings = $uptimeLogs->where('status_code', 200)->count();
+            $uptimePercentage = $totalPings > 0 ? round(($successfulPings / $totalPings) * 100, 2) : 100;
+
+            $openIncidents = $project->incidents()
+                ->whereNotIn('status', ['resolved', 'closed'])
+                ->count();
+
+            $backupFailed = $project->incidents()
+                ->where('title', 'like', '%backup missing%')
+                ->where('created_at', '>=', $startDate)
+                ->exists();
+
+            $stats = [
+                'uptime_percentage' => $uptimePercentage,
+                'open_incidents'    => $openIncidents,
+                'backup_healthy'    => !$backupFailed,
+            ];
+
+            app(\App\Services\NotificationService::class)->notifyDailyReport($project, $stats);
+            
+            return response()->json(['success' => true, 'message' => 'Daily SOC Report pushed to webhooks successfully.']);
+        } catch (\Exception $e) {
+            return response()->json(['success' => false, 'message' => $e->getMessage()], 500);
+        }
+    }
+
+    public function toggleActive(Request $request, Project $project)
+    {
+        $project->update(['active' => !$project->active]);
+        return response()->json([
+            'success' => true,
+            'active' => $project->active,
+            'message' => $project->domain . ' monitoring ' . ($project->active ? 'enabled' : 'disabled')
+        ]);
+    }
+
+    public function destroy(Request $request, Project $project)
+    {
+        \Log::info("deleteProject called for project: " . $project->id);
+        $project->delete();
+        return response()->json([
+            'success' => true,
+            'message' => 'Project removed.'
+        ]);
+    }
+
     public function create()
     {
         $project = new Project();

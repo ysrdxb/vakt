@@ -2,22 +2,16 @@
 
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Auth;
-use App\Livewire\Dashboard\OperatorDashboard;
-use App\Livewire\Dashboard\ClientDashboard;
-use App\Livewire\Projects\ProjectList;
 use App\Livewire\Projects\ProjectForm;
-use App\Livewire\Projects\ProjectDetail;
+use App\Livewire\Dashboard\ClientDashboard;
+use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\ProjectController;
 use App\Livewire\Incidents\IncidentList;
 use App\Livewire\Incidents\IncidentDetail;
 use App\Livewire\Logs\LogViewer;
 use App\Livewire\FileIntegrity\FileIntegrityView;
 use App\Livewire\Audit\AuditTracker;
-use App\Livewire\Vulnerabilities\VulnerabilityList;
-use App\Livewire\Improvements\ImprovementKanban;
-use App\Livewire\Reports\SqaReport;
 use App\Livewire\DailyLogs\DailyLogCalendar;
-use App\Livewire\Settings\SettingsPage;
-use App\Livewire\Alerts\AlertLog;
 
 // ─── Guest ───────────────────────────────────────────
 Route::middleware('guest')->group(function () {
@@ -46,17 +40,24 @@ Route::middleware(['auth'])->group(function () {
     // ─── OPERATOR ROUTES ──────────────────────────────
     Route::middleware(['role:operator'])->group(function () {
 
-        Route::get('/dashboard', OperatorDashboard::class)->name('dashboard');
+        Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
 
         // Projects
-        Route::get('/projects', ProjectList::class)->name('projects.index');
-        Route::get('/projects/create', [\App\Http\Controllers\ProjectController::class, 'create'])->name('projects.create');
-        Route::post('/projects', [\App\Http\Controllers\ProjectController::class, 'store'])->name('projects.store');
-        Route::get('/projects/{project}/edit', [\App\Http\Controllers\ProjectController::class, 'edit'])->name('projects.edit');
-        Route::put('/projects/{project}', [\App\Http\Controllers\ProjectController::class, 'update'])->name('projects.update');
-        Route::post('/projects/test-connection', [\App\Http\Controllers\ProjectController::class, 'testConnection'])->name('projects.test-connection');
-        Route::post('/projects/auto-detect-log', [\App\Http\Controllers\ProjectController::class, 'autoDetectLogPath'])->name('projects.auto-detect-log');
-        Route::get('/projects/{project}', ProjectDetail::class)->name('projects.show');
+        Route::get('/projects', [ProjectController::class, 'index'])->name('projects.index');
+        Route::get('/projects/create', [ProjectController::class, 'create'])->name('projects.create');
+        Route::post('/projects', [ProjectController::class, 'store'])->name('projects.store');
+        Route::post('/projects/{project}/toggle-active', [ProjectController::class, 'toggleActive'])->name('projects.toggle-active');
+        Route::get('/projects/{project}/edit', [ProjectController::class, 'edit'])->name('projects.edit');
+        Route::put('/projects/{project}', [ProjectController::class, 'update'])->name('projects.update');
+        Route::delete('/projects/{project}', [ProjectController::class, 'destroy'])->name('projects.destroy');
+        Route::post('/projects/test-connection', [ProjectController::class, 'testConnection'])->name('projects.test-connection');
+        Route::post('/projects/auto-detect-log', [ProjectController::class, 'autoDetectLogPath'])->name('projects.auto-detect-log');
+        
+        Route::post('/projects/{project}/confirm-whitelist', [ProjectController::class, 'confirmWhitelist'])->name('projects.confirm-whitelist');
+        Route::post('/projects/{project}/run-scan', [ProjectController::class, 'runScan'])->name('projects.run-scan');
+        Route::post('/projects/{project}/test-report', [ProjectController::class, 'testReport'])->name('projects.test-report');
+        
+        Route::get('/projects/{project}', [ProjectController::class, 'show'])->name('projects.show');
 
         // Incidents
         Route::get('/incidents', IncidentList::class)->name('incidents.index');
@@ -78,24 +79,32 @@ Route::middleware(['auth'])->group(function () {
         Route::get('/audit/{project}', AuditTracker::class)->name('audit.project');
 
         // Vulnerabilities
-        Route::get('/vulnerabilities', VulnerabilityList::class)->name('vulnerabilities.index');
-        Route::get('/vulnerabilities/{project}', VulnerabilityList::class)->name('vulnerabilities.project');
+        Route::get('/vulnerabilities', [\App\Http\Controllers\VulnerabilityController::class, 'index'])->name('vulnerabilities.index');
+        Route::post('/vulnerabilities/fetch', [\App\Http\Controllers\VulnerabilityController::class, 'fetch'])->name('vulnerabilities.fetch');
+        Route::post('/vulnerabilities/{v}/patch', [\App\Http\Controllers\VulnerabilityController::class, 'markPatched'])->name('vulnerabilities.patch');
+        Route::post('/vulnerabilities/{v}/accept-risk', [\App\Http\Controllers\VulnerabilityController::class, 'acceptRisk'])->name('vulnerabilities.accept-risk');
 
         // Improvements (operator: all statuses)
-        Route::get('/improvements', ImprovementKanban::class)->name('improvements.index');
+        Route::get('/improvements', [\App\Http\Controllers\ImprovementController::class, 'index'])->name('improvements.index');
+        Route::post('/improvements', [\App\Http\Controllers\ImprovementController::class, 'store'])->name('improvements.store');
+        Route::post('/improvements/{i}/status', [\App\Http\Controllers\ImprovementController::class, 'updateStatus'])->name('improvements.status');
 
         // SQA Reports
-        Route::get('/reports', SqaReport::class)->name('reports.index');
+        Route::get('/reports', [\App\Http\Controllers\SqaReportController::class, 'index'])->name('reports.index');
+        Route::post('/reports/fetch', [\App\Http\Controllers\SqaReportController::class, 'fetch'])->name('reports.fetch');
+        Route::post('/reports/generate', [\App\Http\Controllers\SqaReportController::class, 'generate'])->name('reports.generate');
+        Route::post('/reports/{report}/mark-sent', [\App\Http\Controllers\SqaReportController::class, 'markSent'])->name('reports.mark-sent');
         Route::get('/reports/view/{report}', function(\App\Models\SqaReport $report) {
             return view('reports.show', compact('report'));
         })->name('reports.show');
-        Route::get('/reports/{project}', SqaReport::class)->name('reports.project');
 
         // Alerts
-        Route::get('/alerts', AlertLog::class)->name('alerts.index');
+        Route::get('/alerts', [\App\Http\Controllers\AlertLogController::class, 'index'])->name('alerts.index');
+        Route::post('/alerts/fetch', [\App\Http\Controllers\AlertLogController::class, 'fetch'])->name('alerts.fetch');
 
         // Settings
-        Route::get('/settings', SettingsPage::class)->name('settings.index');
+        Route::get('/settings', [\App\Http\Controllers\SettingsController::class, 'index'])->name('settings.index');
+        Route::post('/settings', [\App\Http\Controllers\SettingsController::class, 'update'])->name('settings.update');
 
         // Agent PHP file download
         Route::get('/projects/{project}/agent-download', function (\App\Models\Project $project) {
