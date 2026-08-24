@@ -24,6 +24,9 @@ Route::middleware('guest')->group(function () {
     require __DIR__.'/auth.php';
 });
 
+// Isolated Livewire Diagnostic Page
+Route::get('/livewire-test', \App\Livewire\TestLivewire::class);
+
 // Temporary route to fix the database on shared hosting
 Route::get('/fix-db', function () {
     \Illuminate\Support\Facades\Artisan::call('migrate', ['--force' => true]);
