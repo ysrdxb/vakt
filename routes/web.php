@@ -60,8 +60,11 @@ Route::middleware(['auth'])->group(function () {
         Route::get('/projects/{project}', [ProjectController::class, 'show'])->name('projects.show');
 
         // Incidents
-        Route::get('/incidents', IncidentList::class)->name('incidents.index');
-        Route::get('/incidents/{incident}', IncidentDetail::class)->name('incidents.show');
+        Route::get('/incidents', [\App\Http\Controllers\IncidentController::class, 'index'])->name('incidents.index');
+        Route::get('/incidents/{incident}', [\App\Http\Controllers\IncidentController::class, 'show'])->name('incidents.show');
+        Route::post('/incidents/{incident}/status', [\App\Http\Controllers\IncidentController::class, 'transitionStatus'])->name('incidents.transition-status');
+        Route::post('/incidents/{incident}/notes', [\App\Http\Controllers\IncidentController::class, 'saveNotes'])->name('incidents.save-notes');
+        Route::post('/incidents/{incident}/command', [\App\Http\Controllers\IncidentController::class, 'executeCommand'])->name('incidents.command');
 
         // Logs
         Route::get('/logs', LogViewer::class)->name('logs.index');

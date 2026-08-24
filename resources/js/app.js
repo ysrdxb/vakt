@@ -10,6 +10,8 @@ import ProjectForm from './components/ProjectForm.vue';
 import OperatorDashboard from './components/OperatorDashboard.vue';
 import ProjectList from './components/ProjectList.vue';
 import ProjectDetail from './components/ProjectDetail.vue';
+import IncidentList from './components/IncidentList.vue';
+import IncidentDetail from './components/IncidentDetail.vue';
 
 const PAGE_COMPONENTS = {
     'vue-login-form':   LoginForm,
@@ -17,6 +19,8 @@ const PAGE_COMPONENTS = {
     'vue-operator-dashboard': OperatorDashboard,
     'vue-project-list': ProjectList,
     'vue-project-detail': ProjectDetail,
+    'vue-incident-list': IncidentList,
+    'vue-incident-detail': IncidentDetail,
 };
 
 window.addEventListener('DOMContentLoaded', () => {
