@@ -176,6 +176,21 @@
         background: rgba(255, 255, 255, 0.1);
         border-color: #475569;
     }
+
+    .spinner-sm {
+        display: inline-block;
+        width: 14px;
+        height: 14px;
+        border: 2px solid rgba(255,255,255,0.3);
+        border-radius: 50%;
+        border-top-color: #fff;
+        animation: spin 0.8s linear infinite;
+        margin-right: 8px;
+    }
+
+    @keyframes spin {
+        to { transform: rotate(360deg); }
+    }
 </style>
 
 <div class="page-container" x-data="{
@@ -186,6 +201,8 @@
     secretKey: '{{ old('agent_secret', $agent_secret) }}',
     logPath: '{{ old('log_path', $project->log_path ?? 'storage/logs/laravel.log') }}',
     autoDetecting: false,
+    submitting: false,
+    formErrors: [],
 
     generateSecret() {
         let array = new Uint8Array(32);
@@ -257,23 +274,68 @@
         } finally {
             this.autoDetecting = false;
         }
+    },
+
+    async submitForm() {
+        this.submitting = true;
+        this.formErrors = [];
+
+        const formEl = this.$refs.projectForm;
+        const formData = new FormData(formEl);
+
+        try {
+            const res = await fetch(formEl.action, {
+                method: 'POST',
+                headers: {
+                    'Accept': 'application/json',
+                    'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                },
+                body: formData
+            });
+
+            const data = await res.json();
+
+            if (res.status === 422) {
+                let errs = [];
+                if (data.errors) {
+                    Object.values(data.errors).forEach(errArray => {
+                        errs.push(...errArray);
+                    });
+                } else if (data.message) {
+                    errs.push(data.message);
+                }
+                this.formErrors = errs;
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+            } else if (res.ok && data.redirect_url) {
+                window.location.href = data.redirect_url;
+            } else if (!res.ok) {
+                this.formErrors = [data.message || 'An error occurred while saving.'];
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+            }
+        } catch (e) {
+            this.formErrors = ['Network error: ' + e.message];
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        } finally {
+            this.submitting = false;
+        }
     }
 }">
     <div class="page-title">{{ $isEdit ? 'Modify Asset Configuration' : 'Configure Monitoring Target' }}</div>
     <div class="page-subtitle">Configure asset properties, surveillance scope, and connection parameters.</div>
 
-    @if ($errors->any())
+    {{-- Dynamic AJAX Error Banner (No Page Refresh) --}}
+    <template x-if="formErrors.length > 0">
         <div style="background: rgba(239, 68, 68, 0.15); border: 1px solid var(--danger); color: #f87171; padding: 16px; border-radius: var(--radius); margin-bottom: 24px;">
             <strong style="display: block; margin-bottom: 8px;">Please fix the following validation errors:</strong>
             <ul style="margin: 0; padding-left: 20px;">
-                @foreach ($errors->all() as $error)
-                    <li>{{ $error }}</li>
-                @endforeach
+                <template x-for="err in formErrors" :key="err">
+                    <li x-text="err"></li>
+                </template>
             </ul>
         </div>
-    @endif
+    </template>
 
-    <form method="POST" action="{{ $isEdit ? route('projects.update', $project) : route('projects.store') }}">
+    <form x-ref="projectForm" method="POST" action="{{ $isEdit ? route('projects.update', $project) : route('projects.store') }}" @submit.prevent="submitForm">
         @csrf
         @if($isEdit)
             @method('PUT')
@@ -462,8 +524,13 @@
         {{-- Submit Buttons --}}
         <div style="display: flex; gap: 12px; justify-content: flex-end;">
             <a href="{{ route('projects.index') }}" class="btn btn-secondary">Cancel</a>
-            <button type="submit" class="btn btn-primary">
-                {{ $isEdit ? 'Save Asset Configuration' : 'Create & Register Asset Target' }}
+            <button type="submit" class="btn btn-primary" :disabled="submitting">
+                <template x-if="submitting">
+                    <span><span class="spinner-sm"></span> Saving...</span>
+                </template>
+                <template x-if="!submitting">
+                    <span>{{ $isEdit ? 'Save Asset Configuration' : 'Create & Register Asset Target' }}</span>
+                </template>
             </button>
         </div>
     </form>
