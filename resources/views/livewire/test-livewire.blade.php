@@ -2,7 +2,9 @@
     <h2 style="color: #38bdf8; margin-top:0;">🧪 Vue 3 & Standard Controller Diagnostic Suite</h2>
 
     {{-- Vue 3 Component --}}
-    <vue-counter></vue-counter>
+    <div id="app">
+        <vue-counter></vue-counter>
+    </div>
 
     {{-- Endpoint Diagnostics --}}
     <div style="background: #1e293b; padding: 20px; border-radius: 10px; margin-bottom: 20px; border: 1px solid #334155;">

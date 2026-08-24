@@ -31,7 +31,7 @@
 </head>
 <body>
 
-<div class="app-layout" id="app" x-data="{ sidebarOpen: false }">
+<div class="app-layout" x-data="{ sidebarOpen: false }">
 
     {{-- Mobile Sidebar Backdrop --}}
     <div class="sidebar-backdrop" 
