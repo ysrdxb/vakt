@@ -188,7 +188,7 @@
 </template>
 
 <script setup>
-import { ref, reactive } from 'vue';
+import { ref, reactive, toRaw } from 'vue';
 
 const props = defineProps({
   initialData: { type: Object, default: () => ({}) },
@@ -243,8 +243,15 @@ async function submitForm() {
   errors.value = [];
   successMessage.value = '';
 
-  const payload = { ...form };
-  if (props.isEdit) payload._method = 'PUT';
+  // Use toRaw + JSON parse/stringify to get a clean plain object from Vue Proxy
+  const raw = JSON.parse(JSON.stringify(toRaw(form)));
+
+  // Cast numeric fields so Laravel integer validation passes
+  raw.monitoring_interval_minutes = parseInt(raw.monitoring_interval_minutes, 10) || 5;
+
+  if (props.isEdit) raw._method = 'PUT';
+
+  console.log('[ProjectForm] Submitting payload:', raw);
 
   try {
     const res = await fetch(props.submitUrl, {
@@ -254,7 +261,7 @@ async function submitForm() {
         'Accept': 'application/json',
         'X-CSRF-TOKEN': props.csrf,
       },
-      body: JSON.stringify(payload),
+      body: JSON.stringify(raw),
     });
 
     const data = await res.json();

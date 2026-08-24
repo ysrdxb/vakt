@@ -78,33 +78,66 @@ class ProjectController extends Controller
         $domain = trim($request->input('domain', ''));
         $domain = preg_replace('#^https?://#', '', $domain);
         $domain = rtrim($domain, '/');
-        $request->merge(['domain' => $domain]);
+        $request->merge([
+            'domain' => $domain,
+            // Cast to int so the integer validation rule passes even when sent as string from Vue
+            'monitoring_interval_minutes' => (int) $request->input('monitoring_interval_minutes', 5),
+        ]);
 
-        return $request->validate([
-            'name' => 'required|string|min:2|max:255',
-            'domain' => ['required', 'regex:/^[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}(\/.*)?$/i', Rule::unique('projects', 'domain')->ignore($ignoreId)],
-            'description' => 'nullable|string',
-            'server_type' => 'required|in:same_server,external_agent,ftp',
-            'stack' => 'required|string',
-            'php_version' => 'required|string',
-            'laravel_version' => 'nullable|string',
-            'monitoring_interval_minutes' => 'required|integer|in:1,5,15,30,60',
-            'alert_email' => 'nullable|email',
-            'slack_webhook_url' => 'nullable|url',
-            'discord_webhook_url' => 'nullable|url',
-            'server_path' => 'required_if:server_type,same_server',
-            'log_path' => 'nullable|string',
-            'php_error_log_path' => 'nullable|string',
-            'agent_url' => 'required_if:server_type,external_agent',
-            'agent_ip_whitelist' => 'nullable|string',
-            'ftp_host' => 'required_if:server_type,ftp',
-            'ftp_user' => 'required_if:server_type,ftp',
-            'active' => 'boolean',
-            'modules' => 'nullable|array',
-            'incident_rules' => 'nullable|array',
+        $validated = $request->validate([
+            'name'                         => 'required|string|min:2|max:255',
+            'domain'                       => ['required', 'regex:/^[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}(\/.*)?$/i', Rule::unique('projects', 'domain')->ignore($ignoreId)],
+            'description'                  => 'nullable|string',
+            'server_type'                  => 'required|in:same_server,external_agent,ftp',
+            'stack'                        => 'required|string',
+            'php_version'                  => 'required|string',
+            'laravel_version'              => 'nullable|string',
+            'monitoring_interval_minutes'  => 'required|integer|in:1,5,15,30,60',
+            'alert_email'                  => 'nullable|email',
+            'slack_webhook_url'            => 'nullable|url',
+            'discord_webhook_url'          => 'nullable|url',
+            // Conditional fields — validated manually below
+            'server_path'                  => 'nullable|string',
+            'log_path'                     => 'nullable|string',
+            'php_error_log_path'           => 'nullable|string',
+            'agent_url'                    => 'nullable|url',
+            'agent_secret'                 => 'nullable|string',
+            'agent_ip_whitelist'           => 'nullable|string',
+            'ftp_host'                     => 'nullable|string',
+            'ftp_user'                     => 'nullable|string',
+            'active'                       => 'boolean',
+            'modules'                      => 'nullable|array',
+            'incident_rules'               => 'nullable|array',
         ], [
             'domain.regex' => 'Please enter a valid domain (e.g. verk.kunnatta.is or domain.com/folder) without http:// or spaces.',
         ]);
+
+        // Manual conditional validation
+        $serverType = $request->input('server_type');
+        if ($serverType === 'same_server' && empty(trim($request->input('server_path', '')))) {
+            throw \Illuminate\Validation\ValidationException::withMessages([
+                'server_path' => ['The server path field is required for same-server connections.'],
+            ]);
+        }
+        if ($serverType === 'external_agent' && empty(trim($request->input('agent_url', '')))) {
+            throw \Illuminate\Validation\ValidationException::withMessages([
+                'agent_url' => ['The agent URL field is required for external agent connections.'],
+            ]);
+        }
+        if ($serverType === 'ftp') {
+            if (empty(trim($request->input('ftp_host', '')))) {
+                throw \Illuminate\Validation\ValidationException::withMessages([
+                    'ftp_host' => ['The FTP host field is required.'],
+                ]);
+            }
+            if (empty(trim($request->input('ftp_user', '')))) {
+                throw \Illuminate\Validation\ValidationException::withMessages([
+                    'ftp_user' => ['The FTP username field is required.'],
+                ]);
+            }
+        }
+
+        return $validated;
     }
 
     public function testConnection(Request $request)
