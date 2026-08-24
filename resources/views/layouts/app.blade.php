@@ -241,9 +241,14 @@
 </div>
 
 {{-- Toast notifications --}}
-<x-toast />
+@php
+    $livewireScriptUrl = url('/livewire/livewire.js');
+    $livewireUpdateUrl = url('/livewire/update');
+@endphp
 
-@livewireScripts
+@livewireScriptConfig(['url' => url('/')])
+<script src="{{ $livewireScriptUrl }}" data-csrf="{{ csrf_token() }}" data-update-uri="{{ $livewireUpdateUrl }}" data-navigate-once="true"></script>
+
 @stack('scripts')
 
 </body>
