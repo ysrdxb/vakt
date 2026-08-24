@@ -28,7 +28,7 @@
 </head>
 <body>
 
-<header class="client-topbar">
+<header class="client-topbar" v-pre>
     <div class="client-topbar-inner">
         <div style="display:flex;align-items:center;gap:12px">
             <div class="logo-icon" style="width:32px;height:32px;background:linear-gradient(135deg,var(--color-primary),#0095b3);border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:16px">🛡️</div>

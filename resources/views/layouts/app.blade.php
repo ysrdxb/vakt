@@ -42,7 +42,7 @@
     </div>
 
     {{-- ===================== SIDEBAR ===================== --}}
-    <aside class="sidebar" id="sidebar" :class="{ 'open': sidebarOpen }">
+    <aside class="sidebar" id="sidebar" :class="{ 'open': sidebarOpen }" v-pre>
         <div class="sidebar-logo">
             <div class="logo-icon">🛡️</div>
             <div>
@@ -189,7 +189,7 @@
     <main class="main-content">
 
         {{-- Topbar --}}
-        <header class="topbar">
+        <header class="topbar" v-pre>
             {{-- Mobile Hamburger --}}
             <button class="mobile-menu-btn" @click="sidebarOpen = true" title="Menu">
                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
