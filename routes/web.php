@@ -94,23 +94,22 @@ Route::middleware(['auth'])->group(function () {
         // Improvements (operator: all statuses)
         Route::get('/improvements', [\App\Http\Controllers\ImprovementController::class, 'index'])->name('improvements.index');
         Route::post('/improvements', [\App\Http\Controllers\ImprovementController::class, 'store'])->name('improvements.store');
-        Route::post('/improvements/{i}/status', [\App\Http\Controllers\ImprovementController::class, 'updateStatus'])->name('improvements.status');
+        Route::post('/improvements/{improvement}/status', [\App\Http\Controllers\ImprovementController::class, 'updateStatus'])->name('improvements.status');
 
         // SQA Reports
         Route::get('/reports', [\App\Http\Controllers\SqaReportController::class, 'index'])->name('reports.index');
-        Route::post('/reports/fetch', [\App\Http\Controllers\SqaReportController::class, 'fetch'])->name('reports.fetch');
-        Route::post('/reports/generate', [\App\Http\Controllers\SqaReportController::class, 'generate'])->name('reports.generate');
+        Route::post('/reports', [\App\Http\Controllers\SqaReportController::class, 'store'])->name('reports.store');
         Route::post('/reports/{report}/mark-sent', [\App\Http\Controllers\SqaReportController::class, 'markSent'])->name('reports.mark-sent');
-        Route::get('/reports/view/{report}', function(\App\Models\SqaReport $report) {
-            return view('reports.show', compact('report'));
-        })->name('reports.show');
+        Route::get('/reports/{report}', [\App\Http\Controllers\SqaReportController::class, 'show'])->name('reports.show');
 
         // Alerts
         Route::get('/alerts', [\App\Http\Controllers\AlertLogController::class, 'index'])->name('alerts.index');
 
         // Settings
         Route::get('/settings', [\App\Http\Controllers\SettingsController::class, 'index'])->name('settings.index');
-        Route::post('/settings', [\App\Http\Controllers\SettingsController::class, 'update'])->name('settings.update');
+        Route::post('/settings/profile', [\App\Http\Controllers\SettingsController::class, 'saveProfile'])->name('settings.profile');
+        Route::post('/settings/password', [\App\Http\Controllers\SettingsController::class, 'changePassword'])->name('settings.password');
+        Route::post('/settings/client-password', [\App\Http\Controllers\SettingsController::class, 'updateClientPassword'])->name('settings.client-password');
 
         // Agent PHP file download
         Route::get('/projects/{project}/agent-download', function (\App\Models\Project $project) {

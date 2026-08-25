@@ -18,6 +18,9 @@ import AuditTracker from './components/AuditTracker.vue';
 import DailyLogCalendar from './components/DailyLogCalendar.vue';
 import VulnerabilityList from './components/VulnerabilityList.vue';
 import AlertLog from './components/AlertLog.vue';
+import SqaReport from './components/SqaReport.vue';
+import ImprovementKanban from './components/ImprovementKanban.vue';
+import SettingsPage from './components/SettingsPage.vue';
 
 const PAGE_COMPONENTS = {
     'vue-login-form':   LoginForm,
@@ -33,6 +36,9 @@ const PAGE_COMPONENTS = {
     'vue-daily-log-calendar': DailyLogCalendar,
     'vue-vulnerability-list': VulnerabilityList,
     'vue-alert-log': AlertLog,
+    'vue-sqa-report': SqaReport,
+    'vue-improvement-kanban': ImprovementKanban,
+    'vue-settings-page': SettingsPage,
 };
 
 window.addEventListener('DOMContentLoaded', () => {
