@@ -147,15 +147,14 @@
 
 <script setup>
 import { ref, computed } from 'vue';
+import axios from 'axios';
 
 const props = defineProps({
   initialSnapshots: { type: Array, default: () => [] },
   initialStats: { type: Object, default: () => ({ total: 0, suspicious: 0, changed: 0, clean: 0 }) },
   meta: { type: Object, default: () => ({}) },
   projects: { type: Array, default: () => [] },
-  initialProjectId: { type: [Number, String], default: '' },
-  csrf: { type: String, required: true },
-  endpoints: { type: Object, required: true }
+  initialProjectId: { type: [Number, String], default: '' }
 });
 
 const snapshots = ref(props.initialSnapshots);
@@ -186,10 +185,10 @@ const fetchSnapshots = async (page = 1) => {
       project_id: projectId.value
     });
     
-    const response = await fetch(`${props.endpoints.index}?${params.toString()}`, {
+    const response = await axios.get(`${route('file-integrity.index')}?${params.toString()}`, {
       headers: { 'Accept': 'application/json', 'X-Requested-With': 'XMLHttpRequest' }
     });
-    const data = await response.json();
+    const data = response.data;
     snapshots.value = data.data;
     meta.value = data.meta;
     stats.value = data.stats;
@@ -208,16 +207,8 @@ const changePage = (page) => {
 const initScan = async () => {
   isScanning.value = true;
   try {
-    const response = await fetch(props.endpoints.initScan, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'X-CSRF-TOKEN': props.csrf,
-        'Accept': 'application/json'
-      },
-      body: JSON.stringify({ project_id: projectId.value })
-    });
-    const data = await response.json();
+    const response = await axios.post(route('file-integrity.scan'), { project_id: projectId.value });
+    const data = response.data;
     if (window.dispatchEvent) {
       window.dispatchEvent(new CustomEvent('toast', { detail: { type: data.success ? 'success' : 'error', title: 'Scan', message: data.message } }));
     }
@@ -233,15 +224,8 @@ const initScan = async () => {
 
 const approveChange = async (file) => {
   try {
-    const response = await fetch(`${props.endpoints.approveChange}/${file.id}/approve`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'X-CSRF-TOKEN': props.csrf,
-        'Accept': 'application/json'
-      }
-    });
-    const data = await response.json();
+    const response = await axios.post(route('file-integrity.approve', file.id));
+    const data = response.data;
     if (data.success) {
       const idx = snapshots.value.findIndex(f => f.id === file.id);
       if (idx !== -1) snapshots.value[idx] = data.snapshot;
@@ -249,14 +233,13 @@ const approveChange = async (file) => {
       // Update stats locally
       if (file.status === 'suspicious') {
         stats.value.suspicious = Math.max(0, stats.value.suspicious - 1);
-        stats.value.clean++;
       } else if (file.status === 'changed') {
         stats.value.changed = Math.max(0, stats.value.changed - 1);
-        stats.value.clean++;
       }
+      stats.value.clean++;
       
       if (window.dispatchEvent) {
-        window.dispatchEvent(new CustomEvent('toast', { detail: { type: 'success', title: 'Approved', message: data.message } }));
+        window.dispatchEvent(new CustomEvent('toast', { detail: { type: 'success', title: 'Approved', message: 'File baseline updated.' } }));
       }
     }
   } catch (e) {

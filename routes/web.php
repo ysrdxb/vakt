@@ -139,6 +139,10 @@ Route::get('/clear-cache', function() {
     \Illuminate\Support\Facades\Artisan::call('cache:clear');
     \Illuminate\Support\Facades\Artisan::call('config:clear');
     \Illuminate\Support\Facades\Artisan::call('route:clear');
+    
+    if (function_exists('opcache_reset')) {
+        opcache_reset();
+    }
 
     return 'Cache, config, and views cleared successfully! You can now go back and refresh the page.';
 });
