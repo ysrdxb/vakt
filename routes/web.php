@@ -90,6 +90,23 @@ Route::middleware(['auth'])->group(function () {
         Route::post('/reports/{report}/mark-sent', [\App\Http\Controllers\SqaReportController::class, 'markSent'])->name('reports.mark-sent');
         Route::get('/reports/{report}', [\App\Http\Controllers\SqaReportController::class, 'show'])->name('reports.show');
 
+        // TEMPORARY TEST ROUTE FOR FILE ACCESS
+        Route::get('/test-log-access', function (\Illuminate\Http\Request $request) {
+            $path = $request->input('path', '/var/www/virtual/kunnatta.is/arnrun.is/htdocs/timetable/storage/logs/laravel.log');
+            
+            return response()->json([
+                'path' => $path,
+                'file_exists' => file_exists($path),
+                'is_readable' => is_readable($path),
+                'is_dir' => is_dir(dirname($path)),
+                'open_basedir' => ini_get('open_basedir'),
+                'user' => get_current_user(),
+                'stat' => @stat($path),
+                'content_preview' => @file_get_contents($path, false, null, 0, 100) ?: 'Empty or unreadable',
+                'last_error' => error_get_last()
+            ]);
+        });
+
         // Alerts
         Route::get('/alerts', [\App\Http\Controllers\AlertLogController::class, 'index'])->name('alerts.index');
 
