@@ -176,7 +176,7 @@
 
       <!-- Submit -->
       <div style="display:flex;gap:12px;justify-content:flex-end;">
-        <a :href="cancelUrl" class="btn btn-secondary">Cancel</a>
+        <Link :href="route('projects.index')" class="btn btn-secondary">Cancel</Link>
         <button type="submit" class="btn btn-primary" :disabled="submitting">
           <span v-if="submitting"><span class="spinner-sm"></span> Saving...</span>
           <span v-else>{{ isEdit ? 'Save Asset Configuration' : 'Create & Register Asset Target' }}</span>
@@ -189,32 +189,30 @@
 
 <script setup>
 import { ref, reactive, toRaw } from 'vue';
+import { router, Link } from '@inertiajs/vue3';
+import axios from 'axios';
 
 const props = defineProps({
-  initialData: { type: Object, default: () => ({}) },
-  submitUrl: { type: String, required: true },
-  cancelUrl: { type: String, required: true },
+  project: { type: Object, default: () => ({}) },
+  agent_secret: { type: String, required: true },
   isEdit: { type: Boolean, default: false },
-  csrf: { type: String, required: true },
-  testConnectionUrl: { type: String, required: true },
-  autoDetectUrl: { type: String, required: true },
 });
 
 const form = reactive({
-  name: props.initialData.name || '',
-  domain: props.initialData.domain || '',
-  description: props.initialData.description || '',
-  stack: props.initialData.stack || 'laravel',
-  php_version: props.initialData.php_version || '8.3',
-  monitoring_interval_minutes: props.initialData.monitoring_interval_minutes || '5',
-  server_type: props.initialData.server_type || 'same_server',
-  server_path: props.initialData.server_path || '',
-  log_path: props.initialData.log_path || 'storage/logs/laravel.log',
-  agent_url: props.initialData.agent_url || '',
-  agent_secret: props.initialData.agent_secret || generateSecretKey(),
-  alert_email: props.initialData.alert_email || '',
-  slack_webhook_url: props.initialData.slack_webhook_url || '',
-  discord_webhook_url: props.initialData.discord_webhook_url || '',
+  name: props.project.name || '',
+  domain: props.project.domain || '',
+  description: props.project.description || '',
+  stack: props.project.stack || 'laravel',
+  php_version: props.project.php_version || '8.3',
+  monitoring_interval_minutes: props.project.monitoring_interval_minutes || '5',
+  server_type: props.project.server_type || 'same_server',
+  server_path: props.project.server_path || '',
+  log_path: props.project.log_path || 'storage/logs/laravel.log',
+  agent_url: props.project.agent_url || '',
+  agent_secret: props.isEdit ? props.agent_secret : (props.project.agent_secret || props.agent_secret),
+  alert_email: props.project.alert_email || '',
+  slack_webhook_url: props.project.slack_webhook_url || '',
+  discord_webhook_url: props.project.discord_webhook_url || '',
 });
 
 const errors = ref([]);
@@ -247,95 +245,105 @@ async function submitForm() {
   const raw = JSON.parse(JSON.stringify(toRaw(form)));
 
   // Cast numeric fields so Laravel integer validation passes
-  raw.monitoring_interval_minutes = parseInt(raw.monitoring_interval_minutes, 10) || 5;
+  raw.monitoring_interval_minutes = parseInt(raw.monitoring_interval_minutes, 10);
+  if (props.isEdit) {
+    raw._method = 'PUT'; // Laravel form spoofing for PUT
+  }
 
-  if (props.isEdit) raw._method = 'PUT';
-
-  console.log('[ProjectForm] Submitting payload:', raw);
+  const url = props.isEdit ? route('projects.update', props.project.id) : route('projects.store');
 
   try {
-    const res = await fetch(props.submitUrl, {
-      method: 'POST',
+    const res = await axios.post(url, raw, {
       headers: {
-        'Content-Type': 'application/json',
         'Accept': 'application/json',
-        'X-CSRF-TOKEN': props.csrf,
-      },
-      body: JSON.stringify(raw),
+        'Content-Type': 'application/json'
+      }
     });
 
-    const data = await res.json();
-
-    if (res.status === 422) {
-      const errs = [];
-      if (data.errors) {
-        Object.values(data.errors).forEach(arr => errs.push(...arr));
-      } else if (data.message) {
-        errs.push(data.message);
+    const data = res.data;
+    if (data.success) {
+      successMessage.value = data.message;
+      if (window.dispatchEvent) {
+        window.dispatchEvent(new CustomEvent('toast', { detail: { type: 'success', title: 'Saved', message: data.message } }));
       }
-      errors.value = errs;
-      window.scrollTo({ top: 0, behavior: 'smooth' });
-    } else if (res.ok && data.redirect_url) {
-      window.location.href = data.redirect_url;
-    } else {
-      errors.value = [data.message || 'An error occurred while saving.'];
-      window.scrollTo({ top: 0, behavior: 'smooth' });
+      setTimeout(() => {
+        router.visit(data.redirect_url);
+      }, 1000);
     }
-  } catch (e) {
-    errors.value = ['Network error: ' + e.message];
-    window.scrollTo({ top: 0, behavior: 'smooth' });
+  } catch (err) {
+    if (err.response && err.response.status === 422) {
+      const msgs = [];
+      const errData = err.response.data.errors;
+      for (const k in errData) {
+        msgs.push(errData[k].join(' '));
+      }
+      errors.value = msgs;
+    } else {
+      errors.value = [err.message || 'An unexpected error occurred.'];
+    }
   } finally {
     submitting.value = false;
   }
 }
 
-async function runDiagnostics() {
-  runningDiagnostics.value = true;
-  diagnosticResults.value = [];
+async function autoDetectLogPath() {
+  autoDetecting.value = true;
+  errors.value = [];
   try {
-    const res = await fetch(props.testConnectionUrl, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json', 'Accept': 'application/json', 'X-CSRF-TOKEN': props.csrf },
-      body: JSON.stringify({
-        server_type: form.server_type,
-        server_path: form.server_path,
-        domain: form.domain,
-        log_path: form.log_path,
-        agent_url: form.agent_url,
-        agent_secret: form.agent_secret,
-      }),
+    const res = await axios.post(route('projects.auto-detect-log'), {
+      server_path: form.server_path,
+      domain: form.domain
+    }, {
+      headers: { 'Accept': 'application/json', 'Content-Type': 'application/json' }
     });
-    const data = await res.json();
+    
+    const data = res.data;
+    if (data.success) {
+      form.log_path = data.log_path;
+      if (window.dispatchEvent) {
+        window.dispatchEvent(new CustomEvent('toast', { detail: { type: 'success', title: 'Auto-Detect', message: 'Log path found.' } }));
+      }
+    } else {
+      alert(data.message);
+    }
+  } catch (err) {
+    console.error('Auto detect error', err);
+    alert('Failed to run auto-detect.');
+  } finally {
+    autoDetecting.value = false;
+  }
+}
+
+async function testConnection() {
+  runningDiagnostics.value = true;
+  diagnosticStatus.value = null;
+  diagnosticResults.value = [];
+  
+  try {
+    const res = await axios.post(route('projects.test-connection'), {
+      server_type: form.server_type,
+      server_path: form.server_path,
+      agent_url: form.agent_url,
+      agent_secret: form.agent_secret
+    }, {
+      headers: { 'Accept': 'application/json', 'Content-Type': 'application/json' }
+    });
+    
+    const data = res.data;
     diagnosticStatus.value = data.status;
     diagnosticResults.value = data.results || [];
-  } catch (e) {
+  } catch (err) {
     diagnosticStatus.value = 'failed';
-    diagnosticResults.value = [{ icon: '❌', name: 'Network Error', value: e.message, pass: false, fix: '' }];
+    if (err.response && err.response.data && err.response.data.results) {
+        diagnosticResults.value = err.response.data.results;
+    } else {
+        diagnosticResults.value = [{ icon: '❌', name: 'Internal Server Error', value: 'API Error', pass: false, fix: 'Check network tab' }];
+    }
   } finally {
     runningDiagnostics.value = false;
   }
 }
 
-async function autoDetectLog() {
-  autoDetecting.value = true;
-  try {
-    const res = await fetch(props.autoDetectUrl, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json', 'Accept': 'application/json', 'X-CSRF-TOKEN': props.csrf },
-      body: JSON.stringify({ server_path: form.server_path, domain: form.domain }),
-    });
-    const data = await res.json();
-    if (data.success && data.log_path) {
-      form.log_path = data.log_path;
-    } else {
-      alert('⚠️ ' + (data.message || 'Could not auto-detect log path.'));
-    }
-  } catch (e) {
-    alert('❌ Auto-detect failed: ' + e.message);
-  } finally {
-    autoDetecting.value = false;
-  }
-}
 </script>
 
 <style scoped>

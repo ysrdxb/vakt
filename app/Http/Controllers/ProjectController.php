@@ -27,9 +27,7 @@ class ProjectController extends Controller
             ->orderBy('domain')
             ->get();
 
-        if ($request->wantsJson()) {
-            return response()->json($projects);
-        }
+
 
         return Inertia::render('ProjectList', compact('projects'));
     }
@@ -151,14 +149,6 @@ class ProjectController extends Controller
         
         $project = Project::create($validated);
         
-        if ($request->wantsJson()) {
-            return response()->json([
-                'success' => true,
-                'redirect_url' => route('projects.show', $project),
-                'message' => 'Project created successfully!'
-            ]);
-        }
-
         return redirect()->route('projects.show', $project)
             ->with('success', 'Project created successfully!');
     }
@@ -177,16 +167,8 @@ class ProjectController extends Controller
         
         $project->update($validated);
         
-        if ($request->wantsJson()) {
-            return response()->json([
-                'success' => true,
-                'redirect_url' => route('projects.show', $project),
-                'message' => 'Project updated successfully!'
-            ]);
-        }
-
         return redirect()->route('projects.show', $project)
-            ->with('success', 'Project updated successfully!');
+            ->with('success', 'Project configuration updated.');
     }
 
     private function validateProject(Request $request, ?int $ignoreId = null): array

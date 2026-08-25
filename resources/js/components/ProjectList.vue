@@ -12,10 +12,10 @@
         <p style="color: #94a3b8; font-size: 14px; margin: 4px 0 0;">Manage monitored assets and environments.</p>
       </div>
       <div>
-        <a :href="endpoints.create" class="btn btn-primary">
+        <Link :href="route('projects.create')" class="btn btn-primary">
           <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" style="width:18px;height:18px;margin-right:6px;"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" /></svg>
           Add Target
-        </a>
+        </Link>
       </div>
     </div>
 
@@ -58,12 +58,12 @@
                 Loading...
               </td>
             </tr>
-            <tr v-else-if="projects.length === 0" style="border-bottom:1px solid #334155;">
+            <tr v-else-if="projectsList.length === 0" style="border-bottom:1px solid #334155;">
               <td colspan="5" style="padding:40px; text-align:center; color:#94a3b8;">
                 <div style="font-weight:500;color:#fff;">No projects found.</div>
               </td>
             </tr>
-            <tr v-else v-for="project in projects" :key="project.id" style="border-bottom:1px solid #334155; transition:background .15s;" class="hover-surface">
+            <tr v-else v-for="project in projectsList" :key="project.id" style="border-bottom:1px solid #334155; transition:background .15s;" class="hover-surface">
               <td style="padding:12px 20px;">
                 <span class="badge" :class="getStatusClass(project.status)">
                   <span class="status-dot" :class="project.status"></span> {{ project.status.toUpperCase() }}
@@ -90,13 +90,13 @@
                     <svg v-else xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" style="width:16px;height:16px;"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
                   </button>
                   
-                  <a :href="endpoints.show + '/' + project.id" class="btn btn-sm btn-secondary" title="View Details">
+                  <Link :href="route('projects.show', project.id)" class="btn btn-sm btn-secondary" title="View Details">
                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" style="width:16px;height:16px;"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" /></svg>
-                  </a>
+                  </Link>
                   
-                  <a :href="endpoints.edit + '/' + project.id + '/edit'" class="btn btn-sm btn-secondary" title="Edit Configuration">
+                  <Link :href="route('projects.edit', project.id)" class="btn btn-sm btn-secondary" title="Edit Configuration">
                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" style="width:16px;height:16px;"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" /></svg>
-                  </a>
+                  </Link>
                   
                   <button @click="deleteProject(project)" class="btn btn-sm btn-danger" title="Delete Project">
                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" style="width:16px;height:16px;"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
@@ -112,19 +112,23 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue';
+import { ref, watch } from 'vue';
+import { router } from '@inertiajs/vue3';
+import axios from 'axios';
 
 const props = defineProps({
-  initialProjects: { type: Array, default: () => [] },
-  endpoints: { type: Object, required: true },
-  csrf: { type: String, required: true }
+  projects: { type: Array, default: () => [] }
 });
 
-const projects = ref(props.initialProjects);
+const projectsList = ref(props.projects);
 const searchQuery = ref('');
 const filterStatus = ref('');
 const loading = ref(false);
 let searchTimeout = null;
+
+watch(() => props.projects, (newVal) => {
+  projectsList.value = newVal;
+});
 
 function getStatusClass(status) {
   if (status === 'ok') return 'success';
@@ -140,41 +144,27 @@ function getScoreClass(score) {
 
 async function fetchProjects() {
   clearTimeout(searchTimeout);
-  searchTimeout = setTimeout(async () => {
+  searchTimeout = setTimeout(() => {
     loading.value = true;
-    try {
-      const params = new URLSearchParams();
-      if (searchQuery.value) params.append('search', searchQuery.value);
-      if (filterStatus.value) params.append('filterStatus', filterStatus.value);
-      
-      const res = await fetch(`${props.endpoints.index}?${params.toString()}`, {
-        headers: { 'Accept': 'application/json' }
-      });
-      projects.value = await res.json();
-    } catch (e) {
-      console.error('Failed to fetch projects', e);
-    } finally {
-      loading.value = false;
-    }
+    router.get(
+      route('projects.index'),
+      { search: searchQuery.value, filterStatus: filterStatus.value },
+      {
+        preserveState: true,
+        replace: true,
+        onFinish: () => loading.value = false
+      }
+    );
   }, 300);
 }
 
 async function toggleActive(project) {
   try {
-    const res = await fetch(`${props.endpoints.toggleActive}/${project.id}/toggle-active`, {
-      method: 'POST',
-      headers: {
-        'Accept': 'application/json',
-        'Content-Type': 'application/json',
-        'X-CSRF-TOKEN': props.csrf
-      }
-    });
-    const data = await res.json();
-    if (data.success) {
-      project.active = data.active;
-      // Show toast if available
+    const res = await axios.post(route('projects.toggle-active', project.id));
+    if (res.data.success) {
+      project.active = res.data.active;
       if (window.dispatchEvent) {
-        window.dispatchEvent(new CustomEvent('toast', { detail: { type: 'success', title: 'Updated', message: data.message } }));
+        window.dispatchEvent(new CustomEvent('toast', { detail: { type: 'success', title: 'Updated', message: res.data.message } }));
       }
     }
   } catch (e) {
@@ -182,28 +172,17 @@ async function toggleActive(project) {
   }
 }
 
-async function deleteProject(project) {
+function deleteProject(project) {
   if (!confirm(`Are you sure you want to delete ${project.domain}? This action cannot be undone.`)) return;
   
-  try {
-    const res = await fetch(`${props.endpoints.destroy}/${project.id}`, {
-      method: 'DELETE',
-      headers: {
-        'Accept': 'application/json',
-        'Content-Type': 'application/json',
-        'X-CSRF-TOKEN': props.csrf
-      }
-    });
-    const data = await res.json();
-    if (data.success) {
-      projects.value = projects.value.filter(p => p.id !== project.id);
+  router.delete(route('projects.destroy', project.id), {
+    preserveState: true,
+    onSuccess: () => {
       if (window.dispatchEvent) {
-        window.dispatchEvent(new CustomEvent('toast', { detail: { type: 'success', title: 'Deleted', message: data.message } }));
+        window.dispatchEvent(new CustomEvent('toast', { detail: { type: 'success', title: 'Deleted', message: 'Project deleted successfully.' } }));
       }
     }
-  } catch (e) {
-    console.error('Failed to delete', e);
-  }
+  });
 }
 </script>
 
