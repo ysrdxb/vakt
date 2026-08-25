@@ -15,6 +15,9 @@ import IncidentDetail from './components/IncidentDetail.vue';
 import LogViewer from './components/LogViewer.vue';
 import FileIntegrityView from './components/FileIntegrityView.vue';
 import AuditTracker from './components/AuditTracker.vue';
+import DailyLogCalendar from './components/DailyLogCalendar.vue';
+import VulnerabilityList from './components/VulnerabilityList.vue';
+import AlertLog from './components/AlertLog.vue';
 
 const PAGE_COMPONENTS = {
     'vue-login-form':   LoginForm,
@@ -27,6 +30,9 @@ const PAGE_COMPONENTS = {
     'vue-log-viewer': LogViewer,
     'vue-file-integrity-view': FileIntegrityView,
     'vue-audit-tracker': AuditTracker,
+    'vue-daily-log-calendar': DailyLogCalendar,
+    'vue-vulnerability-list': VulnerabilityList,
+    'vue-alert-log': AlertLog,
 };
 
 window.addEventListener('DOMContentLoaded', () => {

@@ -83,13 +83,13 @@ Route::middleware(['auth'])->group(function () {
         Route::post('/file-integrity/{snapshot}/approve', [\App\Http\Controllers\FileIntegrityController::class, 'approveChange'])->name('file-integrity.approve');
 
         // Daily Logs
-        Route::get('/daily-logs', DailyLogCalendar::class)->name('daily-logs.index');
+        Route::get('/daily-logs', [\App\Http\Controllers\DailyLogController::class, 'index'])->name('daily-logs.index');
+        Route::post('/daily-logs/{log}/note', [\App\Http\Controllers\DailyLogController::class, 'addNote'])->name('daily-logs.add-note');
 
         // Vulnerabilities
         Route::get('/vulnerabilities', [\App\Http\Controllers\VulnerabilityController::class, 'index'])->name('vulnerabilities.index');
-        Route::post('/vulnerabilities/fetch', [\App\Http\Controllers\VulnerabilityController::class, 'fetch'])->name('vulnerabilities.fetch');
-        Route::post('/vulnerabilities/{v}/patch', [\App\Http\Controllers\VulnerabilityController::class, 'markPatched'])->name('vulnerabilities.patch');
-        Route::post('/vulnerabilities/{v}/accept-risk', [\App\Http\Controllers\VulnerabilityController::class, 'acceptRisk'])->name('vulnerabilities.accept-risk');
+        Route::post('/vulnerabilities/{vulnerability}/patched', [\App\Http\Controllers\VulnerabilityController::class, 'markPatched'])->name('vulnerabilities.patched');
+        Route::post('/vulnerabilities/{vulnerability}/accept-risk', [\App\Http\Controllers\VulnerabilityController::class, 'acceptRisk'])->name('vulnerabilities.accept-risk');
 
         // Improvements (operator: all statuses)
         Route::get('/improvements', [\App\Http\Controllers\ImprovementController::class, 'index'])->name('improvements.index');
@@ -107,7 +107,6 @@ Route::middleware(['auth'])->group(function () {
 
         // Alerts
         Route::get('/alerts', [\App\Http\Controllers\AlertLogController::class, 'index'])->name('alerts.index');
-        Route::post('/alerts/fetch', [\App\Http\Controllers\AlertLogController::class, 'fetch'])->name('alerts.fetch');
 
         // Settings
         Route::get('/settings', [\App\Http\Controllers\SettingsController::class, 'index'])->name('settings.index');
