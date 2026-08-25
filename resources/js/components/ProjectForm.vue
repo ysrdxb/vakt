@@ -1,7 +1,7 @@
 <template>
-  <div class="page-container" style="max-width: 900px; margin: 0 auto;">
+  <div class="page-container" style="margin: 0 auto;">
     <div class="page-title">{{ isEdit ? 'Edit Project' : 'Create Project' }}</div>
-    <div class="page-subtitle">Configure project details, server connection architecture, and monitoring preferences.</div>
+    <div class="page-subtitle">Add project details.</div>
 
     <!-- Validation Errors -->
     <div v-if="errors.length" class="error-banner" style="margin-bottom: 20px;">
@@ -18,24 +18,24 @@
         <div class="card-header" style="background: rgba(0,0,0,0.2); padding: 16px 24px; border-bottom: 1px solid rgba(255,255,255,0.05);">
           <div class="card-title" style="margin: 0; font-size: 18px; display: flex; align-items: center; gap: 8px;">
             <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
-            1. Core Information
+            1. Project Information
           </div>
         </div>
         <div class="card-body" style="padding: 24px;">
-          <div class="grid-2" style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+          <div class="grid-2" style="display: grid; grid-template-columns: 1fr 1fr; gap: 24px;">
             <div class="form-group">
               <label class="form-label">Project Name *</label>
               <input type="text" v-model="form.name" class="form-control" placeholder="e.g. Core Production System" required />
               <div class="form-text" style="font-size: 12px; color: #94a3b8; margin-top: 4px;">A friendly name for your project dashboard.</div>
             </div>
             <div class="form-group">
-              <label class="form-label">Domain Name *</label>
+              <label class="form-label">Domain *</label>
               <input type="text" v-model="form.domain" class="form-control" placeholder="e.g. system.domain.com" required />
-              <div class="form-text" style="font-size: 12px; color: #94a3b8; margin-top: 4px;">Domain or domain/folder (do not include https://).</div>
+              <div class="form-text" style="font-size: 12px; color: #94a3b8; margin-top: 4px;">e.g. domain.com or sub.domain.com/folder</div>
             </div>
           </div>
 
-          <div class="grid-3" style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 20px; margin-top: 20px;">
+          <div class="grid-3" style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 24px; margin-top: 24px;">
             <div class="form-group">
               <label class="form-label">Application Stack *</label>
               <select v-model="form.stack" class="form-control">
@@ -67,7 +67,7 @@
             </div>
           </div>
 
-          <div class="form-group" style="margin-top: 20px;">
+          <div class="form-group" style="margin-top: 24px;">
             <label class="form-label">Description (Optional)</label>
             <textarea v-model="form.description" class="form-control" rows="2" placeholder="Brief notes on project purpose, specific requirements, or contacts..."></textarea>
           </div>
@@ -79,11 +79,11 @@
         <div class="card-header" style="background: rgba(0,0,0,0.2); padding: 16px 24px; border-bottom: 1px solid rgba(255,255,255,0.05);">
           <div class="card-title" style="margin: 0; font-size: 18px; display: flex; align-items: center; gap: 8px;">
             <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M5 12h14M12 5l7 7-7 7" /></svg>
-            2. Server Connection Architecture
+            2. Server Connection
           </div>
         </div>
         <div class="card-body" style="padding: 24px;">
-          <div class="option-cards" style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 16px; margin-bottom: 24px;">
+          <div class="option-cards" style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 24px; margin-bottom: 24px;">
             <label class="option-card" :class="{ selected: form.server_type === 'same_server' }" style="cursor: pointer; padding: 16px; border-radius: 8px; border: 2px solid transparent; background: rgba(255,255,255,0.03); transition: all 0.2s;">
               <input type="radio" v-model="form.server_type" value="same_server" style="display: none;" />
               <div>
@@ -108,9 +108,9 @@
           </div>
 
           <!-- Same Server Fields -->
-          <div v-if="form.server_type === 'same_server'" style="background: rgba(255,255,255,0.02); padding: 20px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.05);">
-            <div style="margin-bottom: 16px; font-weight: 600; color: #e2e8f0; font-size: 15px;">Local File Access Configuration</div>
-            <div class="grid-2" style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+          <div v-if="form.server_type === 'same_server'" style="background: rgba(255,255,255,0.02); padding: 24px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.05);">
+            <div style="margin-bottom: 20px; font-weight: 600; color: #e2e8f0; font-size: 15px;">Local File Access Configuration</div>
+            <div class="grid-2" style="display: grid; grid-template-columns: 1fr 1fr; gap: 24px;">
               <div class="form-group">
                 <label class="form-label">Absolute Root Path *</label>
                 <input type="text" v-model="form.server_path" class="form-control" placeholder="/var/www/virtual/domain.com/htdocs" />
@@ -118,12 +118,12 @@
               </div>
               <div class="form-group">
                 <label class="form-label">Relative Log Path</label>
-                <div style="display:flex;gap:8px; align-items: flex-start;">
+                <div style="display:flex;gap:12px; align-items: flex-start;">
                   <div style="flex: 1;">
                     <input type="text" v-model="form.log_path" class="form-control" placeholder="storage/logs/laravel.log" />
                     <div class="form-text" style="font-size: 12px; color: #94a3b8; margin-top: 4px;">Relative to the Root Path above.</div>
                   </div>
-                  <button type="button" class="btn btn-secondary" @click="autoDetectLogPath" :disabled="autoDetecting || !form.server_path" style="white-space:nowrap; padding: 10px 16px; height: 42px;">
+                  <button type="button" class="btn btn-secondary" @click="autoDetectLogPath" :disabled="autoDetecting || !form.server_path" style="white-space:nowrap; padding: 10px 20px; height: 42px;">
                     <span v-if="autoDetecting" class="spinner-sm" style="margin-right:6px;"></span>
                     <span>🔍 Auto-Detect</span>
                   </button>
@@ -133,9 +133,9 @@
           </div>
 
           <!-- Agent Fields -->
-          <div v-if="form.server_type === 'external_agent'" style="background: rgba(255,255,255,0.02); padding: 20px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.05);">
-            <div style="margin-bottom: 16px; font-weight: 600; color: #e2e8f0; font-size: 15px;">Remote Agent Configuration</div>
-            <div class="grid-2" style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+          <div v-if="form.server_type === 'external_agent'" style="background: rgba(255,255,255,0.02); padding: 24px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.05);">
+            <div style="margin-bottom: 20px; font-weight: 600; color: #e2e8f0; font-size: 15px;">Remote Agent Configuration</div>
+            <div class="grid-2" style="display: grid; grid-template-columns: 1fr 1fr; gap: 24px;">
               <div class="form-group">
                 <label class="form-label">Agent Public URL *</label>
                 <input type="url" v-model="form.agent_url" class="form-control" placeholder="https://example.com/agent.php" />
@@ -143,7 +143,7 @@
               </div>
               <div class="form-group">
                 <label class="form-label">Agent Secret Key</label>
-                <div style="display:flex;gap:8px;">
+                <div style="display:flex;gap:12px;">
                   <input type="text" v-model="form.agent_secret" class="form-control" readonly />
                   <button type="button" class="btn btn-secondary" @click="generateSecret">Regenerate</button>
                 </div>
@@ -153,9 +153,9 @@
           </div>
 
           <!-- FTP Fields -->
-          <div v-if="form.server_type === 'ftp'" style="background: rgba(255,255,255,0.02); padding: 20px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.05);">
-            <div style="margin-bottom: 16px; font-weight: 600; color: #e2e8f0; font-size: 15px;">FTP Connection Credentials</div>
-            <div class="grid-3" style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 20px;">
+          <div v-if="form.server_type === 'ftp'" style="background: rgba(255,255,255,0.02); padding: 24px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.05);">
+            <div style="margin-bottom: 20px; font-weight: 600; color: #e2e8f0; font-size: 15px;">FTP Connection Credentials</div>
+            <div class="grid-3" style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 24px;">
               <div class="form-group">
                 <label class="form-label">FTP Host *</label>
                 <input type="text" v-model="form.ftp_host" class="form-control" placeholder="ftp.example.com" />
@@ -169,7 +169,7 @@
                 <input type="password" v-model="form.ftp_password" class="form-control" placeholder="Leave blank to keep current" />
               </div>
             </div>
-            <div class="grid-2" style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-top: 20px;">
+            <div class="grid-2" style="display: grid; grid-template-columns: 1fr 1fr; gap: 24px; margin-top: 24px;">
               <div class="form-group">
                 <label class="form-label">Absolute Root Path (FTP) *</label>
                 <input type="text" v-model="form.server_path" class="form-control" placeholder="/htdocs" />
@@ -183,26 +183,26 @@
           </div>
 
           <!-- Diagnostics -->
-          <div style="margin-top:24px; padding-top:24px; border-top:1px dashed rgba(255,255,255,0.1); display:flex; align-items:center; justify-content:space-between;">
+          <div style="margin-top:30px; padding-top:24px; border-top:1px dashed rgba(255,255,255,0.1); display:flex; align-items:center; justify-content:space-between;">
             <div>
-              <button type="button" class="btn btn-secondary" @click="testConnection" :disabled="runningDiagnostics" style="background: rgba(59, 130, 246, 0.1); border-color: rgba(59, 130, 246, 0.3); color: #60a5fa;">
-                <span v-if="runningDiagnostics" class="spinner-sm" style="margin-right:6px;"></span>
-                <span v-else style="margin-right:6px;">⚡</span>
+              <button type="button" class="btn btn-secondary" @click="testConnection" :disabled="runningDiagnostics" style="background: rgba(59, 130, 246, 0.1); border-color: rgba(59, 130, 246, 0.3); color: #60a5fa; padding: 10px 20px;">
+                <span v-if="runningDiagnostics" class="spinner-sm" style="margin-right:8px;"></span>
+                <span v-else style="margin-right:8px;">⚡</span>
                 {{ runningDiagnostics ? 'Testing Connection...' : 'Test Connection & Run Diagnostics' }}
               </button>
               <div class="form-text" style="font-size: 12px; color: #94a3b8; margin-top: 8px;">Run a real-time connection check to verify your server settings before saving.</div>
             </div>
-            <span v-if="diagnosticStatus" style="padding: 6px 12px; border-radius: 20px; font-size: 14px; font-weight: 600;" :style="{ background: diagnosticStatus === 'ready' ? 'rgba(16, 185, 129, 0.1)' : 'rgba(239, 68, 68, 0.1)', color: diagnosticStatus === 'ready' ? '#34d399' : '#f87171' }">
+            <span v-if="diagnosticStatus" style="padding: 8px 16px; border-radius: 20px; font-size: 14px; font-weight: 600;" :style="{ background: diagnosticStatus === 'ready' ? 'rgba(16, 185, 129, 0.1)' : 'rgba(239, 68, 68, 0.1)', color: diagnosticStatus === 'ready' ? '#34d399' : '#f87171' }">
               {{ diagnosticStatus === 'ready' ? '✅ Connection Passed' : '❌ Issues Found' }}
             </span>
           </div>
 
-          <div v-if="diagnosticResults.length" style="margin-top:20px; background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.05); border-radius: 8px; overflow: hidden;">
-            <div v-for="(res, index) in diagnosticResults" :key="index" style="display:flex; align-items:center; justify-content:space-between; padding: 12px 16px; border-bottom: 1px solid rgba(255,255,255,0.05);">
+          <div v-if="diagnosticResults.length" style="margin-top:24px; background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.05); border-radius: 8px; overflow: hidden;">
+            <div v-for="(res, index) in diagnosticResults" :key="index" style="display:flex; align-items:center; justify-content:space-between; padding: 14px 20px; border-bottom: 1px solid rgba(255,255,255,0.05);">
               <div style="display: flex; align-items: center;">
                 <span style="font-size: 16px;">{{ res.icon }}</span>
-                <strong style="margin-left: 10px; color: #fff; font-size: 14px;">{{ res.name }}</strong>
-                <span style="color: #94a3b8; font-size: 13px; margin-left: 12px;">{{ res.value }}</span>
+                <strong style="margin-left: 12px; color: #fff; font-size: 14px;">{{ res.name }}</strong>
+                <span style="color: #94a3b8; font-size: 13px; margin-left: 16px;">{{ res.value }}</span>
               </div>
               <div v-if="!res.pass" style="background: rgba(239, 68, 68, 0.1); border: 1px solid rgba(239, 68, 68, 0.2); padding: 4px 10px; border-radius: 4px;">
                 <span style="font-size: 12px; color: #fca5a5;">{{ res.fix }}</span>
@@ -217,14 +217,16 @@
         <div class="card-header" style="background: rgba(0,0,0,0.2); padding: 16px 24px; border-bottom: 1px solid rgba(255,255,255,0.05);">
           <div class="card-title" style="margin: 0; font-size: 18px; display: flex; align-items: center; gap: 8px;">
             <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" /></svg>
-            3. Notification Channels
+            3. Notifications
           </div>
         </div>
         <div class="card-body" style="padding: 24px;">
-          <div class="form-group">
-            <label class="form-label">Alert Email</label>
-            <input type="email" v-model="form.alert_email" class="form-control" placeholder="admin@example.com" style="max-width: 400px;" />
-            <div class="form-text" style="font-size: 12px; color: #94a3b8; margin-top: 4px;">Receive critical downtime alerts and daily security briefings.</div>
+          <div class="grid-2" style="display: grid; grid-template-columns: 1fr 1fr; gap: 24px;">
+            <div class="form-group">
+              <label class="form-label">Alert Email</label>
+              <input type="email" v-model="form.alert_email" class="form-control" placeholder="admin@example.com" />
+              <div class="form-text" style="font-size: 12px; color: #94a3b8; margin-top: 4px;">Receive critical downtime alerts and daily security briefings.</div>
+            </div>
           </div>
         </div>
       </div>
@@ -234,7 +236,7 @@
         <Link :href="route('projects.index')" class="btn btn-secondary" style="padding: 12px 24px; font-weight: 500;">Cancel</Link>
         <button type="submit" class="btn btn-primary" :disabled="submitting" style="padding: 12px 32px; font-weight: 600; font-size: 16px;">
           <span v-if="submitting" class="spinner-sm" style="margin-right: 8px;"></span>
-          <span>{{ isEdit ? 'Save Project Configuration' : 'Deploy Project' }}</span>
+          <span>{{ isEdit ? 'Save Project' : 'Create Project' }}</span>
         </button>
       </div>
 
@@ -243,7 +245,7 @@
 </template>
 
 <script setup>
-import { ref, reactive, toRaw } from 'vue';
+import { ref, reactive, toRaw, watch } from 'vue';
 import { router, Link } from '@inertiajs/vue3';
 import axios from 'axios';
 
@@ -269,6 +271,41 @@ const form = reactive({
   ftp_user: props.project.ftp_user || '',
   ftp_password: '', // Kept empty for security, only sent if changed
   alert_email: props.project.alert_email || '',
+});
+
+function generateServerPath(domainStr) {
+    if (!domainStr) return '';
+    let parts = domainStr.split('/');
+    let host = parts.shift();
+    let path = `/var/www/virtual/${host}/htdocs`;
+    if (parts.length > 0) {
+        path += '/' + parts.join('/');
+    }
+    return path;
+}
+
+watch(() => form.domain, (newDomain, oldDomain) => {
+  if (typeof newDomain !== 'string') return;
+  
+  // Clean domain of protocols and www
+  let clean = newDomain.replace(/^https?:\/\//i, '').replace(/^www\./i, '');
+  if (clean !== newDomain) {
+    form.domain = clean;
+    return; // Watcher will re-trigger with cleaned value
+  }
+  
+  // Predict old path to know if the user kept the auto-generated one
+  let oldPath = '';
+  if (oldDomain) {
+    oldPath = generateServerPath(oldDomain.replace(/^https?:\/\//i, '').replace(/^www\./i, ''));
+  }
+
+  // If path is empty, or it perfectly matched the OLD domain, we can safely overwrite it with the NEW domain
+  if (!form.server_path || form.server_path === oldPath) {
+    if (form.server_type === 'same_server' || form.server_type === 'ftp') {
+        form.server_path = generateServerPath(clean);
+    }
+  }
 });
 
 const errors = ref([]);
@@ -297,10 +334,12 @@ async function submitForm() {
   errors.value = [];
   successMessage.value = '';
 
+  // Clean domain right before submitting just in case
+  form.domain = form.domain.replace(/^https?:\/\//i, '').replace(/^www\./i, '');
+
   const raw = JSON.parse(JSON.stringify(toRaw(form)));
   raw.monitoring_interval_minutes = parseInt(raw.monitoring_interval_minutes, 10);
   
-  // Remove empty ftp password so we don't overwrite with blank
   if (raw.server_type === 'ftp' && !raw.ftp_password) {
     delete raw.ftp_password;
   }
