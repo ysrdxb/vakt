@@ -254,6 +254,11 @@ async function submitForm() {
 
   router.post(url, raw, {
     preserveScroll: true,
+    onSuccess: () => {
+      if (window.dispatchEvent) {
+        window.dispatchEvent(new CustomEvent('toast', { detail: { type: 'success', title: 'Saved', message: 'Project configuration updated.' } }));
+      }
+    },
     onError: (errs) => {
       errors.value = Object.values(errs);
     },
