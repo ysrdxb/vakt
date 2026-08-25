@@ -1383,6 +1383,13 @@ textarea.form-control { resize: vertical; min-height: 90px; }
     background: rgba(0, 0, 0, 0.5);
     z-index: 90; /* just below sidebar which is 100 */
     backdrop-filter: blur(2px);
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.3s ease;
+  }
+  .sidebar-backdrop.visible {
+    opacity: 1;
+    pointer-events: auto;
   }
   
   .grid-sidebar-layout {
