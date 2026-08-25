@@ -1,7 +1,7 @@
 <template>
   <div class="page-container">
-    <div class="page-title">{{ isEdit ? 'Modify Asset Configuration' : 'Configure Monitoring Target' }}</div>
-    <div class="page-subtitle">Configure asset properties, surveillance scope, and connection parameters.</div>
+    <div class="page-title">{{ isEdit ? 'Edit Project' : 'Create Project' }}</div>
+    <div class="page-subtitle">Configure project details and connection parameters.</div>
 
     <!-- Validation Errors -->
     <div v-if="errors.length" class="error-banner">
@@ -20,11 +20,11 @@
 
       <!-- Section 1: Basic Information -->
       <div class="card">
-        <div class="card-header"><div class="card-title">1. Target Information</div></div>
+        <div class="card-header"><div class="card-title">1. Project Information</div></div>
         <div class="card-body">
           <div class="grid-2">
             <div class="form-group">
-              <label class="form-label">Asset Name *</label>
+              <label class="form-label">Project Name *</label>
               <input type="text" v-model="form.name" class="form-control" placeholder="e.g. Core Production System" required />
             </div>
             <div class="form-group">
@@ -60,8 +60,8 @@
           </div>
 
           <div class="form-group">
-            <label class="form-label">Target Description</label>
-            <textarea v-model="form.description" class="form-control" rows="2" placeholder="Brief notes on asset purpose..."></textarea>
+            <label class="form-label">Description</label>
+            <textarea v-model="form.description" class="form-control" rows="2" placeholder="Brief notes on project purpose..."></textarea>
           </div>
         </div>
       </div>
@@ -81,7 +81,7 @@
             <label class="option-card" :class="{ selected: form.server_type === 'external_agent' }">
               <input type="radio" v-model="form.server_type" value="external_agent" />
               <div>
-                <div style="font-weight:600;color:#fff;font-size:15px;">Remote SOC Agent</div>
+                <div style="font-weight:600;color:#fff;font-size:15px;">Remote Agent</div>
                 <div style="font-size:13px;color:#94a3b8;">Single-file agent PHP bridge over HTTPS.</div>
               </div>
             </label>
@@ -118,7 +118,7 @@
             <div class="grid-2">
               <div class="form-group">
                 <label class="form-label">Agent Public URL *</label>
-                <input type="url" v-model="form.agent_url" class="form-control" placeholder="https://target.com/soc-agent.php" />
+                <input type="url" v-model="form.agent_url" class="form-control" placeholder="https://example.com/agent.php" />
               </div>
               <div class="form-group">
                 <label class="form-label">Agent Secret Key</label>
@@ -179,7 +179,7 @@
         <Link :href="route('projects.index')" class="btn btn-secondary">Cancel</Link>
         <button type="submit" class="btn btn-primary" :disabled="submitting">
           <span v-if="submitting"><span class="spinner-sm"></span> Saving...</span>
-          <span v-else>{{ isEdit ? 'Save Asset Configuration' : 'Create & Register Asset Target' }}</span>
+          <span v-else>{{ isEdit ? 'Save Project' : 'Create Project' }}</span>
         </button>
       </div>
 

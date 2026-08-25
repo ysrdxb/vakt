@@ -9,7 +9,7 @@
       </div>
       <div>
         <h1 style="font-size: 24px; font-weight: 600; color: #f8fafc; margin: 0;">Daily Monitoring Logs</h1>
-        <p style="color: #94a3b8; font-size: 14px; margin: 4px 0 0;">Formal audit trail of daily SOC monitoring and health checks</p>
+        <p style="color: #94a3b8; font-size: 14px; margin: 4px 0 0;">Daily log of system monitoring and health checks</p>
       </div>
     </div>
 

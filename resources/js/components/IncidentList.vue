@@ -9,7 +9,7 @@
       </div>
       <div>
         <h1 style="font-size: 24px; font-weight: 600; color: #f8fafc; margin: 0;">Incidents</h1>
-        <p style="color: #94a3b8; font-size: 14px; margin: 4px 0 0;">Security alerts and anomalies detected across all environments.</p>
+        <p style="color: #94a3b8; font-size: 14px; margin: 4px 0 0;">Security alerts and issues detected across all projects.</p>
       </div>
     </div>
 

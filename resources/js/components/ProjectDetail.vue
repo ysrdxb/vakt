@@ -26,7 +26,7 @@
               <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" style="width:16px;height:16px;margin-right:6px">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
               </svg>
-              SOC2 Report
+              Monthly Report
             </a>
             <button @click="runScan" class="btn btn-primary" :disabled="isScanning">
               <span v-if="isScanning" class="spinner-sm"></span>
@@ -67,7 +67,7 @@
     <div v-if="project.server_type === 'external_agent' && !project.firewall_whitelist_confirmed" class="alert alert-warning mb-6" style="background: rgba(245, 158, 11, 0.1); border: 1px solid var(--color-warning); color: #fcd34d;">
       <div style="width:100%">
         <div style="margin-bottom:8px">
-          <strong>FIREWALL WHITELIST REQUIRED:</strong> To prevent this SOC server from being blocked, you MUST whitelist our IP on the target server's firewall (e.g. CSF) BEFORE deploying the agent.
+          <strong>FIREWALL WHITELIST REQUIRED:</strong> To prevent this SOC server from being blocked, you MUST whitelist our IP on the server's firewall (e.g. CSF) BEFORE deploying the agent.
         </div>
         <div style="display: flex; gap: 12px; margin-top: 12px;">
           <button @click="confirmWhitelist" class="btn btn-primary btn-sm" :disabled="isConfirmingWhitelist">

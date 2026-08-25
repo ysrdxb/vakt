@@ -8,13 +8,13 @@
         </svg>
       </div>
       <div style="flex: 1;">
-        <h1 style="font-size: 24px; font-weight: 600; color: #f8fafc; margin: 0;">Monitoring Targets</h1>
-        <p style="color: #94a3b8; font-size: 14px; margin: 4px 0 0;">Manage monitored assets and environments.</p>
+        <h1 style="font-size: 24px; font-weight: 600; color: #f8fafc; margin: 0;">Projects</h1>
+        <p style="color: #94a3b8; font-size: 14px; margin: 4px 0 0;">Manage your projects and websites.</p>
       </div>
       <div>
         <Link :href="route('projects.create')" class="btn btn-primary">
           <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" style="width:18px;height:18px;margin-right:6px;"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" /></svg>
-          Add Target
+          Add Project
         </Link>
       </div>
     </div>
@@ -46,7 +46,7 @@
           <thead>
             <tr style="border-bottom:1px solid #334155; background:rgba(255,255,255,0.02);">
               <th style="padding:12px 20px; color:#94a3b8; font-size:12px; text-transform:uppercase; font-weight:600;">Status</th>
-              <th style="padding:12px 20px; color:#94a3b8; font-size:12px; text-transform:uppercase; font-weight:600;">Asset Name & Domain</th>
+              <th style="padding:12px 20px; color:#94a3b8; font-size:12px; text-transform:uppercase; font-weight:600;">Project Name & Domain</th>
               <th style="padding:12px 20px; color:#94a3b8; font-size:12px; text-transform:uppercase; font-weight:600;">Security Score</th>
               <th style="padding:12px 20px; color:#94a3b8; font-size:12px; text-transform:uppercase; font-weight:600;">Stack</th>
               <th style="padding:12px 20px; color:#94a3b8; font-size:12px; text-transform:uppercase; font-weight:600; text-align:right;">Actions</th>
@@ -94,7 +94,7 @@
                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" style="width:16px;height:16px;"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" /></svg>
                   </Link>
                   
-                  <Link :href="route('projects.edit', project.id)" class="btn btn-sm btn-secondary" title="Edit Configuration">
+                  <Link :href="route('projects.edit', project.id)" class="btn btn-sm btn-secondary" title="Edit Project">
                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" style="width:16px;height:16px;"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" /></svg>
                   </Link>
                   

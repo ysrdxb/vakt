@@ -9,7 +9,7 @@
       </div>
       <div>
         <h1 style="font-size: 24px; font-weight: 600; color: #f8fafc; margin: 0;">Alert Log</h1>
-        <p style="color: #94a3b8; font-size: 14px; margin: 4px 0 0;">History of all automated alerts sent by the SOC</p>
+        <p style="color: #94a3b8; font-size: 14px; margin: 4px 0 0;">History of all automated alerts sent by the system</p>
       </div>
     </div>
 
