@@ -15,6 +15,19 @@ Route::get('/fix-db', function () {
     return 'Database Fixed! You can now go back to the dashboard.';
 });
 
+// Temporary route to discover real log paths via browser
+Route::get('/find-logs', function () {
+    $base = '/var/www/virtual/kunnatta.is';
+    $results = [
+        'base_dir_exists' => is_dir($base),
+        'scandir_base'   => @scandir($base) ?: [],
+        'glob_logs'      => @glob('/var/www/virtual/kunnatta.is/logs/*') ?: [],
+        'glob_logs_deep' => @glob('/var/www/virtual/kunnatta.is/logs/*/*') ?: [],
+        'glob_virtual'   => @glob('/var/www/virtual/*') ?: [],
+    ];
+    return response()->json($results, 200, [], JSON_PRETTY_PRINT);
+});
+
 // Temporary debug route — shows every step of agent collection
 Route::get('/debug-agent/{projectId}', function ($projectId) {
     $project = \App\Models\Project::find($projectId);
