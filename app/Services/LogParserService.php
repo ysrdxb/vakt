@@ -106,7 +106,7 @@ class LogParserService
                 }
             }
 
-            if (!empty($detectedPatterns) || in_array($level, ['error', 'critical'])) {
+            if (!empty($detectedPatterns) || in_array($level, ['error', 'critical', 'warning'])) {
                 preg_match($ipPattern, $line, $ipMatches);
 
                 LogEntry::updateOrCreate(
@@ -131,14 +131,14 @@ class LogParserService
     {
         if (preg_match('/\[CRITICAL\]|CRITICAL|Fatal error/i', $line)) return 'critical';
         if (preg_match('/\[ERROR\]|ERROR|Exception|SQLSTATE/i', $line))   return 'error';
-        if (preg_match('/\[WARNING\]|WARNING|Warning:|Notice:/i', $line))  return 'warning';
+        if (preg_match('/\[WARNING\]|WARNING|Warning:|\[NOTICE\]|Notice:/i', $line))  return 'warning';
         if (preg_match('/\[INFO\]|INFO/i', $line))                          return 'info';
         return 'debug';
     }
 
     protected function extractTimestamp(string $line): ?\Carbon\Carbon
     {
-        if (preg_match('/\[(\d{4}-\d{2}-\d{2}[T ]\d{2}:\d{2}:\d{2})/i', $line, $m)) {
+        if (preg_match('/\[?(\d{4}-\d{2}-\d{2}[T ]\d{2}:\d{2}:\d{2})/i', $line, $m)) {
             try { return \Carbon\Carbon::parse($m[1]); } catch (\Exception) {}
         }
         return null;
