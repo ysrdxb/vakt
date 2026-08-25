@@ -185,7 +185,7 @@ const fetchSnapshots = async (page = 1) => {
       project_id: projectId.value
     });
     
-    const response = await axios.get(`${route('file-integrity.index')}?${params.toString()}`, {
+    const response = await axios.get(`${window.route('file-integrity.index')}?${params.toString()}`, {
       headers: { 'Accept': 'application/json', 'X-Requested-With': 'XMLHttpRequest' }
     });
     const data = response.data;
@@ -207,7 +207,7 @@ const changePage = (page) => {
 const initScan = async () => {
   isScanning.value = true;
   try {
-    const response = await axios.post(route('file-integrity.scan'), { project_id: projectId.value });
+    const response = await axios.post(window.route('file-integrity.scan'), { project_id: projectId.value });
     const data = response.data;
     if (window.dispatchEvent) {
       window.dispatchEvent(new CustomEvent('toast', { detail: { type: data.success ? 'success' : 'error', title: 'Scan', message: data.message } }));
@@ -224,7 +224,7 @@ const initScan = async () => {
 
 const approveChange = async (file) => {
   try {
-    const response = await axios.post(route('file-integrity.approve', file.id));
+    const response = await axios.post(window.route('file-integrity.approve', file.id));
     const data = response.data;
     if (data.success) {
       const idx = snapshots.value.findIndex(f => f.id === file.id);

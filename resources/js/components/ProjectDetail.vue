@@ -375,7 +375,7 @@ function formatTimeOnly(dateString) {
 async function runScan() {
   isScanning.value = true;
   try {
-    const res = await axios.post(route('projects.run-scan', project.value.id));
+    const res = await axios.post(window.route('projects.run-scan', project.value.id));
     const data = res.data;
     if (window.dispatchEvent) {
       window.dispatchEvent(new CustomEvent('toast', { detail: { type: data.success ? 'success' : 'error', title: 'Scan', message: data.message } }));
@@ -390,7 +390,7 @@ async function runScan() {
 async function sendTestReport() {
   isTestingReport.value = true;
   try {
-    const res = await axios.post(route('projects.test-report', project.value.id));
+    const res = await axios.post(window.route('projects.test-report', project.value.id));
     const data = res.data;
     if (window.dispatchEvent) {
       window.dispatchEvent(new CustomEvent('toast', { detail: { type: data.success ? 'success' : 'error', title: 'Report', message: data.message } }));
@@ -405,7 +405,7 @@ async function sendTestReport() {
 async function confirmWhitelist() {
   isConfirmingWhitelist.value = true;
   try {
-    const res = await axios.post(route('projects.confirm-whitelist', project.value.id));
+    const res = await axios.post(window.route('projects.confirm-whitelist', project.value.id));
     const data = res.data;
     if (data.success) {
       project.value.firewall_whitelist_confirmed = true;

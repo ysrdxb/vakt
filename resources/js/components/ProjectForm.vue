@@ -250,7 +250,7 @@ async function submitForm() {
     raw._method = 'PUT'; // Laravel form spoofing for PUT
   }
 
-  const url = props.isEdit ? route('projects.update', props.project.id) : route('projects.store');
+  const url = props.isEdit ? window.route('projects.update', props.project.id) : window.route('projects.store');
 
   router.post(url, raw, {
     preserveScroll: true,
@@ -267,7 +267,7 @@ async function autoDetectLogPath() {
   autoDetecting.value = true;
   errors.value = [];
   try {
-    const res = await axios.post(route('projects.auto-detect-log'), {
+    const res = await axios.post(window.route('projects.auto-detect-log'), {
       server_path: form.server_path,
       domain: form.domain
     }, {
@@ -297,7 +297,7 @@ async function testConnection() {
   diagnosticResults.value = [];
   
   try {
-    const res = await axios.post(route('projects.test-connection'), {
+    const res = await axios.post(window.route('projects.test-connection'), {
       server_type: form.server_type,
       server_path: form.server_path,
       agent_url: form.agent_url,

@@ -147,7 +147,7 @@ async function fetchProjects() {
   searchTimeout = setTimeout(() => {
     loading.value = true;
     router.get(
-      route('projects.index'),
+      window.route('projects.index'),
       { search: searchQuery.value, filterStatus: filterStatus.value },
       {
         preserveState: true,
@@ -160,7 +160,7 @@ async function fetchProjects() {
 
 async function toggleActive(project) {
   try {
-    const res = await axios.post(route('projects.toggle-active', project.id));
+    const res = await axios.post(window.route('projects.toggle-active', project.id));
     if (res.data.success) {
       project.active = res.data.active;
       if (window.dispatchEvent) {
@@ -175,7 +175,7 @@ async function toggleActive(project) {
 function deleteProject(project) {
   if (!confirm(`Are you sure you want to delete ${project.domain}? This action cannot be undone.`)) return;
   
-  router.delete(route('projects.destroy', project.id), {
+  router.delete(window.route('projects.destroy', project.id), {
     preserveState: true,
     onSuccess: () => {
       if (window.dispatchEvent) {
