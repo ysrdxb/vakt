@@ -32,7 +32,7 @@ class FileIntegrityController extends Controller
             ->when($filterStatus, function ($query) use ($filterStatus) {
                 $query->where('status', $filterStatus);
             })
-            ->orderByRaw("FIELD(status,'suspicious','changed','new','deleted','clean')")
+            ->orderByRaw("CASE status WHEN 'suspicious' THEN 1 WHEN 'changed' THEN 2 WHEN 'new' THEN 3 WHEN 'deleted' THEN 4 WHEN 'clean' THEN 5 ELSE 6 END")
             ->paginate(50);
 
         if ($request->wantsJson()) {

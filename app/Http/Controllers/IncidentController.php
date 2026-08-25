@@ -18,7 +18,7 @@ class IncidentController extends Controller
             ->when($request->filterSeverity, fn($q) => $q->where('severity', $request->filterSeverity))
             ->when($request->filterStatus, fn($q) => $q->where('status', $request->filterStatus))
             ->when($request->filterProject, fn($q) => $q->where('project_id', $request->filterProject))
-            ->orderByRaw("FIELD(severity, 'p1','p2','p3','p4')")
+            ->orderByRaw("CASE severity WHEN 'p1' THEN 1 WHEN 'p2' THEN 2 WHEN 'p3' THEN 3 WHEN 'p4' THEN 4 ELSE 5 END")
             ->orderByDesc('detected_at');
 
         $incidents = $query->paginate(25);
