@@ -184,8 +184,8 @@ class SameServerCollector
         // Allow php error logs which may be outside project root
         if ($path === $this->project->php_error_log_path) return true;
 
-        // All other paths must be within the server's home directory
-        return str_starts_with($real, '/home/') || str_starts_with($real, '/Users/') || str_starts_with($real, 'C:\\'); // allow typical roots for testing
+        // All other paths must be within allowed server directories
+        return str_starts_with($real, '/home/') || str_starts_with($real, '/var/www/') || str_starts_with($real, '/Users/') || str_starts_with($real, 'C:\\');
     }
 
     private function resolvePath(string $relativePath): string

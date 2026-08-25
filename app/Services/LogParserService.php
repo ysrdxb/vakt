@@ -129,15 +129,49 @@ class LogParserService
 
     protected function detectLevel(string $line): string
     {
+        // 1. OpenLiteSpeed pattern check: YYYY-MM-DD HH:MM:SS.micro [LEVEL] Message
+        if (preg_match('/(\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}\.\d+) \[(\w+)\] (.+)/', $line, $m)) {
+            $rawLevel = strtoupper($m[2]);
+            return match ($rawLevel) {
+                'CRITICAL', 'FATAL' => 'critical',
+                'STDERR', 'ERROR'   => 'error',
+                'WARN', 'WARNING'   => 'warning',
+                'NOTICE', 'INFO'    => 'info',
+                default             => 'debug',
+            };
+        }
+
+        // 2. Laravel pattern check: [YYYY-MM-DD HH:MM:SS] env.LEVEL: Message
+        if (preg_match('/\[(\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2})\] \w+\.(\w+): (.+)/', $line, $m)) {
+            $rawLevel = strtoupper($m[2]);
+            return match ($rawLevel) {
+                'EMERGENCY', 'ALERT', 'CRITICAL' => 'critical',
+                'ERROR'                          => 'error',
+                'WARNING', 'WARN'                => 'warning',
+                'NOTICE', 'INFO'                 => 'info',
+                default                          => 'debug',
+            };
+        }
+
+        // Fallback checks
         if (preg_match('/\[CRITICAL\]|CRITICAL|Fatal error/i', $line)) return 'critical';
-        if (preg_match('/\[ERROR\]|ERROR|Exception|SQLSTATE/i', $line))   return 'error';
-        if (preg_match('/\[WARNING\]|WARNING|Warning:|\[NOTICE\]|Notice:/i', $line))  return 'warning';
-        if (preg_match('/\[INFO\]|INFO/i', $line))                          return 'info';
+        if (preg_match('/\[ERROR\]|ERROR|STDERR|Exception|SQLSTATE/i', $line)) return 'error';
+        if (preg_match('/\[WARNING\]|WARNING|WARN|Warning:/i', $line)) return 'warning';
+        if (preg_match('/\[NOTICE\]|\[INFO\]|INFO|Notice:/i', $line)) return 'info';
         return 'debug';
     }
 
     protected function extractTimestamp(string $line): ?\Carbon\Carbon
     {
+        // OpenLiteSpeed format
+        if (preg_match('/(\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}\.\d+)/', $line, $m)) {
+            try { return \Carbon\Carbon::parse($m[1]); } catch (\Exception) {}
+        }
+        // Laravel format
+        if (preg_match('/\[(\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2})\]/', $line, $m)) {
+            try { return \Carbon\Carbon::parse($m[1]); } catch (\Exception) {}
+        }
+        // Generic fallback
         if (preg_match('/\[?(\d{4}-\d{2}-\d{2}[T ]\d{2}:\d{2}:\d{2})/i', $line, $m)) {
             try { return \Carbon\Carbon::parse($m[1]); } catch (\Exception) {}
         }

@@ -355,16 +355,19 @@ function downloadAgentScript() {
 // Place this in your project's public/ folder
 
 $secret = '${secret}';
-$defaultPath = '${customLogPath}';
-$headerPath = $_SERVER['HTTP_X_LOG_PATH'] ?? '';
-$customPath = !empty($headerPath) ? $headerPath : $defaultPath;
+$configuredPath = '${customLogPath}';
 
-// Resolve path (support absolute or relative)
-if (strpos($customPath, '/') === 0 || strpos($customPath, ':\\\\') === 1) {
-    $logPath = $customPath;
-} else {
-    $logPath = __DIR__ . '/' . ltrim($customPath, '/');
-}
+// Resolve primary configured path
+$primaryPath = (strpos($configuredPath, '/') === 0 || strpos($configuredPath, ':\\\\') === 1)
+    ? $configuredPath
+    : __DIR__ . '/' . ltrim($configuredPath, '/');
+
+// Fallback search order (security: all paths resolved locally, no HTTP header overrides)
+$candidatePaths = [
+    $primaryPath,
+    __DIR__ . '/vakt-logs/error.log',
+    __DIR__ . '/logs/php-error.log',
+];
 
 header('Content-Type: application/json');
 
@@ -375,12 +378,20 @@ if ($providedKey !== $secret) {
     exit;
 }
 
-if (!@file_exists($logPath)) {
+$logPath = null;
+foreach ($candidatePaths as $candidate) {
+    if (@file_exists($candidate) && @is_readable($candidate)) {
+        $logPath = $candidate;
+        break;
+    }
+}
+
+if (!$logPath) {
     http_response_code(404);
     $ob = ini_get('open_basedir');
-    $errMsg = "Log file not found at: " . $logPath;
+    $errMsg = "Log file not found. Tried: " . implode(' | ', $candidatePaths);
     if ($ob) {
-        $errMsg .= " | SERVER RESTRICTION: open_basedir is active ({$ob}). Your host (1984.is) blocks PHP from reading files outside htdocs.";
+        $errMsg .= " | open_basedir active ({$ob})";
     }
     echo json_encode(['error' => $errMsg]);
     exit;
