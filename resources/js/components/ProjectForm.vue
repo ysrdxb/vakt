@@ -1,7 +1,8 @@
 <template>
   <div class="page-container" style="margin: 0 auto;">
-    <div class="page-title">{{ isEdit ? 'Edit Project' : 'Create Project' }}</div>
-    <div class="page-subtitle">Add project details.</div>
+    <h2 style="font-size: 24px; font-weight: 700; color: #f8fafc; margin-bottom: 24px;">
+      {{ isEdit ? 'Edit Project' : 'Create Project' }}
+    </h2>
 
     <!-- Validation Errors -->
     <div v-if="errors.length" class="error-banner" style="margin-bottom: 20px;">
