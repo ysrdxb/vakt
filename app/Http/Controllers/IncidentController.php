@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use Inertia\Inertia;
 use App\Models\Incident;
 use App\Models\Project;
 use App\Models\IncidentTimeline;
@@ -35,7 +36,7 @@ class IncidentController extends Controller
         }
 
         $projects = Project::orderBy('domain')->get();
-        return view('incidents.index', compact('incidents', 'projects'));
+        return Inertia::render('IncidentList', compact('incidents', 'projects'));
     }
 
     public function show(Incident $incident)
@@ -44,7 +45,7 @@ class IncidentController extends Controller
             $q->orderBy('performed_at', 'desc');
         }]);
         
-        return view('incidents.show', compact('incident'));
+        return Inertia::render('IncidentDetail', compact('incident'));
     }
 
     public function transitionStatus(Request $request, Incident $incident)

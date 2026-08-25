@@ -25,7 +25,7 @@ class SettingsController extends Controller
             ]);
         }
 
-        return view('settings.index', compact('user', 'clientUser'));
+        return \Inertia\Inertia::render('SettingsPage', compact('user', 'clientUser'));
     }
 
     public function saveProfile(Request $request)

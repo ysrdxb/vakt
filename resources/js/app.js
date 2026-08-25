@@ -1,55 +1,21 @@
-import { createApp, defineAsyncComponent } from 'vue';
+import { createApp, h } from 'vue';
+import { createInertiaApp, Link } from '@inertiajs/vue3';
+import Layout from './Layout.vue';
+import { ZiggyVue } from 'ziggy-js';
 
-// --- Auto-register page component mounts ---
-// Each page that needs Vue drops a <div id="vue-PROJECT-FORM"></div>
-// and a window.__VUE_PROPS__['PROJECT-FORM'] = { ... } config object.
-// app.js finds the div, reads the props, and mounts the matching component.
-
-import LoginForm from './components/LoginForm.vue';
-import ProjectForm from './components/ProjectForm.vue';
-import OperatorDashboard from './components/OperatorDashboard.vue';
-import ProjectList from './components/ProjectList.vue';
-import ProjectDetail from './components/ProjectDetail.vue';
-import IncidentList from './components/IncidentList.vue';
-import IncidentDetail from './components/IncidentDetail.vue';
-import LogViewer from './components/LogViewer.vue';
-import FileIntegrityView from './components/FileIntegrityView.vue';
-import AuditTracker from './components/AuditTracker.vue';
-import DailyLogCalendar from './components/DailyLogCalendar.vue';
-import VulnerabilityList from './components/VulnerabilityList.vue';
-import AlertLog from './components/AlertLog.vue';
-import SqaReport from './components/SqaReport.vue';
-import ImprovementKanban from './components/ImprovementKanban.vue';
-import SettingsPage from './components/SettingsPage.vue';
-
-const PAGE_COMPONENTS = {
-    'vue-login-form':   LoginForm,
-    'vue-project-form': ProjectForm,
-    'vue-operator-dashboard': OperatorDashboard,
-    'vue-project-list': ProjectList,
-    'vue-project-detail': ProjectDetail,
-    'vue-incident-list': IncidentList,
-    'vue-incident-detail': IncidentDetail,
-    'vue-log-viewer': LogViewer,
-    'vue-file-integrity-view': FileIntegrityView,
-    'vue-audit-tracker': AuditTracker,
-    'vue-daily-log-calendar': DailyLogCalendar,
-    'vue-vulnerability-list': VulnerabilityList,
-    'vue-alert-log': AlertLog,
-    'vue-sqa-report': SqaReport,
-    'vue-improvement-kanban': ImprovementKanban,
-    'vue-settings-page': SettingsPage,
-};
-
-window.addEventListener('DOMContentLoaded', () => {
-    Object.entries(PAGE_COMPONENTS).forEach(([mountId, component]) => {
-        const el = document.getElementById(mountId);
-        if (!el) return;
-
-        // Read props from a companion <script> tag:  window.__VUE_PROPS__['vue-project-form'] = {...}
-        const props = (window.__VUE_PROPS__ && window.__VUE_PROPS__[mountId]) || {};
-
-        const app = createApp(component, props);
+createInertiaApp({
+    resolve: name => {
+        const pages = import.meta.glob('./components/**/*.vue', { eager: true })
+        let page = pages[`./components/${name}.vue`]
+        page.default.layout = page.default.layout || Layout
+        return page
+    },
+    setup({ el, App, props, plugin }) {
+        const app = createApp({ render: () => h(App, props) })
+            .use(plugin)
+            .use(ZiggyVue);
+        
+        app.component('Link', Link);
         app.mount(el);
-    });
+    },
 });

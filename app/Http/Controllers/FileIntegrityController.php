@@ -49,7 +49,7 @@ class FileIntegrityController extends Controller
         }
 
         $projects = Project::where('server_type', 'same_server')->orderBy('domain')->get();
-        return view('file-integrity.index', compact('snapshots', 'projects', 'projectId', 'stats'));
+        return \Inertia\Inertia::render('FileIntegrityView', compact('snapshots', 'projects', 'projectId', 'stats'));
     }
 
     public function initScan(Request $request, FileIntegrityService $service)

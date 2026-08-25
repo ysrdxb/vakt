@@ -35,7 +35,7 @@ class SqaReportController extends Controller
         }
 
         $projects = Project::orderBy('domain')->get();
-        return view('reports.index', compact('reports', 'projects', 'projectId'));
+        return \Inertia\Inertia::render('SqaReport', compact('reports', 'projects', 'projectId'));
     }
 
     public function store(Request $request)

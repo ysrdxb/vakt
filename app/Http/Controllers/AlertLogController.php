@@ -31,6 +31,6 @@ class AlertLogController extends Controller
             ]);
         }
 
-        return view('alerts.index', compact('logs', 'filterType'));
+        return \Inertia\Inertia::render('AlertLog', compact('logs', 'filterType'));
     }
 }

@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use Inertia\Inertia;
 use App\Models\Project;
 use App\Models\Incident;
 use App\Models\MonitoringCheck;
@@ -74,7 +75,7 @@ class DashboardController extends Controller
                 ];
             });
 
-        return view('dashboard.index', compact(
+        return Inertia::render('OperatorDashboard', compact(
             'projects',
             'openIncidents',
             'p1Count',

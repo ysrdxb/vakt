@@ -32,7 +32,7 @@ class ImprovementController extends Controller
         }
 
         $projects = Project::orderBy('domain')->get();
-        return view('improvements.index', compact('columnedItems', 'projects', 'projectId'));
+        return \Inertia\Inertia::render('ImprovementKanban', compact('columnedItems', 'projects', 'projectId'));
     }
 
     public function store(Request $request)

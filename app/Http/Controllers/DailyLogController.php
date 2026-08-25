@@ -37,7 +37,7 @@ class DailyLogController extends Controller
         }
 
         $projects = Project::orderBy('domain')->get();
-        return view('daily-logs.index', compact('logs', 'projects', 'projectId', 'selectedDate'));
+        return \Inertia\Inertia::render('DailyLogCalendar', compact('logs', 'projects', 'projectId', 'selectedDate'));
     }
 
     public function addNote(Request $request, DailyLog $log)

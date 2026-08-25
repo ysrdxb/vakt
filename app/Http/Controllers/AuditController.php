@@ -40,7 +40,7 @@ class AuditController extends Controller
         }
 
         $projects = Project::orderBy('domain')->get();
-        return view('audit.index', compact('projects', 'projectId', 'itemsByCategory', 'score'));
+        return \Inertia\Inertia::render('AuditTracker', compact('projects', 'projectId', 'itemsByCategory', 'score'));
     }
 
     public function updateStatus(Request $request, AuditItem $item)

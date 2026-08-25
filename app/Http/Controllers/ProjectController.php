@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Project;
 use Illuminate\Http\Request;
+use Inertia\Inertia;
 use Illuminate\Validation\Rule;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Http;
@@ -30,7 +31,7 @@ class ProjectController extends Controller
             return response()->json($projects);
         }
 
-        return view('projects.index', compact('projects'));
+        return Inertia::render('ProjectList', compact('projects'));
     }
 
     public function show(Project $project)
@@ -50,7 +51,7 @@ class ProjectController extends Controller
                             ->limit(60)
                             ->get();
 
-        return view('projects.show', compact('project', 'latestReport', 'uptimeLogs'));
+        return Inertia::render('ProjectDetail', compact('project', 'latestReport', 'uptimeLogs'));
     }
 
     public function confirmWhitelist(Request $request, Project $project)
@@ -132,7 +133,7 @@ class ProjectController extends Controller
         $agent_secret = bin2hex(random_bytes(32));
         $isEdit = false;
         
-        return view('projects.form', compact('project', 'agent_secret', 'isEdit'));
+        return Inertia::render('ProjectForm', compact('project', 'agent_secret', 'isEdit'));
     }
 
     public function edit(Project $project)
@@ -140,7 +141,7 @@ class ProjectController extends Controller
         $agent_secret = $project->agent_secret;
         $isEdit = true;
         
-        return view('projects.form', compact('project', 'agent_secret', 'isEdit'));
+        return Inertia::render('ProjectForm', compact('project', 'agent_secret', 'isEdit'));
     }
 
     public function store(Request $request)

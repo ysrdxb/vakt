@@ -43,7 +43,7 @@ class LogViewerController extends Controller
         }
 
         $projects = Project::orderBy('domain')->get();
-        return view('logs.index', compact('entries', 'projects', 'projectId'));
+        return \Inertia\Inertia::render('LogViewer', compact('entries', 'projects', 'projectId'));
     }
 
     public function markReviewed(Request $request, LogEntry $entry)
