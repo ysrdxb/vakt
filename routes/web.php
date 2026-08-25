@@ -37,21 +37,27 @@ Route::get('/debug-agent/{projectId}', function ($projectId) {
         $out['steps']['3_log_tail_count'] = count($data['log_tail'] ?? []);
         $out['steps']['4_log_tail_sample'] = array_slice($data['log_tail'] ?? [], 0, 3);
 
-        // Step 2: Run parser using actual LogParserService
-        $logEntries = $data['log_tail'] ?? [];
-        $content = is_array($logEntries) ? implode("\n", $logEntries) : $logEntries;
-        $out['steps']['5_joined_content_length'] = strlen($content);
+        // Step 2: Test SameServerCollector direct reading
+        $sameServerCollector = new \App\Services\Collectors\SameServerCollector($project);
+        $sameServerResult = $sameServerCollector->collect();
+        $out['steps']['5_same_server_log_count'] = count($sameServerResult->logEntries);
+        $out['steps']['5b_same_server_sample'] = array_slice($sameServerResult->logEntries, 0, 3);
+
+        // Step 3: Run parser using actual LogParserService
+        $logEntries = $sameServerResult->logEntries ?: ($data['log_tail'] ?? []);
+        $content = is_array($logEntries) ? implode("\n", array_column($logEntries, 'message') ?: $logEntries) : $logEntries;
+        $out['steps']['6_joined_content_length'] = strlen($content);
 
         $parser = app(\App\Services\LogParserService::class);
         $parseResult = $parser->parseRawContent($project, $content);
-        $out['steps']['6_parse_result_stats'] = [
+        $out['steps']['7_parse_result_stats'] = [
             'errors_found' => $parseResult[0] ?? 0,
             'warnings_found' => $parseResult[1] ?? 0,
             'critical_patterns' => $parseResult[2] ?? [],
         ];
 
-        $out['steps']['7_db_log_entries_count'] = \App\Models\LogEntry::where('project_id', $project->id)->count();
-        $out['steps']['8_latest_db_entries'] = \App\Models\LogEntry::where('project_id', $project->id)->latest('occurred_at')->take(3)->get(['id', 'level', 'message', 'occurred_at']);
+        $out['steps']['8_db_log_entries_count'] = \App\Models\LogEntry::where('project_id', $project->id)->count();
+        $out['steps']['9_latest_db_entries'] = \App\Models\LogEntry::where('project_id', $project->id)->latest('occurred_at')->take(3)->get(['id', 'level', 'message', 'occurred_at']);
 
     } catch (\Exception $e) {
         $out['steps']['error'] = $e->getMessage();
