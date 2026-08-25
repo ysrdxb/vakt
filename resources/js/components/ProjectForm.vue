@@ -342,12 +342,21 @@ function generateSecret() {
 
 function downloadAgentScript() {
   const secret = form.agent_secret || 'MISSING_SECRET_KEY';
+  const customLogPath = form.log_path || '../storage/logs/laravel.log';
+  
   const content = `<?php
 // agent.php - Vakt SOC External Agent
 // Place this in your project's public/ folder
 
 $secret = '${secret}';
-$logPath = __DIR__ . '/../storage/logs/laravel.log';
+$customPath = '${customLogPath}';
+
+// Resolve path (support absolute or relative)
+if (strpos($customPath, '/') === 0 || strpos($customPath, ':\\\\') === 1) {
+    $logPath = $customPath;
+} else {
+    $logPath = __DIR__ . '/' . ltrim($customPath, '/');
+}
 
 header('Content-Type: application/json');
 
@@ -360,7 +369,7 @@ if ($providedKey !== $secret) {
 
 if (!file_exists($logPath)) {
     http_response_code(404);
-    echo json_encode(['error' => "Log file not found at " . basename($logPath)]);
+    echo json_encode(['error' => "Log file not found at: " . $logPath . " (Make sure the path is correct and PHP has permission to read it)"]);
     exit;
 }
 
