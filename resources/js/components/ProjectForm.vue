@@ -231,7 +231,7 @@
 
       <!-- Submit -->
       <div style="display:flex; gap: 16px; justify-content: flex-end; margin-top: 30px; margin-bottom: 50px;">
-        <Link :href="window.route('projects.index')" class="btn btn-secondary" style="padding: 12px 24px; font-weight: 500;">Cancel</Link>
+        <Link :href="route('projects.index')" class="btn btn-secondary" style="padding: 12px 24px; font-weight: 500;">Cancel</Link>
         <button type="submit" class="btn btn-primary" :disabled="submitting" style="padding: 12px 32px; font-weight: 600; font-size: 16px;">
           <span v-if="submitting" class="spinner-sm" style="margin-right: 8px;"></span>
           <span>{{ isEdit ? 'Save Project Configuration' : 'Deploy Project' }}</span>
