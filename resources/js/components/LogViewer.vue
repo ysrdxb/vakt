@@ -270,7 +270,7 @@ const toggleExpand = (id) => {
 
 const markReviewed = async (entry) => {
   try {
-    const response = await fetch(`${props.endpoints.markReviewed}/${entry.id}/review`, {
+    const response = await fetch(`/logs/${entry.id}/review`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -297,7 +297,7 @@ const analyzeWithAI = async (entry) => {
   aiErrors.value[entry.id] = null;
   
   try {
-    const response = await fetch(`${props.endpoints.analyzeWithAI}/${entry.id}/analyze`, {
+    const response = await fetch(`/logs/${entry.id}/analyze`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
