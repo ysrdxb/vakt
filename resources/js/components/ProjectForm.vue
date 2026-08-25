@@ -364,12 +364,16 @@ if (!file_exists($logPath)) {
     exit;
 }
 
-$command = "tail -n 1000 " . escapeshellarg($logPath);
 $logTail = [];
-if (function_exists('shell_exec')) {
-    $output = shell_exec($command);
-    if ($output) {
-        $logTail = explode("\\n", trim($output));
+if (file_exists($logPath)) {
+    $size = filesize($logPath);
+    $maxBytes = 524288; // Read max 500KB from end
+    $offset = max(0, $size - $maxBytes);
+    
+    $content = file_get_contents($logPath, false, null, $offset);
+    if ($content) {
+        $lines = explode("\\n", trim($content));
+        $logTail = array_slice($lines, -1000); // Take last 1000 lines
     }
 }
 
