@@ -57,7 +57,9 @@ class ExternalAgentCollector
             }
 
             if (!$response->successful()) {
-                return CollectionResult::failed($this->project->id, "Agent returned HTTP {$response->status()}");
+                $errorData = $response->json();
+                $agentMessage = $errorData['error'] ?? "Agent returned HTTP {$response->status()}";
+                return CollectionResult::failed($this->project->id, $agentMessage);
             }
 
             $data = $response->json();

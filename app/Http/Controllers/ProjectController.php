@@ -62,7 +62,13 @@ class ProjectController extends Controller
     {
         try {
             \App\Jobs\CollectProjectData::dispatchSync($project->id);
-            return response()->json(['success' => true, 'message' => 'Data pulled successfully from agent.']);
+            $project->refresh();
+            
+            if ($project->last_error) {
+                return response()->json(['success' => false, 'message' => 'Agent Error: ' . $project->last_error], 500);
+            }
+            
+            return response()->json(['success' => true, 'message' => 'Data pulled successfully. (Note: Only errors and warnings are recorded in Vakt)']);
         } catch (\Exception $e) {
             return response()->json(['success' => false, 'message' => $e->getMessage()], 500);
         }
