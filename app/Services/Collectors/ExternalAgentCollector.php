@@ -37,6 +37,7 @@ class ExternalAgentCollector
             $response = Http::withHeaders([
                     'X-SOC-Key'    => $this->project->agent_secret,
                     'X-Project-ID' => (string) $this->project->id,
+                    'X-Log-Path'   => (string) ($this->project->log_path ?? ''),
                     'Accept'       => 'application/json',
                     'User-Agent'   => 'Vakt-SOC/1.0',
                 ])

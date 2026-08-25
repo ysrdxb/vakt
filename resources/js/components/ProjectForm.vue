@@ -355,7 +355,9 @@ function downloadAgentScript() {
 // Place this in your project's public/ folder
 
 $secret = '${secret}';
-$customPath = '${customLogPath}';
+$defaultPath = '${customLogPath}';
+$headerPath = $_SERVER['HTTP_X_LOG_PATH'] ?? '';
+$customPath = !empty($headerPath) ? $headerPath : $defaultPath;
 
 // Resolve path (support absolute or relative)
 if (strpos($customPath, '/') === 0 || strpos($customPath, ':\\\\') === 1) {

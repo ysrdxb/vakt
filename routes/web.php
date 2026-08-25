@@ -25,8 +25,9 @@ Route::get('/debug-agent/{projectId}', function ($projectId) {
     // Step 1: Call the agent directly (bypass rate limiter)
     try {
         $response = \Illuminate\Support\Facades\Http::withHeaders([
-            'X-SOC-Key' => $project->agent_secret,
-            'Accept'    => 'application/json',
+            'X-SOC-Key'  => $project->agent_secret,
+            'X-Log-Path' => (string) ($project->log_path ?? ''),
+            'Accept'     => 'application/json',
         ])->timeout(15)->get($project->agent_url);
 
         $out['steps']['1_agent_http_status'] = $response->status();
