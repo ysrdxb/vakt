@@ -106,7 +106,7 @@ class LogParserService
                 }
             }
 
-            if (!empty($detectedPatterns) || in_array($level, ['error', 'critical', 'warning'])) {
+            if (!empty($detectedPatterns) || in_array($level, ['error', 'critical', 'warning', 'info'])) {
                 preg_match($ipPattern, $line, $ipMatches);
 
                 LogEntry::updateOrCreate(

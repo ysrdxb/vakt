@@ -37,24 +37,21 @@ Route::get('/debug-agent/{projectId}', function ($projectId) {
         $out['steps']['3_log_tail_count'] = count($data['log_tail'] ?? []);
         $out['steps']['4_log_tail_sample'] = array_slice($data['log_tail'] ?? [], 0, 3);
 
-        // Step 2: Run parser manually
+        // Step 2: Run parser using actual LogParserService
         $logEntries = $data['log_tail'] ?? [];
         $content = is_array($logEntries) ? implode("\n", $logEntries) : $logEntries;
         $out['steps']['5_joined_content_length'] = strlen($content);
-        $lines = array_filter(explode("\n", $content));
-        $out['steps']['6_line_count_after_split'] = count($lines);
 
-        // Step 3: Check level detection for first 5 lines
-        $levelSamples = [];
-        foreach (array_slice(array_values($lines), 0, 5) as $line) {
-            $level = 'debug';
-            if (preg_match('/\[CRITICAL\]|CRITICAL|Fatal error/i', $line)) $level = 'critical';
-            elseif (preg_match('/\[ERROR\]|ERROR|Exception|SQLSTATE/i', $line)) $level = 'error';
-            elseif (preg_match('/\[WARNING\]|WARNING|Warning:|\[NOTICE\]|Notice:/i', $line)) $level = 'warning';
-            elseif (preg_match('/\[INFO\]|INFO/i', $line)) $level = 'info';
-            $levelSamples[] = ['line' => substr($line, 0, 80), 'level' => $level];
-        }
-        $out['steps']['7_level_detection_sample'] = $levelSamples;
+        $parser = app(\App\Services\LogParserService::class);
+        $parseResult = $parser->parseRawContent($project, $content);
+        $out['steps']['6_parse_result_stats'] = [
+            'errors_found' => $parseResult[0] ?? 0,
+            'warnings_found' => $parseResult[1] ?? 0,
+            'critical_patterns' => $parseResult[2] ?? [],
+        ];
+
+        $out['steps']['7_db_log_entries_count'] = \App\Models\LogEntry::where('project_id', $project->id)->count();
+        $out['steps']['8_latest_db_entries'] = \App\Models\LogEntry::where('project_id', $project->id)->latest('occurred_at')->take(3)->get(['id', 'level', 'message', 'occurred_at']);
 
     } catch (\Exception $e) {
         $out['steps']['error'] = $e->getMessage();
