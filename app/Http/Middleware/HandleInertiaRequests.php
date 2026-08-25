@@ -47,6 +47,7 @@ class HandleInertiaRequests extends Middleware
             'notifications' => [
                 'p1_active' => \App\Models\Incident::where('severity', 'p1')->whereNotIn('status', ['resolved', 'closed'])->count(),
             ],
+            'csrf_token' => csrf_token(),
             'ziggy' => fn () => [
                 ...(new \Tighten\Ziggy\Ziggy)->toArray(),
                 'location' => $request->url(),
