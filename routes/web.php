@@ -31,6 +31,7 @@ Route::get('/debug-agent/{projectId}', function ($projectId) {
 
         $out['steps']['1_agent_http_status'] = $response->status();
         $data = $response->json();
+        $out['steps']['1b_agent_error_message'] = $data['error'] ?? null;
         $out['steps']['2_agent_response_keys'] = array_keys($data ?? []);
         $out['steps']['3_log_tail_count'] = count($data['log_tail'] ?? []);
         $out['steps']['4_log_tail_sample'] = array_slice($data['log_tail'] ?? [], 0, 3);
