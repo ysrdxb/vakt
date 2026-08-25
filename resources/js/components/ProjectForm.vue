@@ -381,8 +381,8 @@ if (file_exists($logPath)) {
     
     $content = file_get_contents($logPath, false, null, $offset);
     if ($content) {
-        $lines = explode("\\n", trim($content));
-        $logTail = array_slice($lines, -1000); // Take last 1000 lines
+        $lines = preg_split('/\\r\\n|\\r|\\n/', trim($content));
+        $logTail = array_values(array_filter(array_slice($lines, -1000)));
     }
 }
 
