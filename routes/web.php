@@ -94,16 +94,18 @@ Route::middleware(['auth'])->group(function () {
         Route::get('/test-log-access', function (\Illuminate\Http\Request $request) {
             $path = $request->input('path', '/var/www/virtual/kunnatta.is/arnrun.is/htdocs/timetable/storage/logs/laravel.log');
             
+            $shellOutput = null;
+            if (function_exists('shell_exec')) {
+                $shellOutput = shell_exec('cat ' . escapeshellarg($path) . ' | head -n 5 2>&1');
+            }
+
             return response()->json([
                 'path' => $path,
-                'file_exists' => @file_exists($path),
-                'is_readable' => @is_readable($path),
-                'is_dir' => @is_dir(dirname($path)),
+                'file_exists_web' => @file_exists($path),
                 'open_basedir' => ini_get('open_basedir'),
                 'user' => get_current_user(),
-                'stat' => @stat($path),
-                'content_preview' => @file_get_contents($path, false, null, 0, 100) ?: 'Empty or unreadable',
-                'last_error' => error_get_last()
+                'shell_exec_enabled' => function_exists('shell_exec'),
+                'shell_output_preview' => $shellOutput ?: 'Empty or blocked'
             ]);
         });
 
