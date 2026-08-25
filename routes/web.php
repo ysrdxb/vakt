@@ -96,9 +96,9 @@ Route::middleware(['auth'])->group(function () {
             
             return response()->json([
                 'path' => $path,
-                'file_exists' => file_exists($path),
-                'is_readable' => is_readable($path),
-                'is_dir' => is_dir(dirname($path)),
+                'file_exists' => @file_exists($path),
+                'is_readable' => @is_readable($path),
+                'is_dir' => @is_dir(dirname($path)),
                 'open_basedir' => ini_get('open_basedir'),
                 'user' => get_current_user(),
                 'stat' => @stat($path),
