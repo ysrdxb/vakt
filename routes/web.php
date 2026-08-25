@@ -17,14 +17,25 @@ Route::get('/fix-db', function () {
 
 // Temporary route to discover real log paths via browser
 Route::get('/find-logs', function () {
-    $base = '/var/www/virtual/kunnatta.is';
-    $results = [
-        'base_dir_exists' => is_dir($base),
-        'scandir_base'   => @scandir($base) ?: [],
-        'glob_logs'      => @glob('/var/www/virtual/kunnatta.is/logs/*') ?: [],
-        'glob_logs_deep' => @glob('/var/www/virtual/kunnatta.is/logs/*/*') ?: [],
-        'glob_virtual'   => @glob('/var/www/virtual/*') ?: [],
+    $results = [];
+    
+    $pathsToTest = [
+        '/var/www/virtual/kunnatta.is/logs',
+        '/var/www/virtual/kunnatta.is/logs/verk.kunnatta.is',
+        '/var/www/virtual/kunnatta.is/logs/verk.kunnatta.is/error.log',
+        '/var/www/virtual/kunnatta.is/verk.kunnatta.is',
+        '/var/www/virtual/kunnatta.is',
     ];
+
+    foreach ($pathsToTest as $path) {
+        $results[$path] = [
+            'exists' => @file_exists($path),
+            'is_dir' => @is_dir($path),
+            'is_readable' => @is_readable($path),
+            'contents' => @is_dir($path) && @is_readable($path) ? array_slice(@scandir($path) ?: [], 0, 15) : 'n/a',
+        ];
+    }
+
     return response()->json($results, 200, [], JSON_PRETTY_PRINT);
 });
 
