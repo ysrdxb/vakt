@@ -375,9 +375,14 @@ if ($providedKey !== $secret) {
     exit;
 }
 
-if (!file_exists($logPath)) {
+if (!@file_exists($logPath)) {
     http_response_code(404);
-    echo json_encode(['error' => "Log file not found at: " . $logPath . " (Make sure the path is correct and PHP has permission to read it)"]);
+    $ob = ini_get('open_basedir');
+    $errMsg = "Log file not found at: " . $logPath;
+    if ($ob) {
+        $errMsg .= " | SERVER RESTRICTION: open_basedir is active ({$ob}). Your host (1984.is) blocks PHP from reading files outside htdocs.";
+    }
+    echo json_encode(['error' => $errMsg]);
     exit;
 }
 
