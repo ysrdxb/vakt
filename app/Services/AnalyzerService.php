@@ -32,12 +32,24 @@ class AnalyzerService
             'received_at'     => $result->collectedAt,
         ]);
 
-        // Parse log tail for patterns
+        // Parse log tail for patterns & store MonitoringCheck
+        $parseResult = [0, 0, []];
         if (!empty($result->logEntries)) {
             // Join array with actual newlines so the parser can split line-by-line
             $content = is_array($result->logEntries) ? implode("\n", $result->logEntries) : $result->logEntries;
-            $this->parser->parseRawContent($project, $content);
+            $parseResult = $this->parser->parseRawContent($project, $content);
         }
+
+        \App\Models\MonitoringCheck::create([
+            'project_id'              => $project->id,
+            'checked_at'              => now(),
+            'status'                  => $result->overallStatus(),
+            'log_lines_scanned'       => is_array($result->logEntries) ? count($result->logEntries) : 0,
+            'errors_found'            => $parseResult[0] ?? 0,
+            'warnings_found'          => $parseResult[1] ?? 0,
+            'critical_patterns_found' => $parseResult[2] ?: null,
+            'duration_ms'             => 0,
+        ]);
 
         // Process Phase 5 Proactive Scans
         $incidentCreator = app(\App\Services\IncidentAutoCreatorService::class);
