@@ -54,13 +54,13 @@
         <table class="table" style="width:100%; border-collapse:collapse; text-align:left;">
           <thead>
             <tr style="border-bottom:1px solid #334155; background:rgba(255,255,255,0.02);">
-              <th style="padding:12px 20px; color:#94a3b8; font-size:12px; text-transform:uppercase; font-weight:600;">Timestamp</th>
-              <th style="padding:12px 20px; color:#94a3b8; font-size:12px; text-transform:uppercase; font-weight:600;">Level</th>
-              <th style="padding:12px 20px; color:#94a3b8; font-size:12px; text-transform:uppercase; font-weight:600;">Project</th>
+              <th style="padding:12px 20px; color:#94a3b8; font-size:12px; text-transform:uppercase; font-weight:600; width:150px;">Timestamp</th>
+              <th style="padding:12px 20px; color:#94a3b8; font-size:12px; text-transform:uppercase; font-weight:600; width:100px;">Level</th>
+              <th style="padding:12px 20px; color:#94a3b8; font-size:12px; text-transform:uppercase; font-weight:600; width:180px;">Project</th>
               <th style="padding:12px 20px; color:#94a3b8; font-size:12px; text-transform:uppercase; font-weight:600;">Message</th>
-              <th style="padding:12px 20px; color:#94a3b8; font-size:12px; text-transform:uppercase; font-weight:600;">Patterns</th>
-              <th style="padding:12px 20px; color:#94a3b8; font-size:12px; text-transform:uppercase; font-weight:600;">IP</th>
-              <th style="padding:12px 20px; color:#94a3b8; font-size:12px; text-transform:uppercase; font-weight:600; text-align:right;">Actions</th>
+              <th style="padding:12px 20px; color:#94a3b8; font-size:12px; text-transform:uppercase; font-weight:600; width:150px;">Patterns</th>
+              <th style="padding:12px 20px; color:#94a3b8; font-size:12px; text-transform:uppercase; font-weight:600; width:120px;">IP</th>
+              <th style="padding:12px 20px; color:#94a3b8; font-size:12px; text-transform:uppercase; font-weight:600; text-align:right; width:120px;">Actions</th>
             </tr>
           </thead>
           <tbody>
@@ -86,8 +86,8 @@
                     {{ entry.project ? entry.project.domain : 'Unknown' }}
                   </a>
                 </td>
-                <td style="padding:12px 20px;">
-                  <div style="font-family:var(--font-mono);font-size:0.75rem;color:var(--color-text-dim);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:350px" :title="entry.message">
+                <td style="padding:12px 20px; max-width:0; width:100%;">
+                  <div style="font-family:var(--font-mono);font-size:0.8rem;color:#e2e8f0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;" :title="entry.message">
                     {{ entry.message }}
                   </div>
                 </td>
@@ -117,20 +117,26 @@
               </tr>
               
               <!-- Expanded View -->
-              <tr v-if="expandedLog === entry.id" style="background:var(--color-surface-2); border-bottom:1px solid #334155;">
-                <td colspan="7" style="padding:16px 20px;">
-                  <div style="display:flex;gap:24px;flex-wrap:wrap">
-                    <div style="flex:1;min-width:300px;">
-                      <div style="font-size:0.75rem;text-transform:uppercase;color:var(--color-muted);margin-bottom:8px">Full Message</div>
-                      <div style="background:var(--color-background);padding:12px;border-radius:6px;font-family:var(--font-mono);font-size:0.85rem;color:var(--color-text);white-space:pre-wrap;max-height:300px;overflow-y:auto;border:1px solid var(--color-border)">
+              <tr v-if="expandedLog === entry.id" style="background:rgba(15, 23, 42, 0.4); border-bottom:1px solid #334155; box-shadow: inset 0 2px 10px rgba(0,0,0,0.2);">
+                <td colspan="7" style="padding:24px 32px;">
+                  <div style="display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:32px;">
+                    <div style="display:flex;flex-direction:column;">
+                      <div style="font-size:0.75rem;text-transform:uppercase;color:#94a3b8;margin-bottom:12px;font-weight:600;letter-spacing:0.5px;display:flex;align-items:center;gap:8px;">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" style="width:16px;height:16px"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4" /></svg>
+                        Raw Log Trace
+                      </div>
+                      <div style="flex:1;background:#0f172a;padding:20px;border-radius:8px;font-family:var(--font-mono);font-size:0.85rem;color:#cbd5e1;white-space:pre-wrap;max-height:500px;overflow-y:auto;border:1px solid rgba(255,255,255,0.05);box-shadow:inset 0 2px 4px rgba(0,0,0,0.3);line-height:1.6;">
                         {{ formatMessage(entry.message) }}
                       </div>
                     </div>
                     
-                    <div style="flex:1;min-width:300px;">
-                      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
-                        <div style="font-size:0.75rem;text-transform:uppercase;color:var(--color-muted);">AI Diagnostics</div>
-                        <button v-if="!entry.ai_explanation" @click="analyzeWithAI(entry)" class="btn btn-primary btn-sm" :disabled="analyzing[entry.id]">
+                    <div style="display:flex;flex-direction:column;">
+                      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
+                        <div style="font-size:0.75rem;text-transform:uppercase;color:#94a3b8;font-weight:600;letter-spacing:0.5px;display:flex;align-items:center;gap:8px;">
+                          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" style="width:16px;height:16px"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" /></svg>
+                          AI Diagnostics
+                        </div>
+                        <button v-if="!entry.ai_explanation" @click="analyzeWithAI(entry)" class="btn btn-primary btn-sm" :disabled="analyzing[entry.id]" style="background:#8b5cf6;border-color:#8b5cf6;">
                           <span v-if="!analyzing[entry.id]">Ask AI for Quick Fix</span>
                           <span v-else><span class="spinner-sm" style="margin-right:6px"></span>Analyzing...</span>
                         </button>
@@ -144,17 +150,16 @@
                         <div style="font-size:0.85rem;line-height:1.5;white-space:pre-wrap">{{ aiErrors[entry.id] }}</div>
                       </div>
                       
-                      <div v-if="entry.ai_explanation" style="background:rgba(139, 92, 246, 0.05);padding:20px;border-radius:8px;border:1px solid rgba(139, 92, 246, 0.2);color:var(--color-text);">
-                        <div style="display:flex;gap:8px;margin-bottom:16px;color:#a78bfa;align-items:center">
-                          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" style="width:22px;height:22px"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" /></svg>
-                          <strong style="font-size:1rem;letter-spacing:0.5px">AI Quick Fix Hint</strong>
+                      <div v-if="entry.ai_explanation" style="flex:1;background:linear-gradient(145deg, rgba(139, 92, 246, 0.08) 0%, rgba(139, 92, 246, 0.02) 100%);padding:24px;border-radius:8px;border:1px solid rgba(139, 92, 246, 0.2);color:var(--color-text);box-shadow:0 4px 15px -3px rgba(0, 0, 0, 0.1);">
+                        <div style="display:flex;gap:10px;margin-bottom:20px;color:#a78bfa;align-items:center;border-bottom:1px solid rgba(139,92,246,0.15);padding-bottom:12px;">
+                          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" style="width:24px;height:24px"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" /></svg>
+                          <strong style="font-size:1.1rem;letter-spacing:0.5px">AI Solution Report</strong>
                         </div>
-                        <div style="font-size:0.95rem;line-height:1.7;white-space:pre-wrap;">
-                          {{ entry.ai_explanation }}
+                        <div class="ai-markdown" v-html="parseMarkdown(entry.ai_explanation)">
                         </div>
                       </div>
-                      <div v-else-if="!entry.ai_explanation && !aiErrors[entry.id]" style="padding:24px;border:1px dashed var(--color-border);border-radius:8px;text-align:center;color:var(--color-text-dim);font-size:0.9rem;background:var(--color-surface)">
-                        Not analyzed yet. Click the button to generate a human-readable explanation and solution hint.
+                      <div v-else-if="!entry.ai_explanation && !aiErrors[entry.id]" style="flex:1;display:flex;align-items:center;justify-content:center;padding:32px;border:1px dashed rgba(255,255,255,0.1);border-radius:8px;text-align:center;color:#94a3b8;font-size:0.95rem;background:rgba(255,255,255,0.02)">
+                        Not analyzed yet. Click the button to generate a human-readable explanation and solution hint powered by Google Gemini.
                       </div>
                     </div>
                   </div>
@@ -182,6 +187,12 @@
 
 <script setup>
 import { ref, computed, onMounted, onUnmounted } from 'vue';
+import { marked } from 'marked';
+
+const parseMarkdown = (text) => {
+  if (!text) return '';
+  return marked.parse(text);
+};
 
 const props = defineProps({
   initialEntries: { type: Array, default: () => [] },
@@ -377,5 +388,57 @@ function formatMessage(msg) {
   0% { transform: scale(1); opacity: 1; }
   50% { transform: scale(1.5); opacity: 0.5; }
   100% { transform: scale(1); opacity: 1; }
+}
+</style>
+
+<style>
+/* Global styles for the AI Markdown renderer so we can style the v-html injection */
+.ai-markdown {
+  font-size: 0.95rem;
+  line-height: 1.6;
+  color: #e2e8f0;
+}
+.ai-markdown h1, .ai-markdown h2, .ai-markdown h3, .ai-markdown h4 {
+  color: #f8fafc;
+  margin-top: 1.5em;
+  margin-bottom: 0.75em;
+  font-weight: 600;
+}
+.ai-markdown h3 { font-size: 1.15rem; color: #a78bfa; }
+.ai-markdown h4 { font-size: 1.05rem; }
+.ai-markdown p {
+  margin-bottom: 1em;
+}
+.ai-markdown ul, .ai-markdown ol {
+  padding-left: 1.5em;
+  margin-bottom: 1em;
+}
+.ai-markdown li {
+  margin-bottom: 0.25em;
+}
+.ai-markdown strong {
+  color: #f8fafc;
+  font-weight: 600;
+}
+.ai-markdown code {
+  background: rgba(0,0,0,0.3);
+  padding: 0.2em 0.4em;
+  border-radius: 4px;
+  font-family: var(--font-mono);
+  font-size: 0.85em;
+  color: #fb7185;
+}
+.ai-markdown pre {
+  background: #0f172a;
+  padding: 1em;
+  border-radius: 6px;
+  overflow-x: auto;
+  margin-bottom: 1em;
+  border: 1px solid rgba(255,255,255,0.05);
+}
+.ai-markdown pre code {
+  background: transparent;
+  padding: 0;
+  color: #e2e8f0;
 }
 </style>
