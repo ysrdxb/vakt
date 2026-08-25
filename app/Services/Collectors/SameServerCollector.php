@@ -34,10 +34,25 @@ class SameServerCollector
 
     private function readLogs(): array
     {
-        $path = $this->resolvePath($this->project->log_path);
+        $primaryPath = $this->resolvePath($this->project->log_path);
 
-        if (!$this->pathSafe($path) || !is_readable($path)) {
-            return ['error' => 'Log file not accessible', 'path' => $path];
+        $candidatePaths = array_unique([
+            $primaryPath,
+            $this->basePath . '/vakt-logs/error.log',
+            $this->basePath . '/logs/php-error.log',
+            $this->basePath . '/logs/error.log',
+        ]);
+
+        $path = null;
+        foreach ($candidatePaths as $candidate) {
+            if ($this->pathSafe($candidate) && @is_readable($candidate)) {
+                $path = $candidate;
+                break;
+            }
+        }
+
+        if (!$path) {
+            return ['error' => 'Log file not accessible. Tried: ' . implode(' | ', $candidatePaths)];
         }
 
         // Read last 2MB of log file only — never load entire file into memory
