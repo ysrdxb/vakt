@@ -240,8 +240,8 @@ class ProjectController extends Controller
     public function testConnection(Request $request)
     {
         $server_type = $request->input('server_type', 'same_server');
-        $server_path = $request->input('server_path');
-        $log_path = $request->input('log_path', 'storage/logs/laravel.log');
+        $server_path = (string) $request->input('server_path', '');
+        $log_path = (string) $request->input('log_path', 'storage/logs/laravel.log');
         $agent_url = $request->input('agent_url');
         $agent_secret = $request->input('agent_secret');
 
@@ -250,29 +250,29 @@ class ProjectController extends Controller
         if ($server_type === 'same_server') {
             $path = rtrim($server_path, '/');
             $results[] = [
-                'icon' => is_dir($path) ? '✅' : '❌',
+                'icon' => @is_dir($path) ? '✅' : '❌',
                 'name' => 'Base path accessible',
                 'value' => $path ?: 'Missing path',
-                'pass' => is_dir($path),
+                'pass' => @is_dir($path),
                 'fix' => 'Check cPanel Addon Domains for the correct document root path'
             ];
 
             $logFull = $path . '/' . ltrim($log_path, '/');
-            $exists = file_exists($logFull);
+            $exists = @file_exists($logFull);
             $results[] = [
                 'icon' => $exists ? '✅' : '❌',
                 'name' => 'Log file found',
                 'value' => $logFull,
                 'pass' => $exists,
-                'fix' => 'Ensure storage/logs/laravel.log exists'
+                'fix' => 'Ensure log file exists'
             ];
 
             if ($exists) {
-                $readable = is_readable($logFull);
+                $readable = @is_readable($logFull);
                 $results[] = [
                     'icon' => $readable ? '✅' : '❌',
                     'name' => 'Log file readable',
-                    'value' => 'Permissions: ' . substr(sprintf('%o', fileperms($logFull)), -4),
+                    'value' => 'Permissions: ' . ($readable ? substr(sprintf('%o', @fileperms($logFull)), -4) : 'N/A'),
                     'pass' => $readable,
                     'fix' => 'Check file permissions'
                 ];
@@ -302,8 +302,8 @@ class ProjectController extends Controller
 
     public function autoDetectLogPath(Request $request)
     {
-        $base = rtrim($request->input('server_path', ''), '/');
-        $domain = $request->input('domain', '');
+        $base = rtrim((string)$request->input('server_path', ''), '/');
+        $domain = (string)$request->input('domain', '');
 
         if (empty($base) || empty($domain)) {
             return response()->json(['success' => false, 'message' => 'Please enter Domain and Server Path first.']);
@@ -314,6 +314,7 @@ class ProjectController extends Controller
         $domainFolder = $domainParts[0];
 
         $possibleFiles = [
+            "/storage/logs/laravel.log",
             "/logs/{$domainFolder}/error.log",
             "/logs/{$domainFolder}/access.log",
             "/logs/{$domainFolder}.log",
@@ -323,12 +324,12 @@ class ProjectController extends Controller
 
         foreach ($levels as $level) {
             $checkDir = $base . $level;
-            $realDir = realpath($checkDir);
+            $realDir = @realpath($checkDir);
             
             if (!$realDir) continue;
 
             foreach ($possibleFiles as $file) {
-                if (file_exists($realDir . $file) && is_readable($realDir . $file)) {
+                if (@file_exists($realDir . $file) && @is_readable($realDir . $file)) {
                     $relativePath = ltrim($level . $file, '/');
                     return response()->json(['success' => true, 'log_path' => $relativePath]);
                 }

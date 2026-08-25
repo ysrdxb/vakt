@@ -407,6 +407,7 @@ async function testConnection() {
     const payload = {
       server_type: form.server_type,
       server_path: form.server_path,
+      log_path: form.log_path,
       agent_url: form.agent_url,
       agent_secret: form.agent_secret,
       ftp_host: form.ftp_host,
