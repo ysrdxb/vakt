@@ -167,6 +167,11 @@ const isSidebarOpen = ref(false);
 const page = usePage();
 const toasts = ref([]);
 
+// Automatically close mobile sidebar when navigating to a new page
+watch(() => page.url, () => {
+  isSidebarOpen.value = false;
+});
+
 const addToast = (type, message) => {
   if (!message) return;
   const id = Date.now() + Math.random();
