@@ -151,6 +151,16 @@
                 <div class="form-text" style="font-size: 12px; color: #94a3b8; margin-top: 4px;">Used to authenticate requests to the agent.</div>
               </div>
             </div>
+
+            <div style="margin-top: 24px; padding: 16px; background: rgba(59, 130, 246, 0.1); border: 1px solid rgba(59, 130, 246, 0.2); border-radius: 8px;">
+              <h4 style="color: #60a5fa; margin-bottom: 8px; font-size: 14px; font-weight: 600;">📥 Need the Agent File?</h4>
+              <p style="color: #cbd5e1; font-size: 13px; line-height: 1.5; margin-bottom: 16px;">
+                Download the pre-configured <code style="background: rgba(0,0,0,0.3); padding: 2px 6px; border-radius: 4px; color: #fff;">agent.php</code> script. Upload this file to the <strong>public</strong> directory of your target application (e.g., <code>public/agent.php</code>). It securely streams your logs directly to Vakt.
+              </p>
+              <button type="button" @click="downloadAgentScript" class="btn btn-primary" style="background: #3b82f6; color: white; border: none;">
+                Download agent.php
+              </button>
+            </div>
           </div>
 
           <!-- FTP Fields -->
@@ -328,6 +338,59 @@ function generateSecretKey() {
 
 function generateSecret() {
   form.agent_secret = generateSecretKey();
+}
+
+function downloadAgentScript() {
+  const secret = form.agent_secret || 'MISSING_SECRET_KEY';
+  const content = `<?php
+// agent.php - Vakt SOC External Agent
+// Place this in your project's public/ folder
+
+$secret = '${secret}';
+$logPath = __DIR__ . '/../storage/logs/laravel.log';
+
+header('Content-Type: application/json');
+
+$providedKey = $_SERVER['HTTP_X_SOC_KEY'] ?? '';
+if ($providedKey !== $secret) {
+    http_response_code(403);
+    echo json_encode(['error' => 'Unauthorized']);
+    exit;
+}
+
+if (!file_exists($logPath)) {
+    http_response_code(404);
+    echo json_encode(['error' => "Log file not found at " . basename($logPath)]);
+    exit;
+}
+
+$command = "tail -n 1000 " . escapeshellarg($logPath);
+$logTail = [];
+if (function_exists('shell_exec')) {
+    $output = shell_exec($command);
+    if ($output) {
+        $logTail = explode("\\n", trim($output));
+    }
+}
+
+echo json_encode([
+    'status' => 'success',
+    'log_tail' => $logTail,
+    'system_metrics' => [
+        'disk_free' => @disk_free_space(__DIR__),
+        'disk_total' => @disk_total_space(__DIR__)
+    ]
+]);
+`;
+  const blob = new Blob([content], { type: 'application/x-httpd-php' });
+  const url = window.URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = 'agent.php';
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  window.URL.revokeObjectURL(url);
 }
 
 async function submitForm() {
