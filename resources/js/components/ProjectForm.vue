@@ -152,6 +152,12 @@
               </div>
             </div>
 
+            <div class="form-group" style="margin-top: 20px;">
+              <label class="form-label">Target Log File Path</label>
+              <input type="text" v-model="form.log_path" class="form-control" placeholder="/var/www/virtual/kunnatta.is/logs/verk.kunnatta.is/error.log" />
+              <div class="form-text" style="font-size: 12px; color: #94a3b8; margin-top: 4px;">Specify the absolute path (e.g. /var/www/virtual/kunnatta.is/logs/verk.kunnatta.is/error.log) or relative path to the log file on the target server.</div>
+            </div>
+
             <div style="margin-top: 24px; padding: 16px; background: rgba(59, 130, 246, 0.1); border: 1px solid rgba(59, 130, 246, 0.2); border-radius: 8px;">
               <h4 style="color: #60a5fa; margin-bottom: 8px; font-size: 14px; font-weight: 600;">📥 Need the Agent File?</h4>
               <p style="color: #cbd5e1; font-size: 13px; line-height: 1.5; margin-bottom: 16px;">
