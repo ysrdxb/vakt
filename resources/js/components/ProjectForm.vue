@@ -105,7 +105,7 @@
                 <label class="form-label">Relative Log Path</label>
                 <div style="display:flex;gap:8px;">
                   <input type="text" v-model="form.log_path" class="form-control" placeholder="storage/logs/laravel.log" />
-                  <button type="button" class="btn btn-secondary" @click="autoDetectLog" :disabled="autoDetecting" style="white-space:nowrap;">
+                  <button type="button" class="btn btn-secondary" @click="autoDetectLogPath" :disabled="autoDetecting" style="white-space:nowrap;">
                     {{ autoDetecting ? 'Detecting...' : 'Auto-Detect' }}
                   </button>
                 </div>
@@ -132,7 +132,7 @@
 
           <!-- Diagnostics -->
           <div style="margin-top:20px;padding-top:20px;border-top:1px solid #334155;display:flex;align-items:center;justify-content:space-between;">
-            <button type="button" class="btn btn-secondary" @click="runDiagnostics" :disabled="runningDiagnostics">
+            <button type="button" class="btn btn-secondary" @click="testConnection" :disabled="runningDiagnostics">
               {{ runningDiagnostics ? 'Testing...' : '⚡ Test Connection & Run Diagnostics' }}
             </button>
             <span v-if="diagnosticStatus" :style="{ color: diagnosticStatus === 'ready' ? '#10b981' : '#ef4444', fontWeight: 600 }">
