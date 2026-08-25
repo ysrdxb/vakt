@@ -193,8 +193,6 @@ class ProjectController extends Controller
             'laravel_version'              => 'nullable|string',
             'monitoring_interval_minutes'  => 'required|integer|in:1,5,15,30,60',
             'alert_email'                  => 'nullable|email',
-            'slack_webhook_url'            => 'nullable|url',
-            'discord_webhook_url'          => 'nullable|url',
             // Conditional fields — validated manually below
             'server_path'                  => 'nullable|string',
             'log_path'                     => 'nullable|string',

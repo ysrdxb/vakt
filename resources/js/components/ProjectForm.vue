@@ -221,22 +221,10 @@
           </div>
         </div>
         <div class="card-body" style="padding: 24px;">
-          <div class="grid-3" style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 20px;">
-            <div class="form-group">
-              <label class="form-label">Alert Email</label>
-              <input type="email" v-model="form.alert_email" class="form-control" placeholder="admin@example.com" />
-              <div class="form-text" style="font-size: 12px; color: #94a3b8; margin-top: 4px;">Receive critical downtime alerts.</div>
-            </div>
-            <div class="form-group">
-              <label class="form-label">Slack Webhook URL</label>
-              <input type="url" v-model="form.slack_webhook_url" class="form-control" placeholder="https://hooks.slack.com/..." />
-              <div class="form-text" style="font-size: 12px; color: #94a3b8; margin-top: 4px;">For incident updates and daily reports.</div>
-            </div>
-            <div class="form-group">
-              <label class="form-label">Discord Webhook URL</label>
-              <input type="url" v-model="form.discord_webhook_url" class="form-control" placeholder="https://discord.com/api/webhooks/..." />
-              <div class="form-text" style="font-size: 12px; color: #94a3b8; margin-top: 4px;">For incident updates and daily reports.</div>
-            </div>
+          <div class="form-group">
+            <label class="form-label">Alert Email</label>
+            <input type="email" v-model="form.alert_email" class="form-control" placeholder="admin@example.com" style="max-width: 400px;" />
+            <div class="form-text" style="font-size: 12px; color: #94a3b8; margin-top: 4px;">Receive critical downtime alerts and daily security briefings.</div>
           </div>
         </div>
       </div>
@@ -281,8 +269,6 @@ const form = reactive({
   ftp_user: props.project.ftp_user || '',
   ftp_password: '', // Kept empty for security, only sent if changed
   alert_email: props.project.alert_email || '',
-  slack_webhook_url: props.project.slack_webhook_url || '',
-  discord_webhook_url: props.project.discord_webhook_url || '',
 });
 
 const errors = ref([]);
