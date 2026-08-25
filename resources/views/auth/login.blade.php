@@ -356,15 +356,29 @@
     <div class="blob blob-3"></div>
 </div>
 
-<div id="app">
-    <login-form
-        action-url="{{ route('login') }}"
-        csrf-token="{{ csrf_token() }}"
-        old-email="{{ old('email') }}"
-        error-message="{{ $errors->first('email') }}"
-        status-message="{{ session('status') }}"
-    ></login-form>
-</div>
+@php
+    $vueProps = [
+        'actionUrl' => route('login'),
+        'csrfToken' => csrf_token(),
+        'oldEmail' => old('email') ?? '',
+        'errorMessage' => $errors->first('email') ?? '',
+        'statusMessage' => session('status') ?? ''
+    ];
+@endphp
+
+<script>
+    window.onerror = function(msg, url, lineNo, columnNo, error) {
+        document.body.innerHTML += '<div style="position:absolute;top:0;left:0;z-index:9999;background:red;color:white;padding:20px;">' + msg + '<br>' + (error ? error.stack : '') + '</div>';
+    };
+    window.addEventListener("unhandledrejection", function(e) {
+        document.body.innerHTML += '<div style="position:absolute;top:50px;left:0;z-index:9999;background:red;color:white;padding:20px;">Promise Rejection: ' + e.reason + '</div>';
+    });
+
+    window.__VUE_PROPS__ = window.__VUE_PROPS__ || {};
+    window.__VUE_PROPS__['vue-login-form'] = @json($vueProps);
+</script>
+
+<div id="vue-login-form"></div>
 
 </body>
 </html>

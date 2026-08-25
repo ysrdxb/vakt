@@ -37,7 +37,7 @@
           <div class="grid-3">
             <div class="form-group">
               <label class="form-label">Application Stack *</label>
-              <select v-model="form.stack" class="form-select">
+              <select v-model="form.stack" class="form-control">
                 <option value="laravel">Laravel Framework</option>
                 <option value="wordpress">WordPress</option>
                 <option value="nodejs">Node.js / Express</option>
@@ -50,7 +50,7 @@
             </div>
             <div class="form-group">
               <label class="form-label">Check Frequency</label>
-              <select v-model="form.monitoring_interval_minutes" class="form-select">
+              <select v-model="form.monitoring_interval_minutes" class="form-control">
                 <option value="1">Every Minute</option>
                 <option value="5">Every 5 Minutes</option>
                 <option value="15">Every 15 Minutes</option>
@@ -369,8 +369,8 @@ async function autoDetectLog() {
 
 .form-group { margin-bottom: 20px; }
 .form-label { display: block; font-size: 13px; font-weight: 500; color: #94a3b8; margin-bottom: 8px; text-transform: uppercase; letter-spacing: 0.05em; }
-.form-control, .form-select { width: 100%; background: #0f172a; border: 1px solid #334155; color: #f8fafc; padding: 10px 12px; border-radius: 6px; font-size: 14px; transition: border-color 0.2s; }
-.form-control:focus, .form-select:focus { outline: none; border-color: #3b82f6; }
+.form-control { width: 100%; background: #0f172a; border: 1px solid #334155; color: #f8fafc; padding: 10px 12px; border-radius: 6px; font-size: 14px; transition: border-color 0.2s; }
+.form-control:focus { outline: none; border-color: #3b82f6; }
 .form-text { font-size: 12px; color: #94a3b8; margin-top: 6px; }
 
 .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; }

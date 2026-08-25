@@ -29,7 +29,7 @@
           <input type="text" v-model="searchQuery" @input="fetchProjects" class="form-control" placeholder="Search by domain or name..." style="padding-left: 38px;" />
         </div>
         <div style="width: 200px;">
-          <select v-model="filterStatus" @change="fetchProjects" class="form-select">
+          <select v-model="filterStatus" @change="fetchProjects" class="form-control">
             <option value="">All Statuses</option>
             <option value="ok">OK - Healthy</option>
             <option value="warning">Warning</option>

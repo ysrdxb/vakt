@@ -101,7 +101,7 @@
                     <span class="badge" :class="getSeverityBadgeClass(item.severity)">{{ item.severity.charAt(0).toUpperCase() + item.severity.slice(1) }}</span>
                   </td>
                   <td style="padding: 12px 20px;">
-                    <select v-model="item.status" @change="updateStatus(item)" class="form-select form-control-sm" style="min-width: 120px;">
+                    <select v-model="item.status" @change="updateStatus(item)" class="form-control form-control-sm" style="min-width: 120px;">
                       <option value="unchecked">Unchecked</option>
                       <option value="pass">Pass</option>
                       <option value="fail">Fail</option>

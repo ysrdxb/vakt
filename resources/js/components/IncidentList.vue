@@ -24,14 +24,14 @@
         </div>
         
         <div style="width: 200px;">
-          <select v-model="filterProject" @change="fetchIncidents(1)" class="form-select">
+          <select v-model="filterProject" @change="fetchIncidents(1)" class="form-control">
             <option value="">All Projects</option>
             <option v-for="p in projects" :key="p.id" :value="p.id">{{ p.domain }}</option>
           </select>
         </div>
         
         <div style="width: 150px;">
-          <select v-model="filterSeverity" @change="fetchIncidents(1)" class="form-select">
+          <select v-model="filterSeverity" @change="fetchIncidents(1)" class="form-control">
             <option value="">All Severities</option>
             <option value="p1">P1 - Critical</option>
             <option value="p2">P2 - High</option>
@@ -41,7 +41,7 @@
         </div>
 
         <div style="width: 160px;">
-          <select v-model="filterStatus" @change="fetchIncidents(1)" class="form-select">
+          <select v-model="filterStatus" @change="fetchIncidents(1)" class="form-control">
             <option value="">All Statuses</option>
             <option value="open">Open</option>
             <option value="investigating">Investigating</option>

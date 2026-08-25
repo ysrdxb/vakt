@@ -24,14 +24,14 @@
         </div>
         
         <div style="width: 180px;">
-          <select v-model="projectId" @change="fetchEntries(1)" class="form-select">
+          <select v-model="projectId" @change="fetchEntries(1)" class="form-control">
             <option value="">All Projects</option>
             <option v-for="p in projects" :key="p.id" :value="p.id">{{ p.domain }}</option>
           </select>
         </div>
         
         <div style="width: 150px;">
-          <select v-model="filterLevel" @change="fetchEntries(1)" class="form-select">
+          <select v-model="filterLevel" @change="fetchEntries(1)" class="form-control">
             <option value="">All Levels</option>
             <option value="debug">Debug</option>
             <option value="info">Info</option>
