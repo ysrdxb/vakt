@@ -18,12 +18,15 @@ class ReportController extends Controller
             ->orderBy('detected_at', 'desc')
             ->get();
 
-        $uptimeLogs = $project->uptimeLogs()
+        $totalPings = $project->uptimeLogs()
             ->whereBetween('created_at', [$startDate, $endDate])
-            ->get();
+            ->count();
 
-        $totalPings = $uptimeLogs->count();
-        $successfulPings = $uptimeLogs->where('status_code', 200)->count();
+        $successfulPings = $project->uptimeLogs()
+            ->whereBetween('created_at', [$startDate, $endDate])
+            ->where('status_code', 200)
+            ->count();
+
         $uptimePercentage = $totalPings > 0 ? round(($successfulPings / $totalPings) * 100, 2) : 100;
 
         $data = [
