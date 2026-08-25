@@ -15,6 +15,53 @@ Route::get('/fix-db', function () {
     return 'Database Fixed! You can now go back to the dashboard.';
 });
 
+// Temporary debug route — shows every step of agent collection
+Route::get('/debug-agent/{projectId}', function ($projectId) {
+    $project = \App\Models\Project::find($projectId);
+    if (!$project) return response()->json(['error' => 'Project not found']);
+
+    $out = ['project' => $project->domain, 'agent_url' => $project->agent_url, 'steps' => []];
+
+    // Step 1: Call the agent directly (bypass rate limiter)
+    try {
+        $response = \Illuminate\Support\Facades\Http::withHeaders([
+            'X-SOC-Key' => $project->agent_secret,
+            'Accept'    => 'application/json',
+        ])->timeout(15)->get($project->agent_url);
+
+        $out['steps']['1_agent_http_status'] = $response->status();
+        $data = $response->json();
+        $out['steps']['2_agent_response_keys'] = array_keys($data ?? []);
+        $out['steps']['3_log_tail_count'] = count($data['log_tail'] ?? []);
+        $out['steps']['4_log_tail_sample'] = array_slice($data['log_tail'] ?? [], 0, 3);
+
+        // Step 2: Run parser manually
+        $logEntries = $data['log_tail'] ?? [];
+        $content = is_array($logEntries) ? implode("\n", $logEntries) : $logEntries;
+        $out['steps']['5_joined_content_length'] = strlen($content);
+        $lines = array_filter(explode("\n", $content));
+        $out['steps']['6_line_count_after_split'] = count($lines);
+
+        // Step 3: Check level detection for first 5 lines
+        $levelSamples = [];
+        foreach (array_slice(array_values($lines), 0, 5) as $line) {
+            $level = 'debug';
+            if (preg_match('/\[CRITICAL\]|CRITICAL|Fatal error/i', $line)) $level = 'critical';
+            elseif (preg_match('/\[ERROR\]|ERROR|Exception|SQLSTATE/i', $line)) $level = 'error';
+            elseif (preg_match('/\[WARNING\]|WARNING|Warning:|\[NOTICE\]|Notice:/i', $line)) $level = 'warning';
+            elseif (preg_match('/\[INFO\]|INFO/i', $line)) $level = 'info';
+            $levelSamples[] = ['line' => substr($line, 0, 80), 'level' => $level];
+        }
+        $out['steps']['7_level_detection_sample'] = $levelSamples;
+
+    } catch (\Exception $e) {
+        $out['steps']['error'] = $e->getMessage();
+    }
+
+    return response()->json($out, 200, [], JSON_PRETTY_PRINT);
+});
+
+
 // ─── Authenticated ────────────────────────────────────
 Route::middleware(['auth'])->group(function () {
 
