@@ -39,7 +39,7 @@
               <span v-if="isTestingReport" class="spinner-sm"></span>
               <span v-else>Test Daily Report</span>
             </button>
-            <a :href="endpoints.edit" class="btn btn-ghost">Edit Settings</a>
+            <Link :href="route('projects.edit', project.id)" class="btn btn-ghost">Edit Settings</Link>
           </div>
         </div>
       </div>
@@ -276,13 +276,13 @@
 
 <script setup>
 import { ref, computed } from 'vue';
+import { Link } from '@inertiajs/vue3';
+import axios from 'axios';
 
 const props = defineProps({
   project: { type: Object, required: true },
   latestReport: { type: Object, default: null },
   uptimeLogs: { type: Array, default: () => [] },
-  endpoints: { type: Object, required: true },
-  csrf: { type: String, required: true }
 });
 
 const isScanning = ref(false);
@@ -375,11 +375,8 @@ function formatTimeOnly(dateString) {
 async function runScan() {
   isScanning.value = true;
   try {
-    const res = await fetch(props.endpoints.runScan, {
-      method: 'POST',
-      headers: { 'Accept': 'application/json', 'Content-Type': 'application/json', 'X-CSRF-TOKEN': props.csrf }
-    });
-    const data = await res.json();
+    const res = await axios.post(route('projects.run-scan', project.value.id));
+    const data = res.data;
     if (window.dispatchEvent) {
       window.dispatchEvent(new CustomEvent('toast', { detail: { type: data.success ? 'success' : 'error', title: 'Scan', message: data.message } }));
     }
@@ -393,11 +390,8 @@ async function runScan() {
 async function sendTestReport() {
   isTestingReport.value = true;
   try {
-    const res = await fetch(props.endpoints.sendTestReport, {
-      method: 'POST',
-      headers: { 'Accept': 'application/json', 'Content-Type': 'application/json', 'X-CSRF-TOKEN': props.csrf }
-    });
-    const data = await res.json();
+    const res = await axios.post(route('projects.test-report', project.value.id));
+    const data = res.data;
     if (window.dispatchEvent) {
       window.dispatchEvent(new CustomEvent('toast', { detail: { type: data.success ? 'success' : 'error', title: 'Report', message: data.message } }));
     }
@@ -411,11 +405,8 @@ async function sendTestReport() {
 async function confirmWhitelist() {
   isConfirmingWhitelist.value = true;
   try {
-    const res = await fetch(props.endpoints.confirmWhitelist, {
-      method: 'POST',
-      headers: { 'Accept': 'application/json', 'Content-Type': 'application/json', 'X-CSRF-TOKEN': props.csrf }
-    });
-    const data = await res.json();
+    const res = await axios.post(route('projects.confirm-whitelist', project.value.id));
+    const data = res.data;
     if (data.success) {
       project.value.firewall_whitelist_confirmed = true;
       if (window.dispatchEvent) {
