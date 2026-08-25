@@ -249,32 +249,35 @@ class ProjectController extends Controller
 
         if ($server_type === 'same_server') {
             $path = rtrim($server_path, '/');
+            $openBasedir = ini_get('open_basedir');
+            $isDir = @is_dir($path);
+            
             $results[] = [
-                'icon' => @is_dir($path) ? '✅' : '❌',
+                'icon' => $isDir ? '✅' : ($openBasedir ? '⚠️' : '❌'),
                 'name' => 'Base path accessible',
                 'value' => $path ?: 'Missing path',
-                'pass' => @is_dir($path),
-                'fix' => 'Check cPanel Addon Domains for the correct document root path'
+                'pass' => $isDir || $openBasedir,
+                'fix' => $openBasedir && !$isDir ? 'Web UI blocked by open_basedir (normal on shared hosting). Cron CLI may still have access.' : 'Check cPanel Addon Domains for the correct document root path'
             ];
 
             $logFull = $path . '/' . ltrim($log_path, '/');
             $exists = @file_exists($logFull);
             $results[] = [
-                'icon' => $exists ? '✅' : '❌',
+                'icon' => $exists ? '✅' : ($openBasedir ? '⚠️' : '❌'),
                 'name' => 'Log file found',
                 'value' => $logFull,
-                'pass' => $exists,
-                'fix' => 'Ensure log file exists'
+                'pass' => $exists || $openBasedir,
+                'fix' => $openBasedir && !$exists ? 'Web UI cannot verify due to open_basedir, but CLI may read it.' : 'Ensure log file exists'
             ];
 
-            if ($exists) {
+            if ($exists || $openBasedir) {
                 $readable = @is_readable($logFull);
                 $results[] = [
-                    'icon' => $readable ? '✅' : '❌',
+                    'icon' => $readable ? '✅' : ($openBasedir ? '⚠️' : '❌'),
                     'name' => 'Log file readable',
-                    'value' => 'Permissions: ' . ($readable ? substr(sprintf('%o', @fileperms($logFull)), -4) : 'N/A'),
-                    'pass' => $readable,
-                    'fix' => 'Check file permissions'
+                    'value' => 'Permissions: ' . ($readable ? substr(sprintf('%o', @fileperms($logFull)), -4) : 'Unknown'),
+                    'pass' => $readable || $openBasedir,
+                    'fix' => $openBasedir && !$readable ? 'Web UI cannot read due to open_basedir.' : 'Check file permissions'
                 ];
             }
         } elseif ($server_type === 'external_agent') {
