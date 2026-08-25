@@ -32,11 +32,10 @@ class AnalyzerService
             'received_at'     => $result->collectedAt,
         ]);
 
-        // Parse log tail for patterns (simulate passing raw string or array)
         // Parse log tail for patterns
         if (!empty($result->logEntries)) {
-            // Join array with newlines so the parser can process it line-by-line
-            $content = is_array($result->logEntries) ? implode("\\n", $result->logEntries) : $result->logEntries;
+            // Join array with actual newlines so the parser can split line-by-line
+            $content = is_array($result->logEntries) ? implode("\n", $result->logEntries) : $result->logEntries;
             $this->parser->parseRawContent($project, $content);
         }
 
