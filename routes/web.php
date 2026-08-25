@@ -18,21 +18,23 @@ Route::get('/fix-db', function () {
 // Temporary route to discover real log paths via browser
 Route::get('/find-logs', function () {
     $results = [];
+    $healthRoot = base_path();
+    $results['health_base_path'] = $healthRoot;
     
-    $pathsToTest = [
-        '/var/www/virtual/kunnatta.is/logs',
-        '/var/www/virtual/kunnatta.is/logs/verk.kunnatta.is',
-        '/var/www/virtual/kunnatta.is/logs/verk.kunnatta.is/error.log',
-        '/var/www/virtual/kunnatta.is/verk.kunnatta.is',
-        '/var/www/virtual/kunnatta.is',
+    $parents = [
+        'level_0_app_root'  => $healthRoot,
+        'level_1_parent'    => dirname($healthRoot),
+        'level_2_grand'     => dirname(dirname($healthRoot)),
+        'level_3_great'     => dirname(dirname(dirname($healthRoot))),
+        'level_4_root'      => dirname(dirname(dirname(dirname($healthRoot)))),
     ];
 
-    foreach ($pathsToTest as $path) {
-        $results[$path] = [
+    foreach ($parents as $label => $path) {
+        $results['hierarchy'][$label] = [
+            'path' => $path,
             'exists' => @file_exists($path),
             'is_dir' => @is_dir($path),
-            'is_readable' => @is_readable($path),
-            'contents' => @is_dir($path) && @is_readable($path) ? array_slice(@scandir($path) ?: [], 0, 15) : 'n/a',
+            'contents' => @is_dir($path) && @is_readable($path) ? array_slice(@scandir($path) ?: [], 0, 30) : 'not_readable',
         ];
     }
 
