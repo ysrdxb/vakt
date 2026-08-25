@@ -2,24 +2,14 @@
 
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Auth;
-use App\Livewire\Projects\ProjectForm;
-use App\Livewire\Dashboard\ClientDashboard;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\ProjectController;
-use App\Livewire\Incidents\IncidentList;
-use App\Livewire\Incidents\IncidentDetail;
-use App\Livewire\Logs\LogViewer;
-use App\Livewire\FileIntegrity\FileIntegrityView;
-use App\Livewire\Audit\AuditTracker;
-use App\Livewire\DailyLogs\DailyLogCalendar;
 
 // ─── Guest ───────────────────────────────────────────
 Route::middleware('guest')->group(function () {
     require __DIR__.'/auth.php';
 });
 
-// Isolated Livewire Diagnostic Page
-Route::get('/livewire-test', \App\Livewire\TestLivewire::class);
 
 // Temporary route to fix the database on shared hosting
 Route::get('/fix-db', function () {
@@ -127,7 +117,7 @@ Route::middleware(['auth'])->group(function () {
 
     // ─── CLIENT ROUTES ────────────────────────────────
     Route::middleware(['role:client'])->group(function () {
-        Route::get('/client/dashboard', ClientDashboard::class)->name('client.dashboard');
+        Route::get('/client/dashboard', [\App\Http\Controllers\DashboardController::class, 'clientIndex'])->name('client.dashboard');
 
         // Client-visible improvements (client_review + approved)
         Route::get('/client/improvements', function () {
