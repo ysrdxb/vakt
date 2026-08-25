@@ -11,7 +11,7 @@ class LogViewerController extends Controller
 {
     public function index(Request $request, ?Project $project = null)
     {
-        $projectId = $request->input('project_id', $project?->id);
+        $projectId = $request->input('project_id', $request->input('project', $project?->id));
         $filterLevel = $request->input('filterLevel');
         $search = $request->input('search');
         $perPage = $request->input('perPage', 50);
@@ -43,7 +43,21 @@ class LogViewerController extends Controller
         }
 
         $projects = Project::orderBy('domain')->get();
-        return \Inertia\Inertia::render('LogViewer', compact('entries', 'projects', 'projectId'));
+        return \Inertia\Inertia::render('LogViewer', [
+            'initialEntries' => $entries->items(),
+            'meta' => [
+                'current_page' => $entries->currentPage(),
+                'last_page' => $entries->lastPage(),
+                'total' => $entries->total(),
+                'per_page' => $entries->perPage()
+            ],
+            'projects' => $projects,
+            'initialProjectId' => $projectId,
+            'csrf' => csrf_token(),
+            'endpoints' => [
+                'index' => route('logs.index')
+            ]
+        ]);
     }
 
     public function markReviewed(Request $request, LogEntry $entry)
