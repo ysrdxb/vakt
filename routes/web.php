@@ -5,10 +5,8 @@ use Illuminate\Support\Facades\Auth;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\ProjectController;
 
-// ─── Guest ───────────────────────────────────────────
-Route::middleware('guest')->group(function () {
-    require __DIR__.'/auth.php';
-});
+// ─── Auth Routes ───────────────────────────────────────────
+require __DIR__.'/auth.php';
 
 
 // Temporary route to fix the database on shared hosting
