@@ -137,12 +137,63 @@
         <slot />
       </div>
     </main>
+
+    <!-- Toast Notifications Container -->
+    <div style="position: fixed; bottom: 24px; right: 24px; z-index: 10000; display: flex; flex-direction: column; gap: 12px; pointer-events: none;">
+      <div v-for="toast in toasts" :key="toast.id" 
+           style="pointer-events: auto; background: #1e293b; padding: 16px 20px; border-radius: 8px; box-shadow: 0 10px 25px rgba(0,0,0,0.5); display: flex; align-items: center; gap: 12px; border: 1px solid rgba(255,255,255,0.1); min-width: 300px; animation: slideInRight 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;">
+        
+        <svg v-if="toast.type === 'success'" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" style="width: 24px; height: 24px; color: #10b981;">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+        </svg>
+        <svg v-else-if="toast.type === 'error'" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" style="width: 24px; height: 24px; color: #ef4444;">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+        </svg>
+        <svg v-else xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" style="width: 24px; height: 24px; color: #3b82f6;">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+        </svg>
+
+        <span style="font-size: 14px; font-weight: 500; color: #f8f9fa;">{{ toast.message }}</span>
+      </div>
+    </div>
   </div>
 </template>
 
 <script setup>
-import { ref } from 'vue';
-import { Link } from '@inertiajs/vue3';
+import { ref, watch } from 'vue';
+import { Link, usePage } from '@inertiajs/vue3';
 
 const isSidebarOpen = ref(false);
+const page = usePage();
+const toasts = ref([]);
+
+const addToast = (type, message) => {
+  if (!message) return;
+  const id = Date.now() + Math.random();
+  toasts.value.push({ id, type, message });
+  setTimeout(() => {
+    toasts.value = toasts.value.filter(t => t.id !== id);
+  }, 4000);
+};
+
+watch(() => page.props.flash, (flash) => {
+  if (!flash) return;
+  if (flash.success) addToast('success', flash.success);
+  if (flash.error) addToast('error', flash.error);
+  if (flash.warning) addToast('warning', flash.warning);
+  if (flash.info) addToast('info', flash.info);
+}, { deep: true, immediate: true });
+
+if (typeof window !== 'undefined') {
+  window.addEventListener('toast', (e) => {
+    addToast(e.detail.type || 'success', e.detail.message || e.detail.title);
+  });
+}
 </script>
+
+<style>
+@keyframes slideInRight {
+  from { opacity: 0; transform: translateX(100%); }
+  to { opacity: 1; transform: translateX(0); }
+}
+</style>

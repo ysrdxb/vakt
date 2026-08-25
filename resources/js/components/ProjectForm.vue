@@ -252,38 +252,15 @@ async function submitForm() {
 
   const url = props.isEdit ? route('projects.update', props.project.id) : route('projects.store');
 
-  try {
-    const res = await axios.post(url, raw, {
-      headers: {
-        'Accept': 'application/json',
-        'Content-Type': 'application/json'
-      }
-    });
-
-    const data = res.data;
-    if (data.success) {
-      successMessage.value = data.message;
-      if (window.dispatchEvent) {
-        window.dispatchEvent(new CustomEvent('toast', { detail: { type: 'success', title: 'Saved', message: data.message } }));
-      }
-      setTimeout(() => {
-        router.visit(data.redirect_url);
-      }, 1000);
+  router.post(url, raw, {
+    preserveScroll: true,
+    onError: (errs) => {
+      errors.value = Object.values(errs);
+    },
+    onFinish: () => {
+      submitting.value = false;
     }
-  } catch (err) {
-    if (err.response && err.response.status === 422) {
-      const msgs = [];
-      const errData = err.response.data.errors;
-      for (const k in errData) {
-        msgs.push(errData[k].join(' '));
-      }
-      errors.value = msgs;
-    } else {
-      errors.value = [err.message || 'An unexpected error occurred.'];
-    }
-  } finally {
-    submitting.value = false;
-  }
+  });
 }
 
 async function autoDetectLogPath() {

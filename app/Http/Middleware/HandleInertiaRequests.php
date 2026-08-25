@@ -47,6 +47,12 @@ class HandleInertiaRequests extends Middleware
             'notifications' => [
                 'p1_active' => \App\Models\Incident::where('severity', 'p1')->whereNotIn('status', ['resolved', 'closed'])->count(),
             ],
+            'flash' => [
+                'success' => fn () => $request->session()->get('success'),
+                'error' => fn () => $request->session()->get('error'),
+                'warning' => fn () => $request->session()->get('warning'),
+                'info' => fn () => $request->session()->get('info'),
+            ],
             'csrf_token' => csrf_token(),
             'ziggy' => fn () => [
                 ...(new \Tighten\Ziggy\Ziggy)->toArray(),
