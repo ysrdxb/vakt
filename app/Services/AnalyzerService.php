@@ -35,8 +35,15 @@ class AnalyzerService
         // Parse log tail for patterns & store MonitoringCheck
         $parseResult = [0, 0, []];
         if (!empty($result->logEntries)) {
-            // Join array with actual newlines so the parser can split line-by-line
-            $content = is_array($result->logEntries) ? implode("\n", $result->logEntries) : $result->logEntries;
+            $lines = [];
+            foreach ((array)$result->logEntries as $entry) {
+                if (is_array($entry)) {
+                    $lines[] = $entry['raw'] ?? $entry['message'] ?? implode(' ', array_filter($entry, 'is_scalar'));
+                } else {
+                    $lines[] = (string) $entry;
+                }
+            }
+            $content = implode("\n", array_filter($lines));
             $parseResult = $this->parser->parseRawContent($project, $content);
         }
 

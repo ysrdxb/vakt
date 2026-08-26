@@ -64,7 +64,7 @@ class SameServerCollector
         $content = fread($handle, $size - $offset);
         fclose($handle);
 
-        return $this->parseLogContent($content);
+        return array_values(array_filter(explode("\n", $content)));
     }
 
     private function checkEnv(): array
