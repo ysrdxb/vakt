@@ -266,7 +266,7 @@ class ProjectController extends Controller
                 'fix' => $openBasedir && !$isDir ? 'Web UI blocked by open_basedir (normal on shared hosting). Cron CLI may still have access.' : 'Check cPanel Addon Domains for the correct document root path'
             ];
 
-            $logFull = $path . '/' . ltrim($log_path, '/');
+            $logFull = str_starts_with($log_path, '/') ? $log_path : $path . '/' . ltrim($log_path, '/');
             $exists = @file_exists($logFull);
             $results[] = [
                 'icon' => $exists ? '✅' : ($openBasedir ? '⚠️' : '❌'),
