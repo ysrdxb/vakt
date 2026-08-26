@@ -109,14 +109,13 @@ Route::get('/debug-agent/{projectId}', function ($projectId) {
         $out['steps']['3_log_tail_count'] = count($data['log_tail'] ?? []);
         $out['steps']['4_log_tail_sample'] = array_slice($data['log_tail'] ?? [], 0, 3);
 
-        // Step 2: Test SameServerCollector direct reading
-        $sameServerCollector = new \App\Services\Collectors\SameServerCollector($project);
-        $sameServerResult = $sameServerCollector->collect();
-        $out['steps']['5_same_server_log_count'] = count($sameServerResult->logEntries);
-        $out['steps']['5b_same_server_sample'] = array_slice($sameServerResult->logEntries, 0, 3);
+        // Step 2: Test CollectorFactory execution
+        $collectionResult = \App\Services\Collectors\CollectorFactory::collect($project);
+        $logEntries = $collectionResult->logEntries;
+        $out['steps']['5_collector_log_count'] = count($logEntries);
+        $out['steps']['5b_collector_log_sample'] = array_slice($logEntries, 0, 3);
 
         // Step 3: Run parser using actual LogParserService
-        $logEntries = $sameServerResult->logEntries ?: ($data['log_tail'] ?? []);
         $content = is_array($logEntries) ? implode("\n", array_column($logEntries, 'message') ?: $logEntries) : $logEntries;
         $out['steps']['6_joined_content_length'] = strlen($content);
 

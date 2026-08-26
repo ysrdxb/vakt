@@ -196,7 +196,8 @@ class SameServerCollector
      */
     private function pathSafe(string $path): bool
     {
-        $real = realpath(dirname($path));
+        $dir = dirname($path);
+        $real = @realpath($dir);
         if ($real === false) return false;
 
         // Allow php error logs which may be outside project root
