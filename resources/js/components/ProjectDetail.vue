@@ -380,6 +380,8 @@ async function runScan() {
     if (window.dispatchEvent) {
       window.dispatchEvent(new CustomEvent('toast', { detail: { type: data.success ? 'success' : 'error', title: 'Scan', message: data.message } }));
     }
+    // Reload Inertia page props so new logs, last_checked_at, and health checks appear instantly!
+    router.reload({ preserveScroll: true });
   } catch (e) {
     console.error(e);
   } finally {
