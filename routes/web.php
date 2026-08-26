@@ -15,30 +15,76 @@ Route::get('/fix-db', function () {
     return 'Database Fixed! You can now go back to the dashboard.';
 });
 
-// Temporary route to discover real log paths via browser
-Route::get('/find-logs', function () {
-    $results = [];
-    $healthRoot = base_path();
-    $results['health_base_path'] = $healthRoot;
-    
-    $parents = [
-        'level_0_app_root'  => $healthRoot,
-        'level_1_parent'    => dirname($healthRoot),
-        'level_2_grand'     => dirname(dirname($healthRoot)),
-        'level_3_great'     => dirname(dirname(dirname($healthRoot))),
-        'level_4_root'      => dirname(dirname(dirname(dirname($healthRoot)))),
-    ];
+// Comprehensive diagnostic route to test reading log files for all projects
+Route::get('/test-log-access', function () {
+    $projects = \App\Models\Project::all();
+    $report = [];
 
-    foreach ($parents as $label => $path) {
-        $results['hierarchy'][$label] = [
-            'path' => $path,
-            'exists' => @file_exists($path),
-            'is_dir' => @is_dir($path),
-            'contents' => @is_dir($path) && @is_readable($path) ? array_slice(@scandir($path) ?: [], 0, 30) : 'not_readable',
+    foreach ($projects as $project) {
+        $basePath = rtrim($project->server_path, '/');
+        $configuredLogPath = $project->log_path;
+
+        $primaryPath = str_starts_with($configuredLogPath, '/')
+            ? $configuredLogPath
+            : $basePath . '/' . ltrim($configuredLogPath, '/');
+
+        $candidatePaths = array_unique([
+            $primaryPath,
+            $basePath . '/logs/errors.log',
+            $basePath . '/logs/error.log',
+            $basePath . '/htdocs/logs/errors.log',
+            $basePath . '/htdocs/logs/error.log',
+            $basePath . '/logs/php-error.log',
+            $basePath . '/vakt-logs/error.log',
+        ]);
+
+        $testedPaths = [];
+        $firstReadable = null;
+        $sampleContent = null;
+        $parseResult = null;
+
+        foreach ($candidatePaths as $path) {
+            $exists = @file_exists($path);
+            $readable = @is_readable($path);
+            $size = $exists ? @filesize($path) : 0;
+
+            $testedPaths[$path] = [
+                'exists' => $exists,
+                'is_readable' => $readable,
+                'size_bytes' => $size,
+            ];
+
+            if ($readable && !$firstReadable) {
+                $firstReadable = $path;
+                $offset = max(0, $size - 10000); // Read last 10KB
+                $content = @file_get_contents($path, false, null, $offset);
+                $sampleContent = substr(trim($content ?: ''), -500);
+
+                if ($content) {
+                    $parser = app(\App\Services\LogParserService::class);
+                    $parseResult = $parser->parseRawContent($project, $content);
+                }
+            }
+        }
+
+        $report[$project->domain] = [
+            'id' => $project->id,
+            'server_type' => $project->server_type,
+            'server_path' => $project->server_path,
+            'configured_log_path' => $project->log_path,
+            'active_log_found' => $firstReadable,
+            'tested_paths' => $testedPaths,
+            'parse_result_stats' => [
+                'errors_found' => $parseResult[0] ?? 0,
+                'warnings_found' => $parseResult[1] ?? 0,
+                'critical_patterns' => $parseResult[2] ?? [],
+            ],
+            'sample_raw_tail' => $sampleContent ?: 'No content read',
+            'db_total_entries_count' => \App\Models\LogEntry::where('project_id', $project->id)->count(),
         ];
     }
 
-    return response()->json($results, 200, [], JSON_PRETTY_PRINT);
+    return response()->json($report, 200, [], JSON_PRETTY_PRINT);
 });
 
 // Temporary debug route — shows every step of agent collection
