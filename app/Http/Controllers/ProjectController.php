@@ -37,7 +37,7 @@ class ProjectController extends Controller
         $project->load([
             'incidents' => fn($q) => $q->orderByDesc('detected_at')->limit(10),
             'monitoringChecks' => fn($q) => $q->orderByDesc('checked_at')->limit(5),
-            'logEntries' => fn($q) => $q->orderByDesc('occurred_at')->limit(10)
+            'logEntries' => fn($q) => $q->orderByDesc('id')->limit(10)
         ]);
 
         $latestReport = \App\Models\AgentReport::where('project_id', $project->id)

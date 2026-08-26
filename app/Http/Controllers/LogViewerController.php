@@ -26,7 +26,7 @@ class LogViewerController extends Controller
             ->when($search, function ($q) use ($search) {
                 $q->where('message', 'like', '%' . $search . '%');
             })
-            ->orderByDesc('occurred_at');
+            ->orderByDesc('id');
 
         $entries = $query->paginate($perPage);
 

@@ -40,6 +40,8 @@ class SameServerCollector
             $primaryPath,
             $this->basePath . '/logs/errors.log',
             $this->basePath . '/logs/error.log',
+            $this->basePath . '/htdocs/logs/errors.log',
+            $this->basePath . '/htdocs/logs/error.log',
             $this->basePath . '/logs/php-error.log',
             $this->basePath . '/vakt-logs/error.log',
         ]);
