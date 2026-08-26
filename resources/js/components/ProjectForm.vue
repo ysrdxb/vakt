@@ -365,8 +365,10 @@ $primaryPath = (strpos($configuredPath, '/') === 0 || strpos($configuredPath, ':
 // Fallback search order (security: all paths resolved locally, no HTTP header overrides)
 $candidatePaths = [
     $primaryPath,
-    __DIR__ . '/vakt-logs/error.log',
+    __DIR__ . '/logs/errors.log',
+    __DIR__ . '/logs/error.log',
     __DIR__ . '/logs/php-error.log',
+    __DIR__ . '/vakt-logs/error.log',
 ];
 
 header('Content-Type: application/json');

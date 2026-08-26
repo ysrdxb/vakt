@@ -38,9 +38,10 @@ class SameServerCollector
 
         $candidatePaths = array_unique([
             $primaryPath,
-            $this->basePath . '/vakt-logs/error.log',
-            $this->basePath . '/logs/php-error.log',
+            $this->basePath . '/logs/errors.log',
             $this->basePath . '/logs/error.log',
+            $this->basePath . '/logs/php-error.log',
+            $this->basePath . '/vakt-logs/error.log',
         ]);
 
         $path = null;
