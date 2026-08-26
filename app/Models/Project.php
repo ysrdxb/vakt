@@ -101,25 +101,26 @@ class Project extends Model
     public function getSecurityScoreAttribute(): int
     {
         $items = $this->auditItems;
-        if ($items->isEmpty()) return 0;
+        $incidents = $this->incidents->filter(fn($inc) => !in_array($inc->status, ['resolved', 'closed']));
 
         $score = 100;
+        foreach ($incidents as $inc) {
+            $score -= match($inc->severity) {
+                'p1' => 25,
+                'p2' => 15,
+                'p3' => 10,
+                default => 5,
+            };
+        }
+
         foreach ($items as $item) {
             if ($item->status === 'fail') {
                 $score -= match($item->severity) {
                     'critical' => 20,
-                    'high'     => 10,
-                    'medium'   => 5,
-                    'low'      => 2,
-                    default    => 0,
-                };
-            } elseif ($item->status === 'partial') {
-                $score -= match($item->severity) {
-                    'critical' => 10,
-                    'high'     => 5,
-                    'medium'   => 2,
-                    'low'      => 1,
-                    default    => 0,
+                    'high'     => 15,
+                    'medium'   => 10,
+                    'low'      => 5,
+                    default    => 5,
                 };
             }
         }

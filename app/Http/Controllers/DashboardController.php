@@ -16,7 +16,10 @@ class DashboardController extends Controller
     {
         $projects = Project::with(['incidents' => function ($q) {
             $q->whereNotIn('status', ['resolved', 'closed']);
-        }])->get();
+        }])->get()->map(function ($p) {
+            $p->append('security_score');
+            return $p;
+        });
 
         $openIncidents = Incident::whereNotIn('status', ['resolved', 'closed'])
             ->orderByRaw("CASE severity WHEN 'p1' THEN 1 WHEN 'p2' THEN 2 WHEN 'p3' THEN 3 WHEN 'p4' THEN 4 ELSE 5 END")
@@ -39,18 +42,23 @@ class DashboardController extends Controller
         elseif ($overallScore >= 60) $scoreColor = 'warning';
 
         $recentChecks = MonitoringCheck::with('project')
-            ->orderByDesc('checked_at')
+            ->orderByDesc('id')
             ->limit(5)
             ->get();
 
+        $lastCheckTime = Project::max('last_checked_at') ?? MonitoringCheck::max('checked_at');
+
         // Last 7 days error counts per day
         $days = collect(range(6, 0))->map(function ($i) {
-            $date = now()->subDays($i)->format('Y-m-d');
-            $count = LogEntry::whereDate('occurred_at', $date)
-                ->whereIn('level', ['error', 'critical'])
-                ->count();
+            $targetDate = now()->subDays($i);
+            $dateStr = $targetDate->format('Y-m-d');
+            $count = LogEntry::where(function($q) use ($dateStr) {
+                $q->whereDate('occurred_at', $dateStr)
+                  ->orWhereDate('created_at', $dateStr);
+            })->whereIn('level', ['error', 'critical', 'warning'])->count();
+
             return [
-                'date'  => now()->subDays($i)->format('M d'),
+                'date'  => $targetDate->format('M d'),
                 'count' => $count,
             ];
         });
@@ -82,6 +90,7 @@ class DashboardController extends Controller
             'overallScore',
             'scoreColor',
             'recentChecks',
+            'lastCheckTime',
             'chartData',
             'agentStatus'
         ));
