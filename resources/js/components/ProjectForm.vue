@@ -408,7 +408,12 @@ if (file_exists($logPath)) {
     $content = file_get_contents($logPath, false, null, $offset);
     if ($content) {
         $lines = preg_split('/\\r\\n|\\r|\\n/', trim($content));
-        $logTail = array_values(array_filter(array_slice($lines, -1000)));
+        $sliced = array_values(array_filter(array_slice($lines, -1000)));
+        $logTail = array_map(function($l) {
+            return function_exists('mb_convert_encoding') 
+                ? mb_convert_encoding($l, 'UTF-8', 'UTF-8, ISO-8859-1, WINDOWS-1252') 
+                : iconv('UTF-8', 'UTF-8//IGNORE', $l);
+        }, $sliced);
     }
 }
 
@@ -419,7 +424,7 @@ echo json_encode([
         'disk_free' => @disk_free_space(__DIR__),
         'disk_total' => @disk_total_space(__DIR__)
     ]
-]);
+], defined('JSON_INVALID_UTF8_SUBSTITUTE') ? JSON_INVALID_UTF8_SUBSTITUTE : 0);
 `;
   const blob = new Blob([content], { type: 'application/x-httpd-php' });
   const url = window.URL.createObjectURL(blob);
